@@ -4,9 +4,10 @@ Data da execucao: 2026-07-30
 
 ## Escopo
 
-Configurar o staging publico do PSFINANCE para responder tambem pelo caminho
-`/staging/psfinance` na porta corporativa `5001`, preservando as rotas tecnicas
-ja existentes e sem alterar producao, banco de dados ou segredos.
+Configurar o staging publico do PSFINANCE para responder pelo caminho
+`/staging/psfinance` sem porta explicita, preservando tambem a porta
+corporativa `5001`, as rotas tecnicas ja existentes e sem alterar producao,
+banco de dados ou segredos.
 
 ## Skills consultadas
 
@@ -41,19 +42,31 @@ As rotas antigas permanecem ativas:
 /gate
 ```
 
-## URL publica esperada
+## URL publica principal
 
 ```text
-http://vps69143.publiccloud.com.br:5001/staging/psfinance
+http://vps69143.publiccloud.com.br/staging/psfinance
 ```
 
 Healthcheck publico:
 
 ```text
-http://vps69143.publiccloud.com.br:5001/staging/psfinance/health
+http://vps69143.publiccloud.com.br/staging/psfinance/health
 ```
 
 Gate publico:
+
+```text
+http://vps69143.publiccloud.com.br/staging/psfinance/gate
+```
+
+## URL auxiliar na porta corporativa 5001
+
+```text
+http://vps69143.publiccloud.com.br:5001/staging/psfinance
+```
+
+Gate auxiliar:
 
 ```text
 http://vps69143.publiccloud.com.br:5001/staging/psfinance/gate
@@ -99,17 +112,17 @@ rotas antigas e novas.
 ## Validacao em staging esperada
 
 Apos merge na `staging`, deploy da branch `staging` na VPS (Servidor Virtual
-Privado) Sistemas e restart dos servicos:
+Privado) Sistemas, ajuste do Nginx e restart/reload dos servicos:
 
 ```bash
 curl -sS -o /tmp/pla825_index.json -w "INDEX_HTTP_STATUS=%{http_code}\n" \
-  http://vps69143.publiccloud.com.br:5001/staging/psfinance
+  http://vps69143.publiccloud.com.br/staging/psfinance
 
 curl -sS -o /tmp/pla825_health.json -w "HEALTH_HTTP_STATUS=%{http_code}\n" \
-  http://vps69143.publiccloud.com.br:5001/staging/psfinance/health
+  http://vps69143.publiccloud.com.br/staging/psfinance/health
 
 curl -sS -o /tmp/pla825_gate.json -w "GATE_HTTP_STATUS=%{http_code}\n" \
-  http://vps69143.publiccloud.com.br:5001/staging/psfinance/gate
+  http://vps69143.publiccloud.com.br/staging/psfinance/gate
 ```
 
 Resultado esperado: `INDEX_HTTP_STATUS=200`, `HEALTH_HTTP_STATUS=200` e
@@ -179,6 +192,61 @@ Os metadados `GIT_COMMIT` dos servicos `psfinance-staging.service` e
 `psfinance-staging-gate.service` foram atualizados para o commit publicado.
 Backups operacionais foram preservados em `/etc/systemd/system/` com prefixo
 `*.bak.pla825-*`.
+
+## Evidencia final da URL sem porta explicita
+
+O Nginx foi ajustado para ouvir tambem em `0.0.0.0:80` e encaminhar
+`/staging/psfinance` para o staging interno do PSFINANCE. A configuracao foi
+validada com `nginx -t` e recarregada com `systemctl reload nginx`.
+
+Validacao publica final:
+
+```text
+PUBLIC_80_INDEX_HTTP_STATUS=200
+EFFECTIVE_URL=http://vps69143.publiccloud.com.br/staging/psfinance
+REMOTE_IP=191.252.93.136
+PUBLIC_80_HEALTH_HTTP_STATUS=200
+PUBLIC_80_GATE_HTTP_STATUS=200
+PUBLIC_5001_GATE_HTTP_STATUS=200
+```
+
+Resposta publica validada em
+`http://vps69143.publiccloud.com.br/staging/psfinance`:
+
+```json
+{
+  "app": "PSFINANCE",
+  "base_path": "/staging/psfinance",
+  "branch": "staging",
+  "commit": "7c029d28c0c803190ecf54fdc2ae8bca144fee3c",
+  "environment": "staging",
+  "status": "ok"
+}
+```
+
+Resposta publica validada em
+`http://vps69143.publiccloud.com.br/staging/psfinance/gate`:
+
+```json
+{
+  "app": "PSFINANCE",
+  "base_path": "/staging/psfinance",
+  "branch": "staging",
+  "checks": {
+    "psfinance_staging": {
+      "http_status": 200,
+      "ok": true,
+      "url": "http://127.0.0.1:5104/health"
+    }
+  },
+  "commit": "7c029d28c0c803190ecf54fdc2ae8bca144fee3c",
+  "environment": "staging-gate",
+  "status": "healthy"
+}
+```
+
+Backup operacional da configuracao Nginx anterior foi preservado em
+`/etc/nginx/sites-available/psfinance-staging-5001.bak.pla825-port80-*`.
 
 ## Limites
 
