@@ -99,6 +99,47 @@ Resposta externa validada:
 http://vps69143.publiccloud.com.br:5001/gate
 ```
 
+## Validacao apos primeira integracao na staging
+
+Apos o primeiro merge da documentacao da PLA-814 na branch `staging`, a copia da
+VPS foi atualizada e os servicos foram reiniciados. O commit vigente deve ser
+confirmado diretamente pela resposta do `/gate` em cada validacao, pois novos
+commits documentais podem avancar a `staging`.
+
+Resultado dessa validacao:
+
+```text
+EXTERNAL_GATE_FINAL_HTTP_STATUS=200
+APP_SERVICE=active
+GATE_SERVICE=active
+NGINX_SERVICE=active
+BRANCH=staging
+HEAD=3ef9a1b566c47ffb269c473cb7c932a9c4262c79
+ORIGIN_STAGING=3ef9a1b566c47ffb269c473cb7c932a9c4262c79
+WORKTREE_STATUS_LINES=0
+```
+
+Resposta externa validada em
+`http://vps69143.publiccloud.com.br:5001/gate`:
+
+```json
+{
+  "app": "PSFINANCE",
+  "branch": "staging",
+  "checks": {
+    "psfinance_staging": {
+      "http_status": 200,
+      "ok": true,
+      "url": "http://127.0.0.1:5104/health"
+    }
+  },
+  "commit": "3ef9a1b566c47ffb269c473cb7c932a9c4262c79",
+  "environment": "staging-gate",
+  "status": "healthy"
+}
+
+```
+
 ## Limites
 
 - Nao houve alteracao em producao.
