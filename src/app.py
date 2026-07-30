@@ -3,7 +3,7 @@ import time
 import urllib.error
 import urllib.request
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template_string
 
 
 app = Flask(__name__)
@@ -22,11 +22,92 @@ def app_metadata():
     }
 
 
+INDEX_TEMPLATE = """<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PSFINANCE - Homologacao</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #20262e;
+      background: #f4f6f8;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+    }
+
+    main {
+      width: min(760px, calc(100% - 32px));
+      padding: 32px;
+      border: 1px solid #d9e0e8;
+      border-radius: 8px;
+      background: #ffffff;
+      box-shadow: 0 12px 36px rgba(24, 35, 48, 0.08);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 32px;
+      line-height: 1.15;
+    }
+
+    p {
+      margin: 0 0 20px;
+      line-height: 1.5;
+      color: #4a5563;
+    }
+
+    dl {
+      display: grid;
+      grid-template-columns: max-content 1fr;
+      gap: 10px 18px;
+      margin: 0;
+    }
+
+    dt {
+      font-weight: 700;
+      color: #2f3a45;
+    }
+
+    dd {
+      margin: 0;
+      overflow-wrap: anywhere;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>PSFINANCE</h1>
+    <p>Ambiente de homologacao ativo.</p>
+    <dl>
+      <dt>Status</dt>
+      <dd>ok</dd>
+      <dt>Ambiente</dt>
+      <dd>{{ metadata.environment }}</dd>
+      <dt>Branch</dt>
+      <dd>{{ metadata.branch }}</dd>
+      <dt>Commit</dt>
+      <dd>{{ metadata.commit }}</dd>
+      <dt>Base</dt>
+      <dd>{{ metadata.base_path }}</dd>
+    </dl>
+  </main>
+</body>
+</html>"""
+
+
 @app.get(STAGING_BASE_PATH)
 @app.get(f"{STAGING_BASE_PATH}/")
 @app.get("/")
 def index():
-    return jsonify({**app_metadata(), "status": "ok"})
+    return render_template_string(INDEX_TEMPLATE, metadata=app_metadata())
 
 
 @app.get(f"{STAGING_BASE_PATH}/health")
