@@ -26,6 +26,13 @@ sem alterar producao, sem criar banco de dados e sem registrar segredos.
 - Nao foram encontrados Docker nem Nginx disponiveis no `PATH` durante o
   inventario inicial.
 - Antes da preparacao, `/opt/plansmart/sistemas/psfinance` nao existia.
+- O pacote `python3.12-venv` foi instalado na VPS porque a criacao do ambiente
+  virtual falhou inicialmente por ausencia do `ensurepip`.
+- Apos a preparacao, a VPS ficou com a branch `staging` publicada em
+  `/opt/plansmart/sistemas/psfinance/staging/repo`.
+- Commit validado na VPS: `6a3eb0c82c7168d45a01f51d8aa5700abd2abc66`.
+- `HEAD` e `origin/staging` estavam iguais na VPS apos o deploy.
+- `git status --short` estava limpo na copia da VPS apos o deploy.
 
 ## Decisao aplicada
 
@@ -43,6 +50,16 @@ somente como referencia legada.
 
 - `127.0.0.1:5104`: aplicacao PSFINANCE staging.
 - `127.0.0.1:5001`: gate corporativo de staging.
+
+## Servicos criados na VPS
+
+- `psfinance-staging.service`: Gunicorn servindo `src.app:app` em
+  `127.0.0.1:5104`.
+- `psfinance-staging-gate.service`: Gunicorn servindo `src.app:app` em
+  `127.0.0.1:5001` e validando `http://127.0.0.1:5104/health`.
+
+Os dois servicos foram habilitados com `systemd` e estavam `active` na
+validacao.
 
 ## Banco de dados
 
@@ -63,3 +80,27 @@ curl -sS -o /tmp/psfinance_gate.json -w 'HTTP_STATUS=%{http_code}\n' \
 ```
 
 Resultado esperado: `HTTP_STATUS=200` nas duas rotas.
+
+## Evidencia obtida
+
+```text
+HEALTH_HTTP_STATUS=200
+GATE_HTTP_STATUS=200
+SERVICE_APP=active
+SERVICE_GATE=active
+BRANCH=staging
+HEAD=6a3eb0c82c7168d45a01f51d8aa5700abd2abc66
+ORIGIN_STAGING=6a3eb0c82c7168d45a01f51d8aa5700abd2abc66
+```
+
+As portas `5001` e `5104` estavam ouvindo somente em `127.0.0.1`.
+
+## Pendencias
+
+- Nginx e HTTPS publico ainda nao foram configurados porque Nginx nao estava
+  instalado no inventario inicial e a skill exige confirmacao dos subdominios
+  oficiais antes da exposicao publica.
+- Nenhum banco foi criado; a criacao de banco, usuario ou migration depende de
+  autorizacao futura.
+- A VPS indicou kernel mais novo disponivel apos instalacao de pacote, mas nao
+  foi realizado reboot por nao fazer parte do escopo autorizado.
