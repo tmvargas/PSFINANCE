@@ -115,6 +115,71 @@ curl -sS -o /tmp/pla825_gate.json -w "GATE_HTTP_STATUS=%{http_code}\n" \
 Resultado esperado: `INDEX_HTTP_STATUS=200`, `HEALTH_HTTP_STATUS=200` e
 `GATE_HTTP_STATUS=200`.
 
+## Evidencia de staging obtida
+
+Branch publicada na VPS:
+
+```text
+staging
+```
+
+Commit validado inicialmente apos o deploy de codigo:
+
+```text
+c2982b916d58503c34c552cf3ecb8e2ed49941ce
+```
+
+Validacao publica:
+
+```text
+PUBLIC_INDEX_HTTP_STATUS=200
+EFFECTIVE_URL=http://vps69143.publiccloud.com.br:5001/staging/psfinance
+REMOTE_IP=191.252.93.136
+PUBLIC_HEALTH_HTTP_STATUS=200
+PUBLIC_GATE_HTTP_STATUS=200
+```
+
+Validacao interna na VPS:
+
+```text
+LOCAL_INDEX_HTTP_STATUS=200
+LOCAL_HEALTH_HTTP_STATUS=200
+LOCAL_GATE_HTTP_STATUS=200
+LEGACY_GATE_HTTP_STATUS=200
+APP_SERVICE=active
+GATE_SERVICE=active
+NGINX_SERVICE=active
+HEAD=c2982b916d58503c34c552cf3ecb8e2ed49941ce
+ORIGIN_STAGING=c2982b916d58503c34c552cf3ecb8e2ed49941ce
+WORKTREE_STATUS_LINES=0
+```
+
+Resposta publica validada em
+`http://vps69143.publiccloud.com.br:5001/staging/psfinance/gate`:
+
+```json
+{
+  "app": "PSFINANCE",
+  "base_path": "/staging/psfinance",
+  "branch": "staging",
+  "checks": {
+    "psfinance_staging": {
+      "http_status": 200,
+      "ok": true,
+      "url": "http://127.0.0.1:5104/health"
+    }
+  },
+  "commit": "c2982b916d58503c34c552cf3ecb8e2ed49941ce",
+  "environment": "staging-gate",
+  "status": "healthy"
+}
+```
+
+Os metadados `GIT_COMMIT` dos servicos `psfinance-staging.service` e
+`psfinance-staging-gate.service` foram atualizados para o commit publicado.
+Backups operacionais foram preservados em `/etc/systemd/system/` com prefixo
+`*.bak.pla825-*`.
+
 ## Limites
 
 - Nao houve alteracao em producao.
