@@ -8,6 +8,7 @@ from flask import Flask, jsonify
 
 app = Flask(__name__)
 STARTED_AT = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+STAGING_BASE_PATH = os.getenv("PSFINANCE_STAGING_BASE_PATH", "/staging/psfinance")
 
 
 def app_metadata():
@@ -16,20 +17,25 @@ def app_metadata():
         "environment": os.getenv("APP_ENV", "staging"),
         "branch": os.getenv("GIT_BRANCH", "unknown"),
         "commit": os.getenv("GIT_COMMIT", "unknown"),
+        "base_path": STAGING_BASE_PATH,
         "started_at": STARTED_AT,
     }
 
 
+@app.get(STAGING_BASE_PATH)
+@app.get(f"{STAGING_BASE_PATH}/")
 @app.get("/")
 def index():
     return jsonify({**app_metadata(), "status": "ok"})
 
 
+@app.get(f"{STAGING_BASE_PATH}/health")
 @app.get("/health")
 def health():
     return jsonify({**app_metadata(), "status": "healthy"})
 
 
+@app.get(f"{STAGING_BASE_PATH}/gate")
 @app.get("/gate")
 def gate():
     target_url = os.getenv("PSFINANCE_STAGING_HEALTH_URL")

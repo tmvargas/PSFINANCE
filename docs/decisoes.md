@@ -31,3 +31,11 @@ Decisao: liberar o acesso externo de staging do PSFINANCE pela URL `http://vps69
 Motivo: Thiago precisava acessar o staging fora da VPS, mas a validacao anterior deixava a porta corporativa `5001` disponivel somente em loopback. A solucao preserva a aplicacao em porta interna e usa Nginx como ponto publico.
 
 Impacto: o staging ficou acessivel para validacao externa sem alterar producao, banco de dados, branch `main` ou dados operacionais. A configuracao segue como provisoria ate formalizacao de dominio e HTTPS publico do PSFINANCE.
+
+## 2026-07-30 - URL publica com prefixo /staging/psfinance
+
+Decisao: manter as rotas tecnicas existentes (`/`, `/health` e `/gate`) e adicionar rotas equivalentes sob o prefixo `/staging/psfinance` para o staging publico do PSFINANCE.
+
+Motivo: a demanda PLA-825 exige uma URL de homologacao identificavel por sistema sem depender apenas da rota tecnica `/gate`, preservando compatibilidade com as validacoes ja implantadas na porta corporativa `5001`.
+
+Impacto: a URL publica de staging passa a aceitar `http://vps69143.publiccloud.com.br:5001/staging/psfinance`, com healthcheck em `/staging/psfinance/health` e gate em `/staging/psfinance/gate`, sem alterar producao, banco de dados ou credenciais.
