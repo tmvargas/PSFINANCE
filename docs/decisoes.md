@@ -55,3 +55,11 @@ Decisao: registrar que o PSFINANCE em operacao na VPS Sistemas permanece como st
 Motivo: a verificacao da PLA-836 confirmou servicos `psfinance-staging` e `psfinance-staging-gate` ativos, branch `staging` no commit `e7c1b1ed566dc9f715d676bc3b94d6cd632a6376`, mas sem `DATABASE_URL`, sem `PSFINANCE_STAGING_DATABASE_URL`, sem PostgreSQL local ativo, sem `Docker` e sem diretorio produtivo do PSFINANCE.
 
 Impacto: qualquer evolucao funcional com persistencia depende de aprovacao previa para criar ou conectar banco, definir usuario, variaveis de ambiente e modelo multicliente. A URL publica de homologacao nao deve ser tratada como evidencia de banco operacional.
+
+## 2026-07-31 - Lacuna funcional do staging do PSFINANCE
+
+Decisao: tratar o staging atual do PSFINANCE como ambiente tecnico de homologacao, nao como produto financeiro funcional pronto para uso ou promocao.
+
+Motivo: a analise da PLA-858 confirmou que a branch `staging` publicada no commit `fb2b9dea247ba34ea91150cb10c20680c9c49a05` responde HTTP 200 na URL publica e na porta corporativa `5001`, mas o codigo atual entrega somente pagina de homologacao, `/health` e `/gate`, sem banco, autenticacao, telas de negocio, API funcional, integracao Sienge ou modelo multicliente definido.
+
+Impacto: a evolucao funcional deve comecar por aprovacao do escopo do MVP e decisao de arquitetura de dados/multicliente. Nao deve haver criacao de banco, migration, escrita em producao ou promocao para `main` sem autorizacao expressa e plano aprovado.
