@@ -64,6 +64,14 @@ Motivo: a PLA-981 autoriza configurar e subir em staging o sistema funcional ja 
 
 Impacto: a tarefa deve permanecer bloqueada por dependencia de artefatos, com desbloqueio sob responsabilidade de Thiago/CEO ao indicar caminho, repositorio, anexo ou origem segura do codigo e da base. Producao, `main`, banco produtivo e migrations produtivas continuam fora do escopo.
 
+## 2026-08-01 - URL base do staging funcional com HTTP 200
+
+Decisao: fazer a entrada `/staging/psfinance` renderizar diretamente o dashboard financeiro funcional, em vez de responder com redirecionamento para `/financeiro/`.
+
+Motivo: a PLA-981 exige validar a URL publica de homologacao com HTTP 200 e tela funcional, mantendo `/health` e o gate corporativo `5001` como rotas tecnicas.
+
+Impacto: o navegador continua exibindo o dashboard financeiro, mas a validacao objetiva da URL base passa a retornar HTTP 200 sem depender de redirect. Producao, `main` e banco produtivo permanecem fora do escopo.
+
 ## 2026-08-01 - PLA-985 retomada com ZIP funcional reenviado
 
 Decisao: incorporar ao repositório somente o código funcional Flask recebido no ZIP `finance.zip`, mantendo o banco SQLite `financeiro.db` e anexos de títulos fora do Git por conterem dados operacionais.
