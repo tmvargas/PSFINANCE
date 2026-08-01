@@ -5,7 +5,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-from flask import Flask, jsonify, redirect, url_for
+from flask import Flask, jsonify
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from database import init_db
@@ -63,7 +63,7 @@ def app_metadata():
 @app.get(f"{STAGING_BASE_PATH}/")
 @app.get("/")
 def index():
-    return redirect(url_for("financeiro.dashboard_financeiro"))
+    return app.view_functions["financeiro.dashboard_financeiro"]()
 
 
 @app.get(f"{STAGING_BASE_PATH}/health")
