@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Baixas do Título{% endblock %}
+
+{% block content %}
+  <h1 class="h4 mb-3">
+    Baixas do Título #{{ titulo.id }} – {{ titulo.nr_documento }}
+  </h1>
+
+  <div class="mb-3">
+    <dl class="row">
+      <dt class="col-sm-2">Credor</dt>
+      <dd class="col-sm-10">{{ titulo.credor }}</dd>
+
+      <dt class="col-sm-2">Valor</dt>
+      <dd class="col-sm-10">R$ {{ '%.2f'|format(titulo.valor or 0) }}</dd>
+
+      <dt class="col-sm-2">Total baixado</dt>
+      <dd class="col-sm-10">R$ {{ '%.2f'|format(total_baixas or 0) }}</dd>
+
+      <dt class="col-sm-2">Saldo em aberto</dt>
+      <dd class="col-sm-10 fw-bold">R$ {{ '%.2f'|format(saldo_aberto or 0) }}</dd>
+    </dl>
+  </div>
+
+  <div class="mb-3">
+    <a
+      href="{{ url_for('financeiro.baixar_titulo', id_titulo=titulo.id) }}"
+      class="btn btn-sm btn-success me-2 {% if (saldo_aberto or 0) <= 0 %}disabled{% endif %}"
+    >
+      Nova baixa
+    </a>
+
+    <a href="{{ url_for('financeiro.listar_titulos') }}" class="btn btn-sm btn-secondary">
+      Voltar aos títulos
+    </a>
+  </div>
+
+  {% if baixas %}
+    <div class="table-responsive">
+      <table class="table table-sm table-striped table-hover align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>Data</th>
+            <th>Conta</th>
+            <th class="text-end">Valor</th>
+            <th class="text-center">Conciliado</th>
+            <th class="text-center">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% set ns = namespace(total=0) %}
+          {% for b in baixas %}
+            {% set ns.total = ns.total + (b.valor or 0) %}
+            <tr>
+              <td>{{ b.data }}</td>
+              <td>{{ b.conta }}</td>
+              <td class="text-end">R$ {{ '%.2f'|format(b.valor or 0) }}</td>
+              <td class="text-center">
+                {% if b.conciliado %}
+                  <span class="badge bg-success">Sim</span>
+                {% else %}
+                  <span class="badge bg-secondary">Não</span>
+                {% endif %}
+              </td>
+              <td class="text-center">
+                <form
+                  method="post"
+                  action="{{ url_for('financeiro.excluir_baixa', id_baixa=b.id_baixa) }}"
+                  style="display:inline"
+                  onsubmit="return confirm('Confirma exclusão desta baixa de R$ {{ '%.2f'|format(b.valor or 0) }}?');"
+                >
+                  <button
+                    type="submit"
+                    class="btn btn-sm btn-outline-danger"
+                    {% if b.conciliado %}disabled title="Baixa conciliada não pode ser excluída"{% endif %}
+                  >
+                    Excluir
+                  </button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr class="fw-bold">
+            <td colspan="2" class="text-end">Total baixado listado:</td>
+            <td class="text-end">R$ {{ '%.2f'|format(ns.total) }}</td>
+            <td colspan="2"></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  {% else %}
+    <p>Não há baixas registradas para este título.</p>
+  {% endif %}
+{% endblock %}

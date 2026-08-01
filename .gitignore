@@ -13,4 +13,8 @@ build/
 *.log
 data/tmp/
 data/exports/
-
+instance/
+uploads/
+*.db
+*.sqlite
+*.sqlite3

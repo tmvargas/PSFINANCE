@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% if plano %}
+  {% set page_title = "Editar conta do plano financeiro" %}
+{% else %}
+  {% set page_title = "Nova conta do plano financeiro" %}
+{% endif %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+  <h1 class="h4 mb-3">{{ page_title }}</h1>
+
+  <form method="post" class="border rounded p-3 bg-white">
+    <div class="row mb-3">
+      <div class="col-md-4">
+        <label class="form-label">Código estrutural</label>
+        <input
+          type="text"
+          name="cod_estrutural"
+          class="form-control"
+          required
+          value="{{ plano.cod_estrutural if plano else '' }}"
+        >
+        <div class="form-text">
+          Ex.: 1.01.01.01
+        </div>
+      </div>
+
+      <div class="col-md-5">
+        <label class="form-label">Nome da conta</label>
+        <input
+          type="text"
+          name="nome_conta"
+          class="form-control"
+          required
+          value="{{ plano.nome_conta if plano else '' }}"
+        >
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label">Tipo</label>
+        <select name="tipo" class="form-select" required>
+          {% set tipo_sel = plano.tipo if plano else '' %}
+          <option value="">Selecione...</option>
+          <option value="analitica" {% if tipo_sel == 'analitica' %}selected{% endif %}>Analítica</option>
+          <option value="totalizadora" {% if tipo_sel == 'totalizadora' %}selected{% endif %}>Totalizadora</option>
+        </select>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-success">
+      Salvar
+    </button>
+    <a href="{{ url_for('financeiro.listar_plano') }}" class="btn btn-secondary">
+      Cancelar
+    </a>
+  </form>
+{% endblock %}

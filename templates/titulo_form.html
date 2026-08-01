@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+
+{% block title %}
+  {% if modo_copia %}Copiar Título{% elif titulo %}Editar Título{% else %}Novo Título{% endif %} - PlanSmart Financeiro
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="h4">
+    {% if modo_copia %}Copiar Título{% elif titulo %}Editar Título{% else %}Novo Título{% endif %}
+  </h2>
+  <div>
+    <a href="{{ url_for('financeiro.dashboard_financeiro') }}" class="btn btn-sm btn-outline-secondary me-2">
+      ⬅ Home
+    </a>
+    <a href="{{ url_for('financeiro.listar_titulos') }}" class="btn btn-sm btn-outline-primary">
+      📃 Voltar para lista de títulos
+    </a>
+  </div>
+</div>
+
+<form method="post" enctype="multipart/form-data" class="card p-3 shadow-sm">
+
+  {% if modo_copia %}
+  <div class="alert alert-info">
+    Você está criando uma cópia do título{% if titulo_original %} #{{ titulo_original }}{% endif %}.
+    Altere os campos necessários e clique em salvar.
+  </div>
+  {% endif %}
+
+
+  <div class="row mb-3">
+    <div class="col-md-3">
+      <label class="form-label">Documento</label>
+      <select name="id_doc" class="form-select" required>
+        <option value="">Selecione...</option>
+        {% for d in documentos %}
+          <option value="{{ d.id_doc }}"
+            {% if titulo and titulo.id_doc == d.id_doc %}selected{% endif %}>
+            {{ d.tipo_doc }} - {{ d.nome_doc }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">Número do Documento</label>
+      <input
+        type="text"
+        name="nr_documento"
+        class="form-control"
+        value="{{ titulo.nr_documento if titulo else '' }}"
+        required
+      >
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Credor</label>
+      <select name="id_credor" class="form-select" required>
+        <option value="">Selecione...</option>
+        {% for c in credores %}
+          <option value="{{ c.id_credor }}"
+            {% if titulo and titulo.id_credor == c.id_credor %}selected{% endif %}>
+            {{ c.nome }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <label class="form-label">Plano Financeiro (Grupo 2)</label>
+
+      <select name="id_plano" class="form-select" required>
+        <option value="">Selecione...</option>
+
+        <optgroup label="Contas do Grupo 2">
+          {% for p in planos %}
+            {# normaliza "Analítica"/"ANALÍTICA" -> "analitica" #}
+            {% set tipo_norm = (p.tipo|default('')|lower|trim)
+              |replace('á','a')|replace('à','a')|replace('ã','a')|replace('â','a')
+              |replace('é','e')|replace('ê','e')
+              |replace('í','i')
+              |replace('ó','o')|replace('ô','o')|replace('õ','o')
+              |replace('ú','u') %}
+            {% set is_analitica = ('analitica' in tipo_norm) %}
+
+            <option value="{{ p.id_plano }}"
+              {% if not is_analitica %}disabled{% endif %}
+              {% if titulo and titulo.id_plano == p.id_plano %}selected{% endif %}>
+              {{ p.cod_estrutural }} - {{ p.nome_conta }}{% if not is_analitica %} (TOTAL){% endif %}
+            </option>
+          {% endfor %}
+        </optgroup>
+      </select>
+
+      <div class="form-text">
+        Contas totalizadoras aparecem, mas não podem ser selecionadas.
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">Valor</label>
+      <input
+        type="text"
+        name="valor"
+        id="valor"
+        class="form-control js-money"
+        inputmode="numeric"
+        autocomplete="off"
+        placeholder="0,00"
+        value="{% if titulo and titulo.valor is not none %}{{ ('%.2f'|format(titulo.valor))|replace('.', ',') }}{% endif %}"
+        required
+      >
+      <div class="form-text">Digite apenas números: 200 → 2,00</div>
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">Data de Emissão</label>
+      {% set emissao_val = hoje %}
+      {% if titulo and titulo.emissao %}
+        {% if titulo.emissao is string %}
+          {% set emissao_val = titulo.emissao %}
+        {% else %}
+          {% set emissao_val = titulo.emissao.isoformat() %}
+        {% endif %}
+      {% endif %}
+      <input
+        type="date"
+        name="emissao"
+        class="form-control"
+        value="{{ emissao_val }}"
+        required
+      >
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-md-3">
+      <label class="form-label">Data de Vencimento</label>
+      {% set venc_val = hoje %}
+      {% if titulo and titulo.vencimento %}
+        {% if titulo.vencimento is string %}
+          {% set venc_val = titulo.vencimento %}
+        {% else %}
+          {% set venc_val = titulo.vencimento.isoformat() %}
+        {% endif %}
+      {% endif %}
+      <input
+        type="date"
+        name="vencimento"
+        class="form-control"
+        value="{{ venc_val }}"
+        required
+      >
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Observação</label>
+    <textarea
+      name="observacao"
+      class="form-control"
+      rows="3"
+      maxlength="1000"
+      placeholder="Detalhes, notas, instruções…"
+    >{{ titulo.observacao if titulo else '' }}</textarea>
+  </div>
+
+
+  <hr>
+
+  <div class="mb-3">
+    <label class="form-label">Anexos (máx. 5 arquivos)</label>
+    <input
+      type="file"
+      name="arquivos"
+      class="form-control"
+      multiple
+      {% if anexos and anexos|length >= 5 %}disabled{% endif %}
+    >
+    <div class="form-text">
+      Você pode anexar até 5 documentos por título.
+      {% if anexos and anexos|length >= 5 %}
+        <span class="text-danger">Limite atingido (5/5).</span>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if anexos and anexos|length > 0 %}
+  <div class="mb-3">
+    <label class="form-label">Anexos já cadastrados:</label>
+    <ul class="list-group">
+      {% for a in anexos %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <span>{{ a.nome_arquivo }}</span>
+          <span class="d-flex gap-2">
+            <a
+              href="{{ url_for('financeiro.download_anexo_titulo', id_anexo=a.id_anexo) }}"
+              class="btn btn-sm btn-outline-secondary"
+              target="_blank"
+            >
+              Baixar
+            </a>
+
+            <a
+              href="{{ url_for('financeiro.excluir_anexo_titulo', id_anexo=a.id_anexo) }}"
+              class="btn btn-sm btn-outline-danger"
+              onclick="return confirm('Confirma excluir este anexo?');"
+            >
+              Excluir
+            </a>
+          </span>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endif %}
+
+
+  <div class="d-flex justify-content-end">
+    <button type="submit" class="btn btn-success">
+      {% if modo_copia %}💾 Salvar cópia{% else %}💾 Salvar{% endif %}
+    </button>
+  </div>
+
+</form>
+
+<script>
+(function () {
+  const nf = new Intl.NumberFormat('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+
+  function formatAsCents(raw) {
+    const digits = String(raw || '').replace(/\D/g, '');
+    if (!digits) return '';
+    const cents = parseInt(digits, 10);
+    const value = cents / 100;
+    return nf.format(value); // ex: 2,00 | 1.234,56
+  }
+
+  function attachMoneyMask(input) {
+    input.addEventListener('input', function () {
+      const formatted = formatAsCents(input.value);
+      input.value = formatted;
+      // cursor no fim (simples e estável)
+      try { input.setSelectionRange(input.value.length, input.value.length); } catch (e) {}
+    });
+
+    input.addEventListener('blur', function () {
+      // se ficou vazio, mantém vazio; se não, garante 2 casas
+      input.value = formatAsCents(input.value);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.js-money').forEach((el) => {
+      attachMoneyMask(el);
+      // formata valor inicial (edição)
+      if (el.value) el.value = formatAsCents(el.value);
+    });
+  });
+})();
+</script>
+{% endblock %}

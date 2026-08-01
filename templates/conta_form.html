@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% if conta %}
+  {% set page_title = "Editar conta" %}
+{% else %}
+  {% set page_title = "Nova conta" %}
+{% endif %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+  <h1 class="h4 mb-3">{{ page_title }}</h1>
+
+  <form method="post" class="border rounded p-3 bg-white">
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label class="form-label">Descrição</label>
+        <input
+          type="text"
+          name="descricao"
+          class="form-control"
+          required
+          value="{{ conta.descricao if conta else '' }}"
+        >
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Tipo</label>
+        <select name="tipo" class="form-select" required>
+          {% set tipo_sel = conta.tipo if conta else '' %}
+          <option value="">Selecione...</option>
+          <option value="corrente" {% if tipo_sel == 'corrente' %}selected{% endif %}>Corrente</option>
+          <option value="aplicacao" {% if tipo_sel == 'aplicacao' %}selected{% endif %}>Aplicação</option>
+          <option value="caixa" {% if tipo_sel == 'caixa' %}selected{% endif %}>Caixa</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Banco / Código</label>
+        <input
+          type="text"
+          name="id_banco"
+          class="form-control"
+          value="{{ conta.id_banco if conta else '' }}"
+        >
+        <div class="form-text">
+          Opcional: código do banco, número da conta, etc.
+        </div>
+      </div>
+    </div>
+
+    <div class="row mb-3">
+      <div class="col-md-4">
+        <label class="form-label">Saldo inicial</label>
+        <input
+          type="number"
+          step="0.01"
+          min="0"
+          name="saldo_inicial"
+          class="form-control"
+          value="{{ '%.2f'|format(conta.saldo_inicial) if conta else '' }}"
+        >
+        <div class="form-text">
+          Opcional. Se preencher, informe também a data de referência.
+        </div>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Data saldo inicial</label>
+        <input
+          type="date"
+          name="data_saldo_inicial"
+          class="form-control"
+          value="{{ conta.data_saldo_inicial if conta and conta.data_saldo_inicial else '' }}"
+        >
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-success">
+      Salvar
+    </button>
+    <a href="{{ url_for('financeiro.listar_contas') }}" class="btn btn-secondary">
+      Cancelar
+    </a>
+  </form>
+{% endblock %}

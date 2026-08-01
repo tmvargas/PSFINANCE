@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Baixar Título{% endblock %}
+
+{% block content %}
+  <h1 class="h4 mb-3">Baixar Título #{{ titulo.id }} – {{ titulo.nr_documento }}</h1>
+
+  <div class="mb-3">
+    <dl class="row">
+      <dt class="col-sm-2">Credor</dt>
+      <dd class="col-sm-10">{{ titulo.credor }}</dd>
+
+      <dt class="col-sm-2">Plano</dt>
+      <dd class="col-sm-10">{{ titulo.plano }}</dd>
+
+      <dt class="col-sm-2">Valor</dt>
+      <dd class="col-sm-10">R$ {{ "%.2f"|format(titulo.valor or 0) }}</dd>
+
+      <dt class="col-sm-2">Saldo em aberto</dt>
+      <dd class="col-sm-10 fw-bold">R$ {{ "%.2f"|format(titulo.saldo_aberto or 0) }}</dd>
+    </dl>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <form method="post">
+        <div class="row g-2">
+          <div class="col-md-3">
+            <label class="form-label">Data</label>
+            <input
+              type="date"
+              name="data"
+              class="form-control"
+              value="{{ hoje }}"
+              required
+            >
+          </div>
+
+          <div class="col-md-5">
+            <label class="form-label">Conta</label>
+            <select name="id_conta" class="form-select" required>
+              <option value="">Selecione...</option>
+              {% for c in contas %}
+                <option value="{{ c.id }}">{{ c.descricao }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Valor da baixa</label>
+            <input
+              type="text"
+              name="valor_baixa"
+              class="form-control"
+              placeholder="0,00"
+              required
+            >
+            <div class="form-text">
+              Máximo: R$ {{ "%.2f"|format(titulo.saldo_aberto or 0) }}
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-3 d-flex gap-2">
+          <button type="submit" class="btn btn-success" {% if (titulo.saldo_aberto or 0) <= 0 %}disabled{% endif %}>
+            Salvar baixa
+          </button>
+
+          <a href="{{ url_for('financeiro.listar_titulos') }}" class="btn btn-secondary">
+            Cancelar
+          </a>
+
+          <a href="{{ url_for('financeiro.listar_baixas_titulo', id_titulo=titulo.id) }}" class="btn btn-outline-info">
+            Ver baixas
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

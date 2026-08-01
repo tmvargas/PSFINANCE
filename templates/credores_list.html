@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Credores{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h4 mb-0">Credores</h1>
+
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('financeiro.novo_credor') }}" class="btn btn-sm btn-primary">
+      Novo credor
+    </a>
+    <a href="{{ url_for('financeiro.dashboard_financeiro') }}" class="btn btn-sm btn-outline-secondary">
+      Voltar para home
+    </a>
+  </div>
+</div>
+
+{% if credores %}
+  <div class="table-responsive">
+    <table class="table table-sm table-striped table-hover align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th style="width: 80px;">ID</th>
+          <th>Nome</th>
+          <th style="width: 140px;" class="text-center">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in credores %}
+          <tr>
+            <td>{{ c.id }}</td>
+            <td>{{ c.nome }}</td>
+            <td class="text-center">
+              <a
+                href="{{ url_for('financeiro.editar_credor', id_credor=c.id) }}"
+                class="btn btn-sm btn-outline-secondary"
+              >
+                Editar
+              </a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <p>Não há credores cadastrados.</p>
+{% endif %}
+
+{% endblock %}

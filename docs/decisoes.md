@@ -63,3 +63,11 @@ Decisao: nao substituir o staging tecnico do PSFINANCE por uma implementacao fun
 Motivo: a PLA-981 autoriza configurar e subir em staging o sistema funcional ja fornecido, preservando dados. A verificacao em workspace, GitHub, historico Paperclip e VPS Sistemas nao localizou o codigo funcional completo nem o banco fornecido.
 
 Impacto: a tarefa deve permanecer bloqueada por dependencia de artefatos, com desbloqueio sob responsabilidade de Thiago/CEO ao indicar caminho, repositorio, anexo ou origem segura do codigo e da base. Producao, `main`, banco produtivo e migrations produtivas continuam fora do escopo.
+
+## 2026-08-01 - PLA-985 retomada com ZIP funcional reenviado
+
+Decisao: incorporar ao repositório somente o código funcional Flask recebido no ZIP `finance.zip`, mantendo o banco SQLite `financeiro.db` e anexos de títulos fora do Git por conterem dados operacionais.
+
+Motivo: a PLA-985 destrava a PLA-981 ao localizar o artefato reenviado por Thiago, mas a governança proíbe versionar dados de clientes, documentos privados, dumps, bancos e uploads.
+
+Impacto: o staging funcional deve usar `PSFINANCE_DATABASE_URL` ou `DATABASE_URL` apontando para um banco em `instance/`, e uploads devem permanecer em diretório operacional não versionado. Produção, `main`, banco produtivo e migrations produtivas continuam fora do escopo.
