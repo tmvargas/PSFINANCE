@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Contas{% endblock %}
+
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">Contas</h1>
+
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('financeiro.listar_contas_inativas') }}" class="btn btn-sm btn-outline-secondary">
+        Contas inativas
+      </a>
+      <a href="{{ url_for('financeiro.nova_conta') }}" class="btn btn-sm btn-outline-primary">
+        Nova conta
+      </a>
+      <a href="{{ url_for('financeiro.nova_movimentacao') }}" class="btn btn-sm btn-primary">
+        Nova movimentação
+      </a>
+    </div>
+  </div>
+
+  {% if contas %}
+    <div class="table-responsive">
+      <table class="table table-sm table-striped table-hover align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>ID</th>
+            <th>Descrição</th>
+            <th>Tipo</th>
+            <th class="text-end">Saldo inicial</th>
+            <th>Data saldo inicial</th>
+            <th class="text-end">Saldo atual</th>
+            <th class="text-center">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% set total_saldo = 0 %}
+          {% for c in contas %}
+            {% set total_saldo = total_saldo + c.saldo_atual %}
+            <tr>
+              <td>{{ c.id }}</td>
+              <td>{{ c.descricao }}</td>
+              <td>{{ c.tipo }}</td>
+              <td class="text-end">R$ {{ '%.2f'|format(c.saldo_inicial) }}</td>
+              <td>{{ c.data_saldo_inicial }}</td>
+              <td class="text-end">R$ {{ '%.2f'|format(c.saldo_atual) }}</td>
+              <td class="text-center">
+
+                <!-- Botão editar -->
+                <a
+                  href="{{ url_for('financeiro.editar_conta', id_conta=c.id) }}"
+                  class="btn btn-sm btn-outline-secondary me-1"
+                >
+                  Editar
+                </a>
+
+                <!-- Botão desativar -->
+                <form
+                  method="post"
+                  action="{{ url_for('financeiro.desativar_conta', id_conta=c.id) }}"
+                  style="display:inline"
+                  onsubmit="return confirm('Confirma desativação da conta {{ c.descricao }}?');"
+                >
+                  <button type="submit" class="btn btn-sm btn-outline-danger">
+                    Desativar
+                  </button>
+                </form>
+
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+
+        <tfoot>
+          <tr class="fw-bold">
+            <td colspan="5" class="text-end">Total geral:</td>
+            <td class="text-end">R$ {{ '%.2f'|format(total_saldo) }}</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  {% else %}
+    <p>Não há contas cadastradas ainda.</p>
+  {% endif %}
+{% endblock %}
+    

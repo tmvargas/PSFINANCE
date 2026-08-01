@@ -1,0 +1,111 @@
+# financeiro/routes_credor.py
+from flask import render_template, request, redirect, url_for, flash
+
+from . import bp_financeiro
+from database import SessionLocal
+from models import Credor
+
+
+def get_session():
+    return SessionLocal()
+
+
+# ----------------------------------------------------------------------
+# LISTAR CREDORES
+# ----------------------------------------------------------------------
+@bp_financeiro.route("/credores")
+def listar_credores():
+    session = get_session()
+
+    credores = (
+        session.query(Credor)
+        .filter(Credor.deleted.is_(False))
+        .order_by(Credor.nome)
+        .all()
+    )
+
+    credores_view = [
+        {
+            "id": c.id_credor,
+            "nome": c.nome,
+        }
+        for c in credores
+    ]
+
+    session.close()
+    return render_template("credores_list.html", credores=credores_view)
+
+
+# ----------------------------------------------------------------------
+# NOVO CREDOR
+# ----------------------------------------------------------------------
+@bp_financeiro.route("/credores/novo", methods=["GET", "POST"])
+def novo_credor():
+    session = get_session()
+
+    if request.method == "POST":
+        nome = (request.form.get("nome") or "").strip()
+
+        erros = []
+        if not nome:
+            erros.append("Nome do credor é obrigatório.")
+
+        if erros:
+            for e in erros:
+                flash(e, "erro")
+        else:
+            credor = Credor(nome=nome)
+            session.add(credor)
+            session.commit()
+            session.close()
+
+            flash("Credor cadastrado com sucesso!", "sucesso")
+            return redirect(url_for("financeiro.listar_credores"))
+
+    session.close()
+    return render_template("credor_form.html", credor=None)
+
+
+# ----------------------------------------------------------------------
+# EDITAR CREDOR
+# ----------------------------------------------------------------------
+@bp_financeiro.route("/credores/<int:id_credor>/editar", methods=["GET", "POST"])
+def editar_credor(id_credor):
+    session = get_session()
+
+    credor = (
+        session.query(Credor)
+        .filter(Credor.id_credor == id_credor, Credor.deleted.is_(False))
+        .first()
+    )
+
+    if not credor:
+        session.close()
+        flash("Credor não encontrado.", "erro")
+        return redirect(url_for("financeiro.listar_credores"))
+
+    if request.method == "POST":
+        nome = (request.form.get("nome") or "").strip()
+
+        erros = []
+        if not nome:
+            erros.append("Nome do credor é obrigatório.")
+
+        if erros:
+            for e in erros:
+                flash(e, "erro")
+        else:
+            credor.nome = nome
+            session.commit()
+            session.close()
+
+            flash("Credor atualizado com sucesso!", "sucesso")
+            return redirect(url_for("financeiro.listar_credores"))
+
+    credor_view = {
+        "id": credor.id_credor,
+        "nome": credor.nome,
+    }
+
+    session.close()
+    return render_template("credor_form.html", credor=credor_view)

@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Títulos{% endblock %}
+
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">Títulos</h1>
+
+    <div class="d-flex align-items-center gap-2">
+
+      {# SUA ROTA LÊ mes=int e ano=int (request.args.get("mes", type=int)) #}
+      {# então aqui usamos selects pra enviar mes/ano compatíveis #}
+      <form method="get" class="d-flex align-items-center gap-2">
+        <label class="form-label mb-0">Vencimento:</label>
+
+        <select name="mes" class="form-select form-select-sm" style="max-width: 90px;">
+          {% for m, nome in meses %}
+            <option value="{{ m }}" {% if mes == m %}selected{% endif %}>{{ nome }}</option>
+          {% endfor %}
+        </select>
+
+        <select name="ano" class="form-select form-select-sm" style="max-width: 110px;">
+          {% for a in anos %}
+            <option value="{{ a }}" {% if ano == a %}selected{% endif %}>{{ a }}</option>
+          {% endfor %}
+        </select>
+
+        <button type="submit" class="btn btn-sm btn-outline-primary">
+          Filtrar
+        </button>
+
+        <a href="{{ url_for('financeiro.listar_titulos') }}" class="btn btn-sm btn-outline-secondary">
+          Mês atual
+        </a>
+      </form>
+
+      <a href="{{ url_for('financeiro.novo_titulo') }}" class="btn btn-primary btn-sm">
+        Novo título
+      </a>
+    </div>
+  </div>
+
+  {% if titulos %}
+    <div class="table-responsive">
+      <table class="table table-sm table-striped table-hover align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>ID</th>
+            <th>Documento</th>
+            <th>Número</th>
+            <th>Credor</th>
+            <th>Plano</th>
+            <th>Vencimento</th>
+            <th class="text-end">Valor</th>
+            <th class="text-end">Baixado</th>
+            <th class="text-end">Saldo</th>
+            <th class="text-center">Ações</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% set ns = namespace(total_aberto=0) %}
+
+          {% for t in titulos %}
+            {% set aberto = (t.aberto or 0) %}
+            {% set ns.total_aberto = ns.total_aberto + aberto %}
+
+            <tr>
+              <td>{{ t.id }}</td>
+              <td>{{ t.doc_label }}</td>
+              <td>{{ t.nr_documento }}</td>
+              <td>{{ t.credor }}</td>
+              <td>{{ t.plano }}</td>
+              <td>{{ t.vencimento }}</td>
+
+              <td class="text-end">R$ {{ "%.2f"|format(t.valor or 0) }}</td>
+              <td class="text-end">R$ {{ "%.2f"|format(t.baixado or 0) }}</td>
+              <td class="text-end">R$ {{ "%.2f"|format(aberto) }}</td>
+
+              <td class="text-center">
+                <a
+                  href="{{ url_for('financeiro.baixar_titulo', id_titulo=t.id) }}"
+                  class="btn btn-sm btn-outline-success me-1 {% if aberto <= 0 %}disabled{% endif %}"
+                >
+                  Baixar
+                </a>
+
+                {% if (t.baixado or 0) > 0 %}
+                  <a
+                    href="{{ url_for('financeiro.listar_baixas_titulo', id_titulo=t.id) }}"
+                    class="btn btn-sm btn-outline-info me-1"
+                  >
+                    Baixas
+                  </a>
+                {% endif %}
+
+                <a
+                  href="{{ url_for('financeiro.editar_titulo', id_titulo=t.id) }}"
+                  class="btn btn-sm btn-outline-secondary me-1"
+                >
+                  Editar
+                </a>
+
+                <a
+                  href="{{ url_for('financeiro.copiar_titulo', id_titulo=t.id) }}"
+                  class="btn btn-sm btn-outline-primary me-1"
+                >
+                  Copiar
+                </a>
+
+                <form
+                  method="post"
+                  action="{{ url_for('financeiro.excluir_titulo', id_titulo=t.id) }}"
+                  style="display:inline"
+                  onsubmit="return confirm('Confirma exclusão do título {{ t.doc_label }} {{ t.nr_documento }}?');"
+                >
+                  <button
+                    type="submit"
+                    class="btn btn-sm btn-outline-danger"
+                    {% if (t.baixado or 0) > 0 %}disabled title="Título possui baixa e não pode ser excluído"{% endif %}
+                  >
+                    Excluir
+                  </button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+
+        <tfoot>
+          <tr class="fw-bold">
+            <td colspan="8" class="text-end">Total saldo em aberto:</td>
+            <td class="text-end">R$ {{ "%.2f"|format(ns.total_aberto) }}</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  {% else %}
+    <p>Não há títulos cadastrados.</p>
+  {% endif %}
+{% endblock %}

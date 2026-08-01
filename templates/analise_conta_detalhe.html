@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}
+  Detalhe da conta {{ plano.cod_estrutural }} - {{ plano.nome_conta }}
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h5 mb-0">
+    Detalhe da conta {{ plano.cod_estrutural }} - {{ plano.nome_conta }}
+  </h1>
+
+  <a href="{{ url_for('financeiro.analise_resultados', mes=mes, ano=ano) }}" class="btn btn-sm btn-outline-secondary">
+    ⬅ Voltar para análise
+  </a>
+</div>
+
+<p class="text-muted">
+  Período:
+  {{ data_ini.strftime("%d/%m/%Y") }} a {{ (data_fim - timedelta(days=1)).strftime("%d/%m/%Y") if data_fim else "" }}
+</p>
+
+<div class="row">
+  <!-- MOVIMENTAÇÕES DIRETAS -->
+  <div class="col-md-6 mb-4">
+    <div class="card shadow-sm">
+      <div class="card-header bg-primary text-white py-2">
+        <strong>Movimentações diretas (Entradas / Saídas)</strong>
+      </div>
+      <div class="card-body p-2">
+        {% if movimentos %}
+          <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Data</th>
+                  <th>Tipo</th>
+                  <th>Documento</th>
+                  <th class="text-end">Valor</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for m in movimentos %}
+                  <tr>
+                    <td>{{ m.data }}</td>
+                    <td>{{ m.tipo }}</td>
+                    <td>
+                      {{ m.documento }}
+                      {% if m.nr_documento %} {{ m.nr_documento }}{% endif %}
+                    </td>
+                    <td class="text-end">
+                      R$ {{ "%.2f"|format(m.valor) }}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+              <tfoot>
+                <tr class="table-primary">
+                  <th colspan="3" class="text-end">Total movimentações</th>
+                  <th class="text-end">R$ {{ "%.2f"|format(total_mov) }}</th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        {% else %}
+          <p class="mb-0">Nenhuma movimentação direta encontrada para o período.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- BAIXAS DE TÍTULOS -->
+  <div class="col-md-6 mb-4">
+    <div class="card shadow-sm">
+      <div class="card-header bg-warning py-2">
+        <strong>Baixas de títulos</strong>
+      </div>
+      <div class="card-body p-2">
+        {% if baixas %}
+          <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Data</th>
+                  <th>Documento</th>
+                  <th>Credor</th>
+                  <th class="text-end">Valor</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for b in baixas %}
+                  <tr>
+                    <td>{{ b.data }}</td>
+                    <td>
+                      {{ b.documento }}
+                      {% if b.nr_documento %} {{ b.nr_documento }}{% endif %}
+                    </td>
+                    <td>{{ b.credor }}</td>
+                    <td class="text-end">
+                      R$ {{ "%.2f"|format(b.valor) }}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+              <tfoot>
+                <tr class="table-warning">
+                  <th colspan="3" class="text-end">Total baixas</th>
+                  <th class="text-end">R$ {{ "%.2f"|format(total_baixas) }}</th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        {% else %}
+          <p class="mb-0">Nenhuma baixa de título encontrada para o período.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESUMO GERAL DA CONTA -->
+<div class="row">
+  <div class="col-md-6 offset-md-3">
+    <div class="card shadow-sm">
+      <div class="card-header bg-secondary text-white py-2">
+        <strong>Resumo desta conta no período</strong>
+      </div>
+      <div class="card-body">
+        <div class="d-flex justify-content-between mb-2">
+          <span>Movimentações diretas</span>
+          <strong>R$ {{ "%.2f"|format(total_mov) }}</strong>
+        </div>
+        <div class="d-flex justify-content-between mb-2">
+          <span>Baixas de títulos</span>
+          <strong>R$ {{ "%.2f"|format(total_baixas) }}</strong>
+        </div>
+        <hr>
+        <div class="d-flex justify-content-between">
+          <span>Total apropriado nesta conta</span>
+          {% set cls = 'text-success' if total_geral >= 0 else 'text-danger' %}
+          <strong class="{{ cls }}">
+            R$ {{ "%.2f"|format(total_geral) }}
+          </strong>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

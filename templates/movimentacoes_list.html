@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Movimentações{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h4 mb-0">Movimentações</h1>
+
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('financeiro.nova_movimentacao') }}" class="btn btn-sm btn-primary">
+      Nova movimentação
+    </a>
+    <a href="{{ url_for('financeiro.listar_contas') }}" class="btn btn-sm btn-outline-secondary">
+      Voltar para contas
+    </a>
+  </div>
+</div>
+
+{% if movimentacoes %}
+<div class="table-responsive">
+  <table class="table table-sm table-striped table-hover align-middle">
+    <thead class="table-dark">
+      <tr>
+        <th style="width: 60px;">ID</th>
+        <th style="width: 95px;">Data</th>
+        <th style="width: 90px;">Tipo</th>
+        <th style="width: 160px;">Documento</th>
+        <th>Descrição</th>
+        <th style="width: 110px;" class="text-end">Valor</th>
+        <th style="width: 180px;">Conta origem</th>
+        <th style="width: 180px;">Conta destino</th>
+        <th style="width: 220px;">Plano financeiro</th>
+        <th style="width: 130px;" class="text-center">Ações</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for m in movimentacoes %}
+      <tr>
+        <td class="text-nowrap">{{ m.id }}</td>
+
+        {# no routes você já monta m.data como string dd/mm/aaaa #}
+        <td class="text-nowrap">{{ m.data or '-' }}</td>
+
+        <td class="text-nowrap">{{ m.tipo_label }}</td>
+
+        {# -------- Documento: queremos "AV - NA" -------- #}
+        {% set doc_sigla = '' %}
+
+        {% if m.documento is not none and m.documento is not string and m.documento.tipo_doc is defined %}
+          {% set doc_sigla = m.documento.tipo_doc %}
+        {% elif m.documento is mapping and m.documento.get('tipo_doc') %}
+          {% set doc_sigla = m.documento.get('tipo_doc') %}
+        {% else %}
+          {% set doc_str = (m.documento|string)|trim %}
+          {% if ' - ' in doc_str %}
+            {% set doc_sigla = doc_str.split(' - ')[0] %}
+          {% elif doc_str.startswith('<Documento ') %}
+            {% set doc_sigla = doc_str.replace('<Documento', '')|replace('>', '')|trim %}
+            {% if ' ' in doc_sigla %}
+              {% set doc_sigla = doc_sigla.split(' ')[0] %}
+            {% endif %}
+          {% else %}
+            {% set doc_sigla = doc_str %}
+          {% endif %}
+        {% endif %}
+
+        <td class="text-nowrap">
+          {{ (doc_sigla or '-') }} - {{ (m.nr_documento or 'NA') }}
+        </td>
+
+        <td>{{ m.descricao or '' }}</td>
+
+        <td class="text-end text-nowrap">
+          R$ {{ "%.2f"|format(m.valor or 0) }}
+        </td>
+
+        <td>{{ m.conta_origem or '-' }}</td>
+        <td>{{ m.conta_destino or '-' }}</td>
+        <td>{{ m.plano or '-' }}</td>
+
+        <td class="text-center text-nowrap">
+          <a
+            href="{{ url_for('financeiro.editar_movimentacao', id_mov=m.id) }}"
+            class="btn btn-sm btn-outline-secondary me-1"
+          >
+            Editar
+          </a>
+
+          <form
+            method="post"
+            action="{{ url_for('financeiro.excluir_movimentacao', id_mov=m.id) }}"
+            style="display:inline;"
+            onsubmit="return confirm('Confirma exclusão desta movimentação de R$ {{ '%.2f'|format(m.valor or 0) }}?');"
+          >
+            <button type="submit" class="btn btn-sm btn-outline-danger">
+              Excluir
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+
+  </table>
+</div>
+{% else %}
+<p>Não há movimentações lançadas ainda.</p>
+{% endif %}
+
+{% endblock %}

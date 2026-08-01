@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Contas inativas{% endblock %}
+
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">Contas inativas</h1>
+
+    <a href="{{ url_for('financeiro.listar_contas') }}" class="btn btn-sm btn-outline-primary">
+      Ver contas ativas
+    </a>
+  </div>
+
+  {% if contas %}
+    <div class="table-responsive">
+      <table class="table table-sm table-striped table-hover align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>ID</th>
+            <th>Descrição</th>
+            <th>Tipo</th>
+            <th class="text-end">Saldo inicial</th>
+            <th>Data saldo inicial</th>
+            <th class="text-end">Saldo atual</th>
+            <th class="text-center">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in contas %}
+            <tr>
+              <td>{{ c.id }}</td>
+              <td>{{ c.descricao }}</td>
+              <td>{{ c.tipo }}</td>
+              <td class="text-end">R$ {{ '%.2f'|format(c.saldo_inicial) }}</td>
+              <td>{{ c.data_saldo_inicial }}</td>
+              <td class="text-end">R$ {{ '%.2f'|format(c.saldo_atual) }}</td>
+              <td class="text-center">
+                <form
+                  method="post"
+                  action="{{ url_for('financeiro.reativar_conta', id_conta=c.id) }}"
+                  style="display:inline"
+                  onsubmit="return confirm('Confirma reativação da conta {{ c.descricao }}?');"
+                >
+                  <button type="submit" class="btn btn-sm btn-outline-success">
+                    Reativar
+                  </button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr class="fw-bold">
+            <td colspan="5" class="text-end">Total geral (inativas):</td>
+            <td class="text-end">R$ {{ '%.2f'|format(total_saldo) }}</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  {% else %}
+    <p>Não há contas inativas.</p>
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,342 @@
+{% extends "base.html" %}
+
+{% block title %}
+  Editar Movimentação - PlanSmart Financeiro
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="h4">Editar Movimentação de Conta</h2>
+  <div>
+    <a href="{{ url_for('financeiro.dashboard_financeiro') }}" class="btn btn-sm btn-outline-secondary me-2">
+      ⬅ Home
+    </a>
+    <a href="{{ url_for('financeiro.listar_movimentacoes') }}" class="btn btn-sm btn-outline-primary">
+      📃 Voltar para lista de movimentações
+    </a>
+  </div>
+</div>
+
+<form method="post" class="card p-3 shadow-sm">
+
+  <div class="row mb-3">
+    <div class="col-md-3">
+      <label class="form-label">Tipo de Movimentação</label>
+      <select name="tipo" id="tipo_mov" class="form-select" required>
+        <option value="">Selecione...</option>
+        <option value="E" {% if movimentacao and movimentacao.tipo == 'E' %}selected{% endif %}>Entrada</option>
+        <option value="S" {% if movimentacao and movimentacao.tipo == 'S' %}selected{% endif %}>Saída</option>
+        <option value="T" {% if movimentacao and movimentacao.tipo == 'T' %}selected{% endif %}>Transferência</option>
+      </select>
+    </div>
+
+    {# ---------- CONTA ÚNICA (E/S) ---------- #}
+    <div class="col-md-3" id="col_conta_unica">
+      <label class="form-label">
+        Conta
+        <span id="label_conta">
+          {% if movimentacao %}
+            {% if movimentacao.tipo == 'E' %}(Destino){% elif movimentacao.tipo == 'S' %}(Origem){% endif %}
+          {% endif %}
+        </span>
+      </label>
+
+      <select name="id_conta" id="id_conta" class="form-select">
+        <option value="">Selecione...</option>
+        {% for c in contas %}
+          <option value="{{ c.id }}"
+            {% if movimentacao and movimentacao.id_conta == c.id %}selected{% endif %}>
+            {{ c.descricao }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    {# ---------- TRANSFERÊNCIA: ORIGEM ---------- #}
+    <div class="col-md-3" id="col_conta_origem" style="display:none;">
+      <label class="form-label">Conta Origem</label>
+      <select name="id_conta_origem" id="id_conta_origem" class="form-select">
+        <option value="">Selecione...</option>
+        {% for c in contas %}
+          <option value="{{ c.id }}"
+            {% if movimentacao and movimentacao.id_conta_origem == c.id %}selected{% endif %}>
+            {{ c.descricao }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    {# ---------- TRANSFERÊNCIA: DESTINO ---------- #}
+    <div class="col-md-3" id="col_conta_destino" style="display:none;">
+      <label class="form-label">Conta Destino</label>
+      <select name="id_conta_destino" id="id_conta_destino" class="form-select">
+        <option value="">Selecione...</option>
+        {% for c in contas %}
+          <option value="{{ c.id }}"
+            {% if movimentacao and movimentacao.id_conta_destino == c.id %}selected{% endif %}>
+            {{ c.descricao }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">Data</label>
+      <input
+        type="date"
+        name="data"
+        class="form-control"
+        value="{% if movimentacao and movimentacao.data %}{{ movimentacao.data }}{% else %}{{ hoje }}{% endif %}"
+        required
+      >
+    </div>
+  </div>
+
+  {# -------- Documento: precisa selecionar pela SIGLA (AV/NF/...) -------- #}
+  {% set doc_sigla_edit = '' %}
+
+  {# 1) objeto Documento #}
+  {% if movimentacao and movimentacao.documento is not none and movimentacao.documento is not string and movimentacao.documento.tipo_doc is defined %}
+    {% set doc_sigla_edit = movimentacao.documento.tipo_doc %}
+  {# 2) dict {"tipo_doc": "..."} #}
+  {% elif movimentacao and movimentacao.documento is mapping and movimentacao.documento.get('tipo_doc') %}
+    {% set doc_sigla_edit = movimentacao.documento.get('tipo_doc') %}
+  {# 3) string "AV - Aviso..." ou "<Documento ...>" #}
+  {% elif movimentacao and movimentacao.documento is not none %}
+    {% set doc_str = (movimentacao.documento|string)|trim %}
+    {% if ' - ' in doc_str %}
+      {% set doc_sigla_edit = doc_str.split(' - ')[0] %}
+    {% elif doc_str.startswith('<Documento ') %}
+      {% set tmp = doc_str.replace('<Documento', '')|replace('>', '')|trim %}
+      {% if ' ' in tmp %}{% set doc_sigla_edit = tmp.split(' ')[0] %}{% else %}{% set doc_sigla_edit = tmp %}{% endif %}
+    {% else %}
+      {% set doc_sigla_edit = doc_str %}
+    {% endif %}
+  {% endif %}
+
+  <div class="row mb-3">
+    <div class="col-md-3">
+      <label class="form-label">Documento</label>
+      <select name="documento" class="form-select" required>
+        <option value="">Selecione...</option>
+        {% for d in documentos %}
+          <option value="{{ d.tipo_doc }}"
+            {% if doc_sigla_edit and doc_sigla_edit == d.tipo_doc %}selected{% endif %}>
+            {{ d.tipo_doc }} - {{ d.nome_doc }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">Número</label>
+      <input
+        type="text"
+        name="nr_documento"
+        class="form-control"
+        value="{{ movimentacao.nr_documento if movimentacao else '' }}"
+        required
+      >
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Descrição</label>
+      <input
+        type="text"
+        name="descricao"
+        class="form-control"
+        value="{{ movimentacao.descricao if movimentacao else '' }}"
+      >
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-md-3">
+      <label class="form-label">Valor</label>
+      <input
+        type="text"
+        name="valor"
+        id="valor"
+        class="form-control js-money"
+        inputmode="numeric"
+        autocomplete="off"
+        placeholder="0,00"
+        value="{% if movimentacao and movimentacao.valor is not none %}{{ ('%.2f'|format(movimentacao.valor))|replace('.', ',') }}{% endif %}"
+        required
+      >
+      <div class="form-text">Digite só números: 200 → 2,00</div>
+    </div>
+
+    <div class="col-md-9" id="col_plano">
+      <label class="form-label">Plano Financeiro</label>
+
+      <select name="id_plano" id="id_plano" class="form-select">
+        <option value="">Selecione...</option>
+
+        <optgroup label="Entradas (Grupo 1)" id="grp_1">
+          {% for p in planos_entrada %}
+            {% set tipo_norm = (p.tipo|default('')|lower|trim)
+              |replace('á','a')|replace('à','a')|replace('ã','a')|replace('â','a')
+              |replace('é','e')|replace('ê','e')
+              |replace('í','i')
+              |replace('ó','o')|replace('ô','o')|replace('õ','o')
+              |replace('ú','u') %}
+            {% set is_analitica = ('analitica' in tipo_norm) %}
+
+            <option value="{{ p.id }}"
+              data-grupo="1"
+              {% if not is_analitica %}disabled{% endif %}
+              {% if movimentacao and movimentacao.id_plano == p.id %}selected{% endif %}>
+              {{ p.codigo }} - {{ p.nome }}
+            </option>
+          {% endfor %}
+        </optgroup>
+
+        <optgroup label="Saídas (Grupo 2)" id="grp_2">
+          {% for p in planos_saida %}
+            {% set tipo_norm = (p.tipo|default('')|lower|trim)
+              |replace('á','a')|replace('à','a')|replace('ã','a')|replace('â','a')
+              |replace('é','e')|replace('ê','e')
+              |replace('í','i')
+              |replace('ó','o')|replace('ô','o')|replace('õ','o')
+              |replace('ú','u') %}
+            {% set is_analitica = ('analitica' in tipo_norm) %}
+
+            <option value="{{ p.id }}"
+              data-grupo="2"
+              {% if not is_analitica %}disabled{% endif %}
+              {% if movimentacao and movimentacao.id_plano == p.id %}selected{% endif %}>
+              {{ p.codigo }} - {{ p.nome }}
+            </option>
+          {% endfor %}
+        </optgroup>
+      </select>
+
+      <div class="form-text">
+        Totalizadoras aparecem, mas não podem ser selecionadas.
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-end">
+    <button type="submit" class="btn btn-success">💾 Salvar</button>
+  </div>
+</form>
+
+<script>
+(function () {
+  const tipo = document.getElementById("tipo_mov");
+
+  const colContaUnica = document.getElementById("col_conta_unica");
+  const colOrigem = document.getElementById("col_conta_origem");
+  const colDestino = document.getElementById("col_conta_destino");
+
+  const selContaUnica = document.getElementById("id_conta");
+  const selOrigem = document.getElementById("id_conta_origem");
+  const selDestino = document.getElementById("id_conta_destino");
+
+  const colPlano = document.getElementById("col_plano");
+  const plano = document.getElementById("id_plano");
+  const grp1 = document.getElementById("grp_1");
+  const grp2 = document.getElementById("grp_2");
+
+  const labelConta = document.getElementById("label_conta");
+
+  function setRequired(el, on) {
+    if (!el) return;
+    if (on) el.setAttribute("required", "required");
+    else el.removeAttribute("required");
+  }
+
+  function ajustar() {
+    const t = (tipo.value || "").trim();
+
+    if (t === "T") {
+      // Transferência: origem + destino, sem plano
+      colContaUnica.style.display = "none";
+      colOrigem.style.display = "";
+      colDestino.style.display = "";
+      colPlano.style.display = "none";
+
+      // required correto
+      setRequired(selContaUnica, false);
+      setRequired(selOrigem, true);
+      setRequired(selDestino, true);
+
+      // plano zera
+      if (plano) plano.value = "";
+
+      // esconde grupos
+      if (grp1) grp1.style.display = "none";
+      if (grp2) grp2.style.display = "none";
+      return;
+    }
+
+    // E ou S: conta única, com plano
+    colOrigem.style.display = "none";
+    colDestino.style.display = "none";
+    colContaUnica.style.display = "";
+    colPlano.style.display = "";
+
+    setRequired(selOrigem, false);
+    setRequired(selDestino, false);
+    setRequired(selContaUnica, true);
+
+    if (t === "E") {
+      labelConta.textContent = "(Destino)";
+      if (grp1) grp1.style.display = "";
+      if (grp2) grp2.style.display = "none";
+      if (plano && plano.selectedOptions[0]?.dataset?.grupo === "2") plano.value = "";
+    } else if (t === "S") {
+      labelConta.textContent = "(Origem)";
+      if (grp1) grp1.style.display = "none";
+      if (grp2) grp2.style.display = "";
+      if (plano && plano.selectedOptions[0]?.dataset?.grupo === "1") plano.value = "";
+    } else {
+      labelConta.textContent = "";
+      if (grp1) grp1.style.display = "";
+      if (grp2) grp2.style.display = "";
+    }
+  }
+
+  if (tipo) {
+    tipo.addEventListener("change", ajustar);
+    ajustar(); // inicial
+  }
+})();
+</script>
+
+<script>
+(function () {
+  const nf = new Intl.NumberFormat('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+
+  function formatAsCents(raw) {
+    const digits = String(raw || '').replace(/\D/g, '');
+    if (!digits) return '';
+    const cents = parseInt(digits, 10);
+    return nf.format(cents / 100); // 200 -> 2,00
+  }
+
+  function attachMoneyMask(input) {
+    input.addEventListener('input', function () {
+      input.value = formatAsCents(input.value);
+      try { input.setSelectionRange(input.value.length, input.value.length); } catch (e) {}
+    });
+
+    input.addEventListener('blur', function () {
+      input.value = formatAsCents(input.value);
+    });
+
+    // formata valor inicial (edição)
+    if (input.value) input.value = formatAsCents(input.value);
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.js-money').forEach(attachMoneyMask);
+  });
+})();
+</script>
+{% endblock %}

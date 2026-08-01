@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+
+{% block title %}Análise de Resultado{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h4 mb-0">Análise de Resultado</h1>
+
+  <a href="{{ url_for('financeiro.dashboard_financeiro') }}" class="btn btn-sm btn-outline-secondary">
+    ⬅ Voltar para home
+  </a>
+</div>
+
+<form method="get" class="row g-2 align-items-end mb-4">
+  <div class="col-auto">
+    <label class="form-label mb-1">Mês</label>
+    <select name="mes" class="form-select form-select-sm">
+      {% for m_num, m_label in meses %}
+        <option value="{{ m_num }}" {% if m_num == mes %}selected{% endif %}>
+          {{ "%02d"|format(m_num) }} - {{ m_label }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="col-auto">
+    <label class="form-label mb-1">Ano</label>
+    <select name="ano" class="form-select form-select-sm">
+      {% for a in anos %}
+        <option value="{{ a }}" {% if a == ano %}selected{% endif %}>
+          {{ a }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="col-auto">
+    <button type="submit" class="btn btn-sm btn-primary">
+      Atualizar
+    </button>
+  </div>
+
+  <div class="col-auto">
+    <div class="form-text">
+      Período:
+      {{ data_ini.strftime("%d/%m/%Y") }}
+      a
+      {{ (data_fim - timedelta(days=1)).strftime("%d/%m/%Y") if data_fim else "" }}
+    </div>
+  </div>
+</form>
+
+<div class="row">
+  <!-- RECEITAS -->
+  <div class="col-md-6 mb-4">
+    <div class="card shadow-sm">
+      <div class="card-header bg-success text-white py-2">
+        <strong>Receitas</strong>
+      </div>
+      <div class="card-body p-2">
+        {% if receitas %}
+          <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th style="width: 35%;">Conta</th>
+                  <th style="width: 45%;">Descrição</th>
+                  <th class="text-end" style="width: 20%;">Valor</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for r in receitas %}
+                  {% set is_total = (r.tipo == 'totalizadora') %}
+                  <tr class="{% if is_total %}table-success{% endif %}">
+                    <td>
+                      {% if is_total %}
+                        {{ r.cod }}
+                      {% else %}
+                        <a
+                          href="{{ url_for('financeiro.detalhe_conta_resultado', id_plano=r.id_plano, mes=mes, ano=ano) }}"
+                          class="text-decoration-none"
+                        >
+                          {{ r.cod }}
+                        </a>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if is_total %}
+                        <strong>{{ r.nome }}</strong>
+                      {% else %}
+                        {{ r.nome }}
+                      {% endif %}
+                    </td>
+                    <td class="text-end">
+                      {% if is_total %}
+                        <strong>R$ {{ "%.2f"|format(r.valor) }}</strong>
+                      {% else %}
+                        R$ {{ "%.2f"|format(r.valor) }}
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+              <tfoot>
+                <tr class="table-success">
+                  <th colspan="2" class="text-end">Total de receitas</th>
+                  <th class="text-end">R$ {{ "%.2f"|format(total_receitas) }}</th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        {% else %}
+          <p class="mb-0">Nenhuma receita encontrada para o período.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- DESPESAS -->
+  <div class="col-md-6 mb-4">
+    <div class="card shadow-sm">
+      <div class="card-header bg-danger text-white py-2">
+        <strong>Despesas</strong>
+      </div>
+      <div class="card-body p-2">
+        {% if despesas %}
+          <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th style="width: 35%;">Conta</th>
+                  <th style="width: 45%;">Descrição</th>
+                  <th class="text-end" style="width: 20%;">Valor</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for d in despesas %}
+                  {% set is_total = (d.tipo == 'totalizadora') %}
+                  <tr class="{% if is_total %}table-danger{% endif %}">
+                    <td>
+                      {% if is_total %}
+                        {{ d.cod }}
+                      {% else %}
+                        <a
+                          href="{{ url_for('financeiro.detalhe_conta_resultado', id_plano=d.id_plano, mes=mes, ano=ano) }}"
+                          class="text-decoration-none"
+                        >
+                          {{ d.cod }}
+                        </a>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if is_total %}
+                        <strong>{{ d.nome }}</strong>
+                      {% else %}
+                        {{ d.nome }}
+                      {% endif %}
+                    </td>
+                    <td class="text-end">
+                      {% if is_total %}
+                        <strong>R$ {{ "%.2f"|format(d.valor) }}</strong>
+                      {% else %}
+                        R$ {{ "%.2f"|format(d.valor) }}
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+              <tfoot>
+                <tr class="table-danger">
+                  <th colspan="2" class="text-end">Total de despesas</th>
+                  <th class="text-end">R$ {{ "%.2f"|format(total_despesas) }}</th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        {% else %}
+          <p class="mb-0">Nenhuma despesa encontrada para o período.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESUMO GERAL -->
+<div class="row">
+  <div class="col-md-6 offset-md-3">
+    <div class="card shadow-sm">
+      <div class="card-header bg-secondary text-white py-2">
+        <strong>Resumo do período</strong>
+      </div>
+      <div class="card-body">
+        <div class="d-flex justify-content-between mb-2">
+          <span>Total de receitas</span>
+          <strong>R$ {{ "%.2f"|format(total_receitas) }}</strong>
+        </div>
+        <div class="d-flex justify-content-between mb-2">
+          <span>Total de despesas</span>
+          <strong>R$ {{ "%.2f"|format(total_despesas) }}</strong>
+        </div>
+        <hr>
+        <div class="d-flex justify-content-between">
+          <span>Resultado</span>
+          {% set cls = 'text-success' if resultado >= 0 else 'text-danger' %}
+          <strong class="{{ cls }}">
+            R$ {{ "%.2f"|format(resultado) }}
+          </strong>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

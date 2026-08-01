@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% if credor %}
+  {% set titulo_pagina = "Editar credor" %}
+{% else %}
+  {% set titulo_pagina = "Novo credor" %}
+{% endif %}
+
+{% block title %}{{ titulo_pagina }}{% endblock %}
+
+{% block content %}
+  <h1 class="h4 mb-3">{{ titulo_pagina }}</h1>
+
+  <form method="post" class="border rounded p-3 bg-white">
+    <div class="mb-3">
+      <label class="form-label">Nome do credor</label>
+      <input
+        type="text"
+        name="nome"
+        class="form-control"
+        required
+        value="{{ credor.nome if credor else '' }}"
+      >
+    </div>
+
+    <button type="submit" class="btn btn-success">
+      Salvar
+    </button>
+    <a href="{{ url_for('financeiro.listar_credores') }}" class="btn btn-secondary">
+      Cancelar
+    </a>
+  </form>
+{% endblock %}

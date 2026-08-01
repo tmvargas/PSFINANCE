@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}Extrato de Conta{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h4 mb-0">Extrato de Conta / Conciliação</h1>
+
+  <a href="{{ url_for('financeiro.dashboard_financeiro') }}" class="btn btn-sm btn-outline-secondary">
+    ⬅ Voltar para home
+  </a>
+</div>
+
+<form method="get" class="row g-2 align-items-end mb-4">
+  <div class="col-md-4">
+    <label class="form-label mb-1">Conta</label>
+    <select name="id_conta" class="form-select form-select-sm" required>
+      <option value="">Selecione...</option>
+      {% for c in contas %}
+        <option value="{{ c.id_conta }}"
+          {% if conta_selecionada and c.id_conta == conta_selecionada.id_conta %}selected{% endif %}>
+          {{ c.descricao }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="col-md-3">
+    <label class="form-label mb-1">Data inicial</label>
+    <input type="date"
+           name="data_ini"
+           class="form-control form-control-sm"
+           value="{{ data_ini.strftime('%Y-%m-%d') }}">
+  </div>
+
+  <div class="col-md-3">
+    <label class="form-label mb-1">Data final</label>
+    <input type="date"
+           name="data_fim"
+           class="form-control form-control-sm"
+           value="{{ data_fim.strftime('%Y-%m-%d') }}">
+  </div>
+
+  <div class="col-md-2 d-flex align-items-end">
+    <button type="submit" class="btn btn-sm btn-primary w-100">
+      Buscar extrato
+    </button>
+  </div>
+</form>
+
+{% if conta_selecionada %}
+  <div class="card mb-3 shadow-sm">
+    <div class="card-body py-2">
+      <div class="row">
+        <div class="col-md-3">
+          <div class="small text-muted">Conta</div>
+          <div><strong>{{ conta_selecionada.descricao }}</strong></div>
+        </div>
+        <div class="col-md-3">
+          <div class="small text-muted">Saldo inicial</div>
+          <div><strong>R$ {{ "%.2f"|format(saldo_inicial or 0) }}</strong></div>
+        </div>
+        <div class="col-md-3">
+          <div class="small text-muted">Total de entradas</div>
+          <div class="text-success"><strong>R$ {{ "%.2f"|format(total_entradas) }}</strong></div>
+        </div>
+        <div class="col-md-3">
+          <div class="small text-muted">Total de saídas</div>
+          <div class="text-danger"><strong>R$ {{ "%.2f"|format(total_saidas) }}</strong></div>
+        </div>
+      </div>
+      <hr class="my-2">
+      <div class="row">
+        <div class="col-md-3">
+          <div class="small text-muted">Saldo final</div>
+          {% set cls = 'text-success' if (saldo_final or 0) >= 0 else 'text-danger' %}
+          <div class="{{ cls }}"><strong>R$ {{ "%.2f"|format(saldo_final or 0) }}</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <form method="post">
+    <div class="card shadow-sm">
+      <div class="card-header py-2 d-flex justify-content-between align-items-center">
+        <strong>Movimentações do período / Conciliação</strong>
+        <button type="submit" class="btn btn-sm btn-success">
+          Salvar conciliação
+        </button>
+      </div>
+      <div class="card-body p-2">
+        {% if extrato %}
+          <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th style="width: 3%;">✔</th>
+                  <th>Data</th>
+                  <th>Tipo</th>
+                  <th>Origem</th>
+                  <th>Documento</th>
+                  <th>Descrição</th>
+                  <th class="text-end">Entrada</th>
+                  <th class="text-end">Saída</th>
+                  <th class="text-end">Saldo</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for lin in extrato %}
+                  <tr>
+                    <td class="text-center">
+                      {% if lin.origem_tipo == 'mov' %}
+                        <input
+                          type="checkbox"
+                          name="mov_{{ lin.id }}"
+                          {% if lin.conciliado %}checked{% endif %}
+                        >
+                      {% elif lin.origem_tipo == 'bx' %}
+                        <input
+                          type="checkbox"
+                          name="bx_{{ lin.id }}"
+                          {% if lin.conciliado %}checked{% endif %}
+                        >
+                      {% endif %}
+                    </td>
+                    <td>{{ lin.data_str }}</td>
+                    <td>{{ lin.tipo }}</td>
+                    <td>{{ lin.origem }}</td>
+                    <td>
+                      {{ lin.documento }}
+                      {% if lin.nr_documento %} {{ lin.nr_documento }}{% endif %}
+                    </td>
+                    <td>{{ lin.descricao }}</td>
+                    <td class="text-end">
+                      {% if lin.entrada %}
+                        R$ {{ "%.2f"|format(lin.entrada) }}
+                      {% endif %}
+                    </td>
+                    <td class="text-end">
+                      {% if lin.saida %}
+                        R$ {{ "%.2f"|format(lin.saida) }}
+                      {% endif %}
+                    </td>
+                    <td class="text-end">
+                      R$ {{ "%.2f"|format(lin.saldo) }}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="mt-2 text-muted small">
+            ✔ Marque as linhas conciliadas e clique em <strong>Salvar conciliação</strong>.
+          </div>
+        {% else %}
+          <p class="mb-0">Não há movimentações para o período selecionado.</p>
+        {% endif %}
+      </div>
+    </div>
+  </form>
+{% else %}
+  <p class="text-muted">Selecione uma conta e um período para visualizar o extrato e conciliar.</p>
+{% endif %}
+
+{% endblock %}
