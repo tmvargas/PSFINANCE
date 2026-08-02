@@ -139,3 +139,20 @@ Impacto: o menu inicial passa a refletir a hierarquia solicitada por Thiago:
 `Extrato` sob `FINANCEIRO > CAIXAS E BANCOS`, com expansao lateral pelo icone e
 icones/siglas em todos os menus, mantendo o escopo restrito a
 documentacao/mockup.
+
+## 2026-08-02 - PLA-1022 refacao do mockup de menu rejeitado
+
+Decisao: refazer o menu do mockup estatico em
+`docs/mockups/PLA-1016-layout-inicial.html`, corrigindo nomes e grupos para os
+termos exatos da tarefa, removendo resumo e contadores do menu lateral e
+mantendo evidencia reproduzivel de submenu expandido a direita quando o menu
+esta recolhido.
+
+Motivo: a versao anterior da `PLA-1019` foi rejeitada por Thiago e o screenshot
+evidenciava sobreposicao do submenu sobre a area principal, alem de ruido visual
+no menu lateral para uma tela operacional.
+
+Impacto: a `PLA-1022` mantem a hierarquia financeira ja solicitada, corrige
+`GERENCIAL`, `APOIO`, `Título`, `Baixa` e `Credor`, e entrega um menu mais
+simples para revisao executiva, sem alterar aplicacao Flask, rotas, banco, VPS
+ou producao.

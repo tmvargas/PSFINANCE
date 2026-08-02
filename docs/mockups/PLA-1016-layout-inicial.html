@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>PLA-1019 - Mockup menu inicial PSFINANCE</title>
+    <title>PLA-1022 - Mockup menu inicial PSFINANCE</title>
     <style>
       :root {
         --bg: #f4f7f5;
@@ -32,7 +32,7 @@
 
       .app {
         display: grid;
-        grid-template-columns: 264px 1fr;
+        grid-template-columns: 292px 1fr;
         min-height: 100vh;
         transition: grid-template-columns 180ms ease;
       }
@@ -46,7 +46,7 @@
         color: #ffffff;
         display: flex;
         flex-direction: column;
-        gap: 14px;
+        gap: 12px;
         padding: 18px 14px;
       }
 
@@ -112,41 +112,29 @@
         justify-content: center;
       }
 
-      .menu-summary {
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 8px;
-        padding: 10px;
-      }
-
-      .sidebar-compact .menu-summary {
-        display: none;
-      }
-
-      .menu-summary strong {
-        display: block;
-        font-size: 0.84rem;
-        margin-bottom: 3px;
-      }
-
-      .menu-summary span {
-        color: rgba(255, 255, 255, 0.62);
-        display: block;
-        font-size: 0.76rem;
-        line-height: 1.35;
-      }
-
       .menu-group {
         border-top: 1px solid rgba(255, 255, 255, 0.1);
-        padding-top: 13px;
+        padding-top: 14px;
       }
 
       .group-header {
         align-items: center;
         display: flex;
         gap: 8px;
-        justify-content: space-between;
         margin-bottom: 8px;
+      }
+
+      .group-icon {
+        align-items: center;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        color: rgba(255, 255, 255, 0.78);
+        display: inline-flex;
+        font-size: 0.72rem;
+        font-weight: 800;
+        height: 24px;
+        justify-content: center;
+        width: 24px;
       }
 
       .group-title {
@@ -155,21 +143,6 @@
         font-weight: 800;
         letter-spacing: 0.08em;
         margin: 0;
-      }
-
-      .group-count {
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 999px;
-        color: rgba(255, 255, 255, 0.74);
-        font-size: 0.72rem;
-        font-weight: 800;
-        min-width: 26px;
-        padding: 3px 7px;
-        text-align: center;
-      }
-
-      .sidebar-compact .group-count {
-        display: none;
       }
 
       .menu-list {
@@ -181,6 +154,11 @@
 
       .menu-node {
         position: relative;
+      }
+
+      .menu-node.submenu-open > .menu-item {
+        background: rgba(22, 131, 74, 0.28);
+        color: #ffffff;
       }
 
       .menu-item {
@@ -238,32 +216,26 @@
       }
 
       .submenu {
-        background: #173c28;
-        border: 1px solid rgba(255, 255, 255, 0.16);
-        border-radius: 8px;
-        box-shadow: 0 16px 34px rgba(0, 0, 0, 0.18);
         display: none;
-        left: calc(100% + 10px);
-        min-width: 218px;
-        padding: 8px;
-        position: absolute;
-        top: 0;
-        z-index: 5;
+        gap: 4px;
+        margin: 4px 0 2px 34px;
+        padding: 0 0 0 10px;
+        position: static;
       }
 
       .menu-node.submenu-open .submenu {
         display: grid;
-        gap: 6px;
       }
 
       .submenu-item {
         align-items: center;
-        border-radius: 7px;
-        color: rgba(255, 255, 255, 0.86);
+        border-left: 2px solid rgba(255, 255, 255, 0.16);
+        border-radius: 0 7px 7px 0;
+        color: rgba(255, 255, 255, 0.78);
         display: flex;
         gap: 10px;
-        min-height: 38px;
-        padding: 7px 9px;
+        min-height: 34px;
+        padding: 6px 9px;
         text-decoration: none;
       }
 
@@ -277,8 +249,23 @@
         padding-block: 6px;
       }
 
-      .sidebar.groups-compact .menu-summary {
+      .sidebar-compact .submenu {
         display: none;
+      }
+
+      .app.sidebar-compact .menu-node.submenu-open .submenu {
+        background: #173c28;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 8px;
+        box-shadow: 0 16px 34px rgba(0, 0, 0, 0.18);
+        display: grid;
+        left: calc(100% + 10px);
+        margin: 0;
+        min-width: 218px;
+        padding: 8px;
+        position: absolute;
+        top: 0;
+        z-index: 5;
       }
 
       .content {
@@ -561,10 +548,9 @@
         }
 
         .group-title,
-        .group-count,
         .nav-chevron,
+        .group-icon,
         .sidebar-compact .group-title,
-        .sidebar-compact .group-count,
         .sidebar-compact .nav-label,
         .sidebar-compact .nav-chevron {
           display: none;
@@ -579,15 +565,17 @@
           padding-top: 0;
         }
 
-        .menu-summary,
-        .sidebar-compact .menu-summary {
-          display: none;
-        }
-
         .submenu {
+          background: #173c28;
+          border: 1px solid rgba(255, 255, 255, 0.16);
+          border-radius: 8px;
           left: 0;
+          margin: 0;
           min-width: 210px;
+          padding: 8px;
+          position: absolute;
           top: calc(100% + 8px);
+          z-index: 5;
         }
 
         .metrics,
@@ -633,13 +621,16 @@
         </div>
 
         <div class="sidebar-actions">
-          <button class="icon-button" id="toggleWidth" title="Recolher menu lateral" type="button">||</button>
-          <button class="icon-button" id="toggleHeight" title="Compactar grupos do menu" type="button">=</button>
+          <button class="icon-button" id="toggleWidth" title="Recolher menu lateral" type="button">‹</button>
+          <button class="icon-button" id="toggleHeight" title="Compactar grupos do menu" type="button">—</button>
         </div>
 
         <nav>
           <div class="menu-group">
-            <p class="group-title">HOME</p>
+            <div class="group-header">
+              <span class="group-icon">HM</span>
+              <p class="group-title">HOME</p>
+            </div>
             <div class="menu-list">
               <a class="menu-item active" href="#" aria-current="page">
                 <span class="nav-icon">IN</span>
@@ -649,29 +640,24 @@
             </div>
           </div>
 
-          <div class="menu-summary">
-            <strong>Menu inicial</strong>
-            <span>Organizado por rotina para validar a navegação antes da implementação no produto.</span>
-          </div>
-
           <div class="menu-group">
             <div class="group-header">
+              <span class="group-icon">FN</span>
               <p class="group-title">FINANCEIRO</p>
-              <span class="group-count">2</span>
             </div>
             <div class="menu-list">
-              <div class="menu-node submenu-open">
+              <div class="menu-node submenu-open" data-menu-node="contas-pagar">
                 <div class="menu-item">
                   <button class="nav-icon submenu-toggle" type="button" aria-label="Expandir Contas a Pagar" aria-expanded="true">CP</button>
                   <span class="nav-label">Contas a Pagar</span>
                   <span class="nav-chevron">›</span>
                 </div>
                 <div class="submenu" aria-label="Submenu Contas a Pagar">
-                  <a class="submenu-item" href="#"><span class="nav-icon">TT</span><span>Títulos</span></a>
-                  <a class="submenu-item" href="#"><span class="nav-icon">BX</span><span>Baixas</span></a>
+                  <a class="submenu-item" href="#"><span class="nav-icon">TT</span><span>Título</span></a>
+                  <a class="submenu-item" href="#"><span class="nav-icon">BX</span><span>Baixa</span></a>
                 </div>
               </div>
-              <div class="menu-node">
+              <div class="menu-node" data-menu-node="caixas-bancos">
                 <div class="menu-item">
                   <button class="nav-icon submenu-toggle" type="button" aria-label="Expandir Caixas e Bancos" aria-expanded="false">CB</button>
                   <span class="nav-label">Caixas e Bancos</span>
@@ -687,8 +673,8 @@
 
           <div class="menu-group">
             <div class="group-header">
-              <p class="group-title">ANALISE</p>
-              <span class="group-count">1</span>
+              <span class="group-icon">GE</span>
+              <p class="group-title">GERENCIAL</p>
             </div>
             <div class="menu-list">
               <a class="menu-item" href="#"><span class="nav-icon">GF</span><span class="nav-label">Gerencial Financeiro</span><span class="nav-chevron">›</span></a>
@@ -697,11 +683,11 @@
 
           <div class="menu-group">
             <div class="group-header">
-              <p class="group-title">CADASTROS</p>
-              <span class="group-count">2</span>
+              <span class="group-icon">AP</span>
+              <p class="group-title">APOIO</p>
             </div>
             <div class="menu-list">
-              <a class="menu-item" href="#"><span class="nav-icon">CR</span><span class="nav-label">Credores</span><span class="nav-chevron">›</span></a>
+              <a class="menu-item" href="#"><span class="nav-icon">CR</span><span class="nav-label">Credor</span><span class="nav-chevron">›</span></a>
               <a class="menu-item" href="#"><span class="nav-icon">PF</span><span class="nav-label">Plano Financeiro</span><span class="nav-chevron">›</span></a>
             </div>
           </div>
@@ -710,7 +696,7 @@
 
       <div class="content">
         <header class="topbar">
-          <div class="search">Buscar títulos, credores, contas ou movimentações</div>
+          <div class="search">Buscar título, credor, contas ou movimentações</div>
           <div class="user-pill">Staging PSFINANCE</div>
         </header>
 
@@ -719,7 +705,7 @@
             <div>
               <div class="eyebrow">Painel inicial</div>
               <h1>Controle financeiro PlanSmart</h1>
-              <p class="subtitle">Mockup de navegação e visão executiva para validação visual do PSFINANCE.</p>
+              <p class="subtitle">Mockup de navegação com menu operacional revisado para validação visual do PSFINANCE.</p>
             </div>
             <div class="actions">
               <button class="btn btn-primary" type="button">Nova movimentação</button>
@@ -735,12 +721,12 @@
               <div class="metric-note">Contas ativas no ambiente de teste.</div>
             </div>
             <div class="card">
-              <div class="metric-label">Títulos em aberto</div>
+              <div class="metric-label">Título em aberto</div>
               <div class="metric-value">18</div>
               <div class="metric-note">Visão simulada para composição inicial.</div>
             </div>
             <div class="card">
-              <div class="metric-label">Baixas no mês</div>
+              <div class="metric-label">Baixa no mês</div>
               <div class="metric-value">7</div>
               <div class="metric-note">Atalho para conferência operacional.</div>
             </div>
@@ -814,6 +800,38 @@
     <script>
       const app = document.querySelector("#app");
       const sidebar = document.querySelector("#sidebar");
+      const params = new URLSearchParams(window.location.search);
+
+      function closeSubmenus() {
+        document.querySelectorAll(".menu-node").forEach((node) => {
+          node.classList.remove("submenu-open");
+          const button = node.querySelector(".submenu-toggle");
+          if (button) {
+            button.setAttribute("aria-expanded", "false");
+          }
+        });
+      }
+
+      function openSubmenu(menuId) {
+        const node = document.querySelector(`[data-menu-node="${menuId}"]`);
+        if (!node) {
+          return;
+        }
+        node.classList.add("submenu-open");
+        const button = node.querySelector(".submenu-toggle");
+        if (button) {
+          button.setAttribute("aria-expanded", "true");
+        }
+      }
+
+      if (params.get("compact") === "1") {
+        app.classList.add("sidebar-compact");
+      }
+
+      if (params.has("open")) {
+        closeSubmenus();
+        openSubmenu(params.get("open"));
+      }
 
       document.querySelector("#toggleWidth").addEventListener("click", () => {
         app.classList.toggle("sidebar-compact");
