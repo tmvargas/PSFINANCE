@@ -110,3 +110,16 @@ Impacto: a validacao oficial da porta `5001` passa a comprovar diretamente se o
 processo em execucao esta usando `PSFINANCE_STAGING_DATABASE_URL` e o dialeto
 PostgreSQL, reduzindo risco de nova evidencia ambigua. Producao, `main` e banco
 produtivo permanecem fora do escopo.
+
+## 2026-08-02 - PLA-1016 mockup estatico do layout inicial do PSFINANCE
+
+Decisao: entregar a PLA-1016 como mockup HTML estatico em `docs/mockups/`,
+sem alterar templates da aplicacao Flask, banco, rotas, VPS ou producao.
+
+Motivo: a tarefa solicita validacao visual antes de implementacao em codigo e
+define como requisitos a referencia ABF, variacao verde e menu lateral com
+comportamento de recolhimento vertical e horizontal.
+
+Impacto: a entrega permite revisao visual navegavel pelo CEO antes de qualquer
+implementacao no produto. A aplicacao PSFINANCE em staging permanece sem
+alteracao funcional nesta etapa.

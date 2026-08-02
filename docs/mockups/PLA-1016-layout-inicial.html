@@ -1,0 +1,675 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PLA-1016 - Mockup layout inicial PSFINANCE</title>
+    <style>
+      :root {
+        --bg: #f4f7f5;
+        --surface: #ffffff;
+        --surface-muted: #eef5f1;
+        --border: #d6e1da;
+        --text: #1b2520;
+        --muted: #66756c;
+        --green: #16834a;
+        --green-dark: #0f5c36;
+        --green-soft: #dff3e8;
+        --amber: #a16207;
+        --sidebar: #11241a;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, Arial, sans-serif;
+        margin: 0;
+      }
+
+      .app {
+        display: grid;
+        grid-template-columns: 264px 1fr;
+        min-height: 100vh;
+        transition: grid-template-columns 180ms ease;
+      }
+
+      .app.sidebar-compact {
+        grid-template-columns: 78px 1fr;
+      }
+
+      .sidebar {
+        background: var(--sidebar);
+        color: #ffffff;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        padding: 18px 14px;
+      }
+
+      .brand {
+        align-items: center;
+        display: flex;
+        gap: 10px;
+        min-height: 42px;
+      }
+
+      .brand-mark {
+        align-items: center;
+        background: #ffffff;
+        border-radius: 7px;
+        color: var(--green-dark);
+        display: inline-flex;
+        font-size: 0.78rem;
+        font-weight: 800;
+        height: 38px;
+        justify-content: center;
+        width: 42px;
+      }
+
+      .brand-name {
+        font-size: 1rem;
+        font-weight: 800;
+        letter-spacing: 0;
+        white-space: nowrap;
+      }
+
+      .sidebar-compact .brand-name,
+      .sidebar-compact .group-title,
+      .sidebar-compact .nav-label,
+      .sidebar-compact .nav-chevron {
+        display: none;
+      }
+
+      .sidebar-actions {
+        display: grid;
+        gap: 8px;
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .sidebar-compact .sidebar-actions {
+        grid-template-columns: 1fr;
+      }
+
+      button {
+        border: 0;
+        cursor: pointer;
+        font: inherit;
+      }
+
+      .icon-button {
+        align-items: center;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 7px;
+        color: #ffffff;
+        display: inline-flex;
+        height: 38px;
+        justify-content: center;
+      }
+
+      .menu-group {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 13px;
+      }
+
+      .group-title {
+        color: rgba(255, 255, 255, 0.58);
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        margin: 0 0 8px;
+      }
+
+      .menu-list {
+        display: grid;
+        gap: 6px;
+        margin: 0;
+        padding: 0;
+      }
+
+      .menu-item {
+        align-items: center;
+        border-radius: 7px;
+        color: rgba(255, 255, 255, 0.82);
+        display: flex;
+        gap: 10px;
+        min-height: 42px;
+        padding: 9px 10px;
+        text-decoration: none;
+      }
+
+      .menu-item.active,
+      .menu-item:hover {
+        background: var(--green);
+        color: #ffffff;
+      }
+
+      .nav-icon {
+        align-items: center;
+        display: inline-flex;
+        flex: 0 0 auto;
+        font-size: 1.05rem;
+        height: 24px;
+        justify-content: center;
+        width: 24px;
+      }
+
+      .nav-label {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .nav-chevron {
+        color: rgba(255, 255, 255, 0.46);
+      }
+
+      .sidebar.groups-compact .menu-item:not(.active) {
+        min-height: 36px;
+        padding-block: 6px;
+      }
+
+      .content {
+        min-width: 0;
+      }
+
+      .topbar {
+        align-items: center;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        gap: 16px;
+        justify-content: space-between;
+        min-height: 66px;
+        padding: 0 26px;
+      }
+
+      .search {
+        background: var(--surface-muted);
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        color: var(--muted);
+        min-height: 38px;
+        padding: 9px 12px;
+        width: min(420px, 42vw);
+      }
+
+      .user-pill {
+        align-items: center;
+        background: var(--green-soft);
+        border: 1px solid #bfe7cf;
+        border-radius: 999px;
+        color: var(--green-dark);
+        display: inline-flex;
+        font-size: 0.86rem;
+        font-weight: 700;
+        min-height: 36px;
+        padding: 0 14px;
+        white-space: nowrap;
+      }
+
+      main {
+        padding: 24px 26px 34px;
+      }
+
+      .header {
+        align-items: end;
+        display: flex;
+        gap: 18px;
+        justify-content: space-between;
+        margin-bottom: 18px;
+      }
+
+      .eyebrow {
+        color: var(--green-dark);
+        font-size: 0.76rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        margin-bottom: 7px;
+      }
+
+      h1,
+      h2,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        font-size: clamp(1.6rem, 3vw, 2.25rem);
+        line-height: 1.08;
+        margin-bottom: 8px;
+      }
+
+      .subtitle {
+        color: var(--muted);
+        margin-bottom: 0;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: flex-end;
+      }
+
+      .btn {
+        align-items: center;
+        border-radius: 7px;
+        display: inline-flex;
+        font-weight: 700;
+        gap: 8px;
+        min-height: 38px;
+        padding: 0 14px;
+      }
+
+      .btn-primary {
+        background: var(--green);
+        color: #ffffff;
+      }
+
+      .btn-secondary {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--green-dark);
+      }
+
+      .metrics {
+        display: grid;
+        gap: 14px;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        margin-bottom: 18px;
+      }
+
+      .card,
+      .panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+      }
+
+      .card {
+        min-height: 116px;
+        padding: 16px;
+      }
+
+      .metric-label {
+        color: var(--muted);
+        font-size: 0.82rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+
+      .metric-value {
+        font-size: 1.55rem;
+        font-weight: 800;
+        margin-bottom: 7px;
+      }
+
+      .metric-note {
+        color: var(--muted);
+        font-size: 0.84rem;
+      }
+
+      .grid {
+        display: grid;
+        gap: 14px;
+        grid-template-columns: minmax(0, 1.6fr) minmax(320px, 0.85fr);
+      }
+
+      .panel {
+        overflow: hidden;
+      }
+
+      .panel-header {
+        align-items: center;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        padding: 16px;
+      }
+
+      .panel-title {
+        font-size: 1rem;
+        margin-bottom: 4px;
+      }
+
+      .panel-caption {
+        color: var(--muted);
+        font-size: 0.84rem;
+        margin-bottom: 0;
+      }
+
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+
+      th,
+      td {
+        border-bottom: 1px solid var(--border);
+        padding: 11px 16px;
+        text-align: left;
+      }
+
+      th {
+        background: #f0f6f2;
+        color: var(--muted);
+        font-size: 0.74rem;
+        letter-spacing: 0.06em;
+      }
+
+      td:last-child,
+      th:last-child {
+        text-align: right;
+      }
+
+      .status {
+        border-radius: 999px;
+        display: inline-flex;
+        font-size: 0.78rem;
+        font-weight: 800;
+        padding: 5px 10px;
+      }
+
+      .status.ok {
+        background: var(--green-soft);
+        color: var(--green-dark);
+      }
+
+      .status.warn {
+        background: #fef3c7;
+        color: var(--amber);
+      }
+
+      .shortcut-list {
+        display: grid;
+        gap: 10px;
+        padding: 16px;
+      }
+
+      .shortcut {
+        align-items: center;
+        background: var(--surface-muted);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text);
+        display: grid;
+        gap: 2px;
+        grid-template-columns: 42px 1fr;
+        min-height: 62px;
+        padding: 10px;
+        text-decoration: none;
+      }
+
+      .shortcut-icon {
+        align-items: center;
+        background: #ffffff;
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        color: var(--green-dark);
+        display: inline-flex;
+        font-weight: 800;
+        height: 38px;
+        justify-content: center;
+        width: 38px;
+      }
+
+      .shortcut strong {
+        display: block;
+        font-size: 0.92rem;
+      }
+
+      .shortcut span:last-child {
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+
+      @media (max-width: 980px) {
+        .app {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar,
+        .app.sidebar-compact .sidebar {
+          display: block;
+          overflow-x: auto;
+          padding: 12px;
+          white-space: nowrap;
+        }
+
+        .brand,
+        .sidebar-actions,
+        .menu-group,
+        .menu-list,
+        .menu-item {
+          display: inline-flex;
+          vertical-align: middle;
+        }
+
+        .group-title,
+        .nav-chevron,
+        .sidebar-compact .group-title,
+        .sidebar-compact .nav-label,
+        .sidebar-compact .nav-chevron {
+          display: none;
+        }
+
+        .sidebar-actions {
+          margin: 0 10px;
+        }
+
+        .menu-group {
+          border-top: 0;
+          padding-top: 0;
+        }
+
+        .metrics,
+        .grid {
+          grid-template-columns: 1fr;
+        }
+
+        .header,
+        .topbar {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .topbar {
+          padding: 14px;
+        }
+
+        .search {
+          width: 100%;
+        }
+
+        main {
+          padding: 18px 14px 28px;
+        }
+
+        .actions {
+          justify-content: stretch;
+        }
+
+        .btn {
+          flex: 1 1 150px;
+          justify-content: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app" id="app">
+      <aside class="sidebar" id="sidebar" aria-label="Menu lateral">
+        <div class="brand">
+          <span class="brand-mark">PS</span>
+          <span class="brand-name">PSFINANCE</span>
+        </div>
+
+        <div class="sidebar-actions">
+          <button class="icon-button" id="toggleWidth" title="Recolher menu lateral" type="button">||</button>
+          <button class="icon-button" id="toggleHeight" title="Compactar grupos do menu" type="button">=</button>
+        </div>
+
+        <nav>
+          <div class="menu-group">
+            <p class="group-title">HOME</p>
+            <div class="menu-list">
+              <a class="menu-item active" href="#">
+                <span class="nav-icon">H</span>
+                <span class="nav-label">Home</span>
+                <span class="nav-chevron">›</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="menu-group">
+            <p class="group-title">FINANCEIRO</p>
+            <div class="menu-list">
+              <a class="menu-item" href="#"><span class="nav-icon">$</span><span class="nav-label">Contas a Pagar</span><span class="nav-chevron">›</span></a>
+              <a class="menu-item" href="#"><span class="nav-icon">T</span><span class="nav-label">Título</span><span class="nav-chevron">›</span></a>
+              <a class="menu-item" href="#"><span class="nav-icon">B</span><span class="nav-label">Baixa</span><span class="nav-chevron">›</span></a>
+              <a class="menu-item" href="#"><span class="nav-icon">C</span><span class="nav-label">Caixas e Bancos</span><span class="nav-chevron">›</span></a>
+              <a class="menu-item" href="#"><span class="nav-icon">M</span><span class="nav-label">Movimentações</span><span class="nav-chevron">›</span></a>
+              <a class="menu-item" href="#"><span class="nav-icon">E</span><span class="nav-label">Extrato</span><span class="nav-chevron">›</span></a>
+            </div>
+          </div>
+
+          <div class="menu-group">
+            <p class="group-title">GERENCIAL</p>
+            <div class="menu-list">
+              <a class="menu-item" href="#"><span class="nav-icon">G</span><span class="nav-label">Gerencial Financeiro</span><span class="nav-chevron">›</span></a>
+            </div>
+          </div>
+
+          <div class="menu-group">
+            <p class="group-title">APOIO</p>
+            <div class="menu-list">
+              <a class="menu-item" href="#"><span class="nav-icon">P</span><span class="nav-label">Credor</span><span class="nav-chevron">›</span></a>
+              <a class="menu-item" href="#"><span class="nav-icon">F</span><span class="nav-label">Plano Financeiro</span><span class="nav-chevron">›</span></a>
+            </div>
+          </div>
+        </nav>
+      </aside>
+
+      <div class="content">
+        <header class="topbar">
+          <div class="search">Buscar títulos, credores, contas ou movimentações</div>
+          <div class="user-pill">Staging PSFINANCE</div>
+        </header>
+
+        <main>
+          <section class="header">
+            <div>
+              <div class="eyebrow">Painel inicial</div>
+              <h1>Controle financeiro PlanSmart</h1>
+              <p class="subtitle">Mockup de navegação e visão executiva para validação visual do PSFINANCE.</p>
+            </div>
+            <div class="actions">
+              <button class="btn btn-primary" type="button">Nova movimentação</button>
+              <button class="btn btn-secondary" type="button">Novo título</button>
+              <button class="btn btn-secondary" type="button">Abrir extrato</button>
+            </div>
+          </section>
+
+          <section class="metrics">
+            <div class="card">
+              <div class="metric-label">Saldo consolidado</div>
+              <div class="metric-value">R$ 4.744,81</div>
+              <div class="metric-note">Contas ativas no ambiente de teste.</div>
+            </div>
+            <div class="card">
+              <div class="metric-label">Títulos em aberto</div>
+              <div class="metric-value">18</div>
+              <div class="metric-note">Visão simulada para composição inicial.</div>
+            </div>
+            <div class="card">
+              <div class="metric-label">Baixas no mês</div>
+              <div class="metric-value">7</div>
+              <div class="metric-note">Atalho para conferência operacional.</div>
+            </div>
+            <div class="card">
+              <div class="metric-label">Pendências</div>
+              <div class="metric-value">3</div>
+              <div class="metric-note">Destaque para rotina de acompanhamento.</div>
+            </div>
+          </section>
+
+          <section class="grid">
+            <div class="panel">
+              <div class="panel-header">
+                <div>
+                  <h2 class="panel-title">Agenda financeira</h2>
+                  <p class="panel-caption">Exemplo visual dos próximos vencimentos.</p>
+                </div>
+                <button class="btn btn-secondary" type="button">Ver todos</button>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Rotina</th>
+                    <th>Credor</th>
+                    <th>Status</th>
+                    <th>Valor</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Contas a Pagar</td>
+                    <td>Fornecedor Alpha</td>
+                    <td><span class="status warn">Hoje</span></td>
+                    <td>R$ 2.180,00</td>
+                  </tr>
+                  <tr>
+                    <td>Título</td>
+                    <td>Contrato Beta</td>
+                    <td><span class="status ok">Previsto</span></td>
+                    <td>R$ 8.940,00</td>
+                  </tr>
+                  <tr>
+                    <td>Movimentações</td>
+                    <td>Caixa Matriz</td>
+                    <td><span class="status ok">Conferido</span></td>
+                    <td>R$ 1.255,40</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="panel">
+              <div class="panel-header">
+                <div>
+                  <h2 class="panel-title">Acesso rápido</h2>
+                  <p class="panel-caption">Rotas principais previstas para a primeira tela.</p>
+                </div>
+              </div>
+              <div class="shortcut-list">
+                <a class="shortcut" href="#"><span class="shortcut-icon">$</span><span><strong>Caixas e Bancos</strong><span>Saldos, contas e conciliação.</span></span></a>
+                <a class="shortcut" href="#"><span class="shortcut-icon">E</span><span><strong>Extrato</strong><span>Movimentos por conta e período.</span></span></a>
+                <a class="shortcut" href="#"><span class="shortcut-icon">G</span><span><strong>Gerencial Financeiro</strong><span>Indicadores de acompanhamento.</span></span></a>
+                <a class="shortcut" href="#"><span class="shortcut-icon">F</span><span><strong>Plano Financeiro</strong><span>Classificação e apoio à análise.</span></span></a>
+              </div>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      const app = document.querySelector("#app");
+      const sidebar = document.querySelector("#sidebar");
+
+      document.querySelector("#toggleWidth").addEventListener("click", () => {
+        app.classList.toggle("sidebar-compact");
+      });
+
+      document.querySelector("#toggleHeight").addEventListener("click", () => {
+        sidebar.classList.toggle("groups-compact");
+      });
+    </script>
+  </body>
+</html>
