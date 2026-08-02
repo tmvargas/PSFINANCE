@@ -79,3 +79,18 @@ Decisao: incorporar ao repositório somente o código funcional Flask recebido n
 Motivo: a PLA-985 destrava a PLA-981 ao localizar o artefato reenviado por Thiago, mas a governança proíbe versionar dados de clientes, documentos privados, dumps, bancos e uploads.
 
 Impacto: o staging funcional deve usar `PSFINANCE_DATABASE_URL` ou `DATABASE_URL` apontando para um banco em `instance/`, e uploads devem permanecer em diretório operacional não versionado. Produção, `main`, banco produtivo e migrations produtivas continuam fora do escopo.
+
+## 2026-08-01 - PLA-988 migracao controlada do staging para PostgreSQL
+
+Decisao: preparar o PSFINANCE para priorizar `PSFINANCE_STAGING_DATABASE_URL`
+no staging e versionar um script transacional de migracao SQLite para
+PostgreSQL, sem versionar o banco SQLite nem arquivos anexos.
+
+Motivo: a PLA-988 exige substituir o SQLite do staging por PostgreSQL
+preservando dados. O inventario local confirmou dados operacionais nas tabelas
+financeiras e cinco registros de `documento` com auditoria tecnica nula.
+
+Impacto: o script cria a estrutura pelo SQLAlchemy, copia os dados para um
+PostgreSQL vazio, preserva chaves e vinculos e preenche apenas campos tecnicos
+de auditoria ausentes. Producao, `main` e escrita em banco produtivo continuam
+fora do escopo.
