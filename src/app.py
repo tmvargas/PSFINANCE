@@ -8,7 +8,7 @@ from pathlib import Path
 from flask import Flask, jsonify
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from database import init_db
+from database import database_metadata, init_db
 from financeiro import bp_financeiro
 
 
@@ -56,6 +56,7 @@ def app_metadata():
         "commit": os.getenv("GIT_COMMIT", "unknown"),
         "base_path": STAGING_BASE_PATH,
         "started_at": STARTED_AT,
+        **database_metadata(),
     }
 
 
