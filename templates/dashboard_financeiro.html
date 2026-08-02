@@ -3,145 +3,105 @@
 {% block title %}Visão Financeira{% endblock %}
 
 {% block content %}
-  <section class="ps-page-header">
-    <div class="container ps-shell">
-      <div class="row align-items-end g-3">
-        <div class="col-lg-7">
-          <div class="ps-eyebrow mb-2">Gestão financeira</div>
-          <h1 class="display-6 fw-semibold mb-2">Visão financeira</h1>
-          <p class="mb-0 text-white-50">
-            Acompanhamento de saldos, contas e rotinas financeiras do PSFINANCE.
-          </p>
-        </div>
-        <div class="col-lg-5">
-          <div class="d-flex flex-wrap justify-content-lg-end gap-2 ps-header-actions">
-            <a href="{{ url_for('financeiro.nova_movimentacao') }}" class="btn btn-light">
-              Nova movimentação
-            </a>
-            <a href="{{ url_for('financeiro.novo_titulo') }}" class="btn btn-success">
-              Novo título
-            </a>
-            <a href="{{ url_for('financeiro.analise_resultados') }}" class="btn btn-outline-light">
-              Análise
-            </a>
-          </div>
-        </div>
-      </div>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">Visão financeira</h1>
+
+    <div class="d-flex flex-wrap gap-2">
+      <a href="{{ url_for('financeiro.listar_contas') }}" class="btn btn-sm btn-outline-primary">
+        Ver contas
+      </a>
+      <a href="{{ url_for('financeiro.analise_resultados') }}" class="btn btn-sm btn-outline-primary">
+        Análise de resultados
+      </a>
+      <a href="{{ url_for('financeiro.nova_movimentacao') }}" class="btn btn-sm btn-primary">
+        Nova movimentação
+      </a>
+      <a href="{{ url_for('financeiro.listar_credores') }}" class="btn btn-sm btn-outline-primary">
+        Credores
+      </a>
+      <a href="{{ url_for('financeiro.listar_titulos') }}" class="btn btn-sm btn-outline-secondary">
+        Títulos
+      </a>
+      <a href="{{ url_for('financeiro.novo_titulo') }}" class="btn btn-sm btn-success">
+        Novo título
+      </a>
     </div>
-  </section>
+  </div>
 
-  <div class="container ps-shell mb-4">
-    <div class="row g-3 mb-4">
-      <div class="col-md-4">
-        <div class="ps-metric p-3">
-          <div class="ps-metric-label mb-2">Saldo total em contas</div>
-          <div class="ps-metric-value">R$ {{ '%.2f'|format(total_saldo) }}</div>
-          <div class="text-muted small mt-2">Contas ativas e não excluídas.</div>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="ps-metric p-3">
-          <div class="ps-metric-label mb-2">Contas acompanhadas</div>
-          <div class="ps-metric-value">{{ contas|length }}</div>
-          <div class="text-muted small mt-2">Base operacional disponível no staging.</div>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="ps-metric p-3">
-          <div class="ps-metric-label mb-2">Rotinas rápidas</div>
-          <div class="ps-metric-value">6</div>
-          <div class="text-muted small mt-2">Acessos diretos para operação financeira.</div>
-        </div>
-      </div>
-    </div>
 
-    <div class="row g-3 mb-4">
-      <div class="col-lg-8">
-        <section class="ps-panel p-3">
-          <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
-            <div>
-              <h2 class="h5 mb-1">Saldos por conta</h2>
-              <div class="text-muted small">Resumo das contas financeiras cadastradas.</div>
-            </div>
-            <a href="{{ url_for('financeiro.listar_contas') }}" class="btn btn-sm btn-outline-primary">
-              Ver contas
-            </a>
+
+
+
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title mb-1">Saldo total em contas</h5>
+          <p class="text-muted mb-2">Inclui todas as contas não excluídas.</p>
+          <div class="display-6">
+            R$ {{ '%.2f'|format(total_saldo) }}
           </div>
-
-          {% if contas %}
-            <div class="table-responsive">
-              <table class="table table-sm table-hover align-middle mb-0 ps-table">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Descrição</th>
-                    <th>Tipo</th>
-                    <th class="text-end">Saldo atual</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for c in contas %}
-                    <tr>
-                      <td>{{ c.id }}</td>
-                      <td class="fw-semibold">{{ c.descricao }}</td>
-                      <td>{{ c.tipo }}</td>
-                      <td class="text-end fw-semibold">
-                        R$ {{ '%.2f'|format(c.saldo_atual) }}
-                      </td>
-                    </tr>
-                  {% endfor %}
-                </tbody>
-                <tfoot>
-                  <tr class="fw-bold">
-                    <td colspan="3" class="text-end">Total geral:</td>
-                    <td class="text-end">
-                      R$ {{ '%.2f'|format(total_saldo) }}
-                    </td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-          {% else %}
-            <div class="text-muted py-4">Não há contas cadastradas ainda.</div>
-          {% endif %}
-        </section>
-      </div>
-
-      <div class="col-lg-4">
-        <section class="ps-panel p-3 h-100">
-          <h2 class="h5 mb-3">Ações principais</h2>
-          <div class="d-grid gap-2">
-            <a href="{{ url_for('financeiro.extrato_conta') }}" class="ps-action-link">
-              <span class="ps-action-icon">EX</span>
-              <span>
-                <span class="d-block fw-semibold">Extrato de conta</span>
-                <span class="d-block text-muted small">Entradas, saídas e baixas no período.</span>
-              </span>
-            </a>
-            <a href="{{ url_for('financeiro.listar_titulos') }}" class="ps-action-link">
-              <span class="ps-action-icon">TI</span>
-              <span>
-                <span class="d-block fw-semibold">Títulos</span>
-                <span class="d-block text-muted small">Consulta e manutenção de títulos.</span>
-              </span>
-            </a>
-            <a href="{{ url_for('financeiro.listar_credores') }}" class="ps-action-link">
-              <span class="ps-action-icon">CR</span>
-              <span>
-                <span class="d-block fw-semibold">Credores</span>
-                <span class="d-block text-muted small">Cadastro auxiliar da operação.</span>
-              </span>
-            </a>
-            <a href="{{ url_for('financeiro.listar_plano') }}" class="ps-action-link">
-              <span class="ps-action-icon">PF</span>
-              <span>
-                <span class="d-block fw-semibold">Plano financeiro</span>
-                <span class="d-block text-muted small">Estrutura de classificação financeira.</span>
-              </span>
-            </a>
-          </div>
-        </section>
+        </div>
       </div>
     </div>
   </div>
+
+  <h2 class="h5 mb-3">Saldos por conta</h2>
+
+  {% if contas %}
+    <div class="table-responsive">
+      <table class="table table-sm table-striped table-hover align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>ID</th>
+            <th>Descrição</th>
+            <th>Tipo</th>
+            <th class="text-end">Saldo atual</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in contas %}
+            <tr>
+              <td>{{ c.id }}</td>
+              <td>{{ c.descricao }}</td>
+              <td>{{ c.tipo }}</td>
+              <td class="text-end">
+                R$ {{ '%.2f'|format(c.saldo_atual) }}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr class="fw-bold">
+            <td colspan="3" class="text-end">Total geral:</td>
+            <td class="text-end">
+              R$ {{ '%.2f'|format(total_saldo) }}
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+     <div class="col-md-4 mb-3">
+        <div class="card shadow-sm h-100">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title">Extrato de conta</h5>
+            <p class="card-text small text-muted">
+              Consulte o extrato detalhado de uma conta, com saldo inicial, entradas, saídas,
+              transferências e baixas de títulos no período.
+            </p>
+            <div class="mt-auto">
+              <a href="{{ url_for('financeiro.extrato_conta') }}" class="btn btn-sm btn-outline-primary">
+                Abrir extrato
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+  {% else %}
+    <p>Não há contas cadastradas ainda.</p>
+  {% endif %}
 {% endblock %}
+
+ 

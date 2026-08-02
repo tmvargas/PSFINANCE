@@ -12,157 +12,17 @@
     >
 
     <style>
-      :root {
-        --ps-bg: #f4f6f8;
-        --ps-surface: #ffffff;
-        --ps-surface-soft: #eef3f7;
-        --ps-border: #d9e0e7;
-        --ps-text: #1b2430;
-        --ps-muted: #687586;
-        --ps-primary: #155eef;
-        --ps-primary-dark: #0f3f9f;
-        --ps-success: #15803d;
-        --ps-warning: #b45309;
-      }
-
-      body {
-        background: var(--ps-bg);
-        color: var(--ps-text);
-      }
-
+      /* Remove a setinha padrão do dropdown do Bootstrap */
       .dropdown-toggle::after { display: none; }
-
-      .ps-shell {
-        max-width: 1180px;
-      }
-
-      .ps-navbar {
-        background: #121820;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      }
-
-      .ps-brand-mark {
-        align-items: center;
-        background: #ffffff;
-        border-radius: 6px;
-        color: #121820;
-        display: inline-flex;
-        font-size: 0.72rem;
-        font-weight: 700;
-        height: 30px;
-        justify-content: center;
-        letter-spacing: 0;
-        width: 38px;
-      }
-
-      .ps-page-header {
-        background: linear-gradient(135deg, #111827 0%, #184e77 62%, #2a9d8f 100%);
-        color: #ffffff;
-        margin-bottom: 1.25rem;
-        padding: 1.75rem 0;
-      }
-
-      .ps-eyebrow {
-        color: rgba(255, 255, 255, 0.74);
-        font-size: 0.76rem;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
-
-      .ps-header-actions .btn {
-        min-height: 38px;
-      }
-
-      .ps-metric {
-        background: var(--ps-surface);
-        border: 1px solid var(--ps-border);
-        border-radius: 8px;
-        height: 100%;
-      }
-
-      .ps-metric-label {
-        color: var(--ps-muted);
-        font-size: 0.82rem;
-        font-weight: 600;
-      }
-
-      .ps-metric-value {
-        color: var(--ps-text);
-        font-size: clamp(1.35rem, 2vw, 1.9rem);
-        font-weight: 700;
-        line-height: 1.15;
-      }
-
-      .ps-panel {
-        background: var(--ps-surface);
-        border: 1px solid var(--ps-border);
-        border-radius: 8px;
-      }
-
-      .ps-table thead th {
-        background: #17212e;
-        border-bottom: 0;
-        color: #ffffff;
-        font-size: 0.76rem;
-        letter-spacing: 0.02em;
-        text-transform: uppercase;
-      }
-
-      .ps-action-link {
-        align-items: center;
-        background: var(--ps-surface-soft);
-        border: 1px solid var(--ps-border);
-        border-radius: 8px;
-        color: var(--ps-text);
-        display: flex;
-        gap: 0.75rem;
-        min-height: 64px;
-        padding: 0.85rem;
-        text-decoration: none;
-      }
-
-      .ps-action-link:hover {
-        border-color: var(--ps-primary);
-        color: var(--ps-primary-dark);
-      }
-
-      .ps-action-icon {
-        align-items: center;
-        background: #ffffff;
-        border: 1px solid var(--ps-border);
-        border-radius: 7px;
-        display: inline-flex;
-        flex: 0 0 auto;
-        font-weight: 700;
-        height: 38px;
-        justify-content: center;
-        width: 38px;
-      }
-
-      @media (max-width: 767.98px) {
-        .ps-page-header {
-          padding: 1.25rem 0;
-        }
-
-        .ps-header-actions {
-          width: 100%;
-        }
-
-        .ps-header-actions .btn {
-          flex: 1 1 150px;
-        }
-      }
     </style>
   </head>
 
-  <body>
+  <body class="bg-light">
     <!-- NAVBAR PRINCIPAL -->
-    <nav class="navbar navbar-expand-lg navbar-dark ps-navbar">
-      <div class="container-fluid ps-shell">
-        <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('financeiro.dashboard_financeiro') }}">
-          <span class="ps-brand-mark">PS</span>
-          <span>PSFINANCE</span>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-3">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('financeiro.listar_titulos') }}">
+          PlanSmart Financeiro
         </a>
 
         <div class="navbar-nav me-auto">
@@ -222,7 +82,7 @@
       </div>
     </nav>
 
-    <main>
+    <main class="container mb-4">
       <!-- mensagens flash -->
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
