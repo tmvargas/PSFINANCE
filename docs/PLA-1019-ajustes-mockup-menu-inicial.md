@@ -35,6 +35,10 @@ no produto. Nao houve alteracao de regra de negocio, rota, banco ou ambiente.
 - Comparacao objetiva contra os quatro pontos solicitados por Thiago:
   `Titulos`/`Baixas` sob `Contas a Pagar`, `Movimentacoes`/`Extrato` sob
   `Caixas e Bancos`, expansao lateral pelo icone e icones em todos os menus.
+- Screenshot desktop gerado por Playwright CLI:
+  `docs/mockups/evidencias/PLA-1019-menu-desktop.png`.
+- Screenshot mobile gerado por Playwright CLI:
+  `docs/mockups/evidencias/PLA-1019-menu-mobile.png`.
 - Verificacao de que os ajustes permanecem restritos a `docs/mockups/` e
   documentacao.
 
