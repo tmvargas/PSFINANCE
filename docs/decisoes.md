@@ -110,3 +110,17 @@ Impacto: a validacao oficial da porta `5001` passa a comprovar diretamente se o
 processo em execucao esta usando `PSFINANCE_STAGING_DATABASE_URL` e o dialeto
 PostgreSQL, reduzindo risco de nova evidencia ambigua. Producao, `main` e banco
 produtivo permanecem fora do escopo.
+
+## 2026-08-02 - PLA-1016 mockup do layout inicial do PSFINANCE
+
+Decisao: evoluir a tela inicial do PSFINANCE como mockup visual sobre os dados
+ja renderizados pelo dashboard financeiro, sem criar nova regra de negocio,
+rota, tabela, migration ou carga de dados.
+
+Motivo: a tarefa solicita o layout inicial; a forma mais segura nesta fase e
+preservar o backend existente e concentrar a alteracao na composicao visual,
+com indicadores, acoes principais e tabela responsiva.
+
+Impacto: a URL inicial continua usando o dashboard financeiro e os mesmos dados
+operacionais disponiveis no staging. Producao, `main`, banco produtivo e
+migrations permanecem fora do escopo.
