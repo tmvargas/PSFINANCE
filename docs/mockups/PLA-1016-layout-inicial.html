@@ -179,8 +179,13 @@
         padding: 0;
       }
 
+      .menu-node {
+        position: relative;
+      }
+
       .menu-item {
         align-items: center;
+        background: transparent;
         border-radius: 7px;
         color: rgba(255, 255, 255, 0.82);
         display: flex;
@@ -188,6 +193,7 @@
         min-height: 42px;
         padding: 8px 9px;
         text-decoration: none;
+        width: 100%;
       }
 
       .menu-item.active,
@@ -209,6 +215,12 @@
         width: 24px;
       }
 
+      .submenu-toggle {
+        color: #ffffff;
+        min-width: 24px;
+        padding: 0;
+      }
+
       .menu-item.active .nav-icon,
       .menu-item:hover .nav-icon {
         background: rgba(255, 255, 255, 0.18);
@@ -223,6 +235,41 @@
 
       .nav-chevron {
         color: rgba(255, 255, 255, 0.46);
+      }
+
+      .submenu {
+        background: #173c28;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 8px;
+        box-shadow: 0 16px 34px rgba(0, 0, 0, 0.18);
+        display: none;
+        left: calc(100% + 10px);
+        min-width: 218px;
+        padding: 8px;
+        position: absolute;
+        top: 0;
+        z-index: 5;
+      }
+
+      .menu-node.submenu-open .submenu {
+        display: grid;
+        gap: 6px;
+      }
+
+      .submenu-item {
+        align-items: center;
+        border-radius: 7px;
+        color: rgba(255, 255, 255, 0.86);
+        display: flex;
+        gap: 10px;
+        min-height: 38px;
+        padding: 7px 9px;
+        text-decoration: none;
+      }
+
+      .submenu-item:hover {
+        background: var(--green);
+        color: #ffffff;
       }
 
       .sidebar.groups-compact .menu-item:not(.active) {
@@ -507,6 +554,7 @@
         .menu-group,
         .group-header,
         .menu-list,
+        .menu-node,
         .menu-item {
           display: inline-flex;
           vertical-align: middle;
@@ -534,6 +582,12 @@
         .menu-summary,
         .sidebar-compact .menu-summary {
           display: none;
+        }
+
+        .submenu {
+          left: 0;
+          min-width: 210px;
+          top: calc(100% + 8px);
         }
 
         .metrics,
@@ -602,26 +656,42 @@
 
           <div class="menu-group">
             <div class="group-header">
-              <p class="group-title">OPERACIONAL</p>
-              <span class="group-count">5</span>
+              <p class="group-title">FINANCEIRO</p>
+              <span class="group-count">2</span>
             </div>
             <div class="menu-list">
-              <a class="menu-item" href="#"><span class="nav-icon">CP</span><span class="nav-label">Contas a Pagar</span><span class="nav-chevron">›</span></a>
-              <a class="menu-item" href="#"><span class="nav-icon">TT</span><span class="nav-label">Títulos</span><span class="nav-chevron">›</span></a>
-              <a class="menu-item" href="#"><span class="nav-icon">BX</span><span class="nav-label">Baixas</span><span class="nav-chevron">›</span></a>
-              <a class="menu-item" href="#"><span class="nav-icon">MV</span><span class="nav-label">Movimentações</span><span class="nav-chevron">›</span></a>
-              <a class="menu-item" href="#"><span class="nav-icon">EX</span><span class="nav-label">Extrato</span><span class="nav-chevron">›</span></a>
+              <div class="menu-node submenu-open">
+                <div class="menu-item">
+                  <button class="nav-icon submenu-toggle" type="button" aria-label="Expandir Contas a Pagar" aria-expanded="true">CP</button>
+                  <span class="nav-label">Contas a Pagar</span>
+                  <span class="nav-chevron">›</span>
+                </div>
+                <div class="submenu" aria-label="Submenu Contas a Pagar">
+                  <a class="submenu-item" href="#"><span class="nav-icon">TT</span><span>Títulos</span></a>
+                  <a class="submenu-item" href="#"><span class="nav-icon">BX</span><span>Baixas</span></a>
+                </div>
+              </div>
+              <div class="menu-node">
+                <div class="menu-item">
+                  <button class="nav-icon submenu-toggle" type="button" aria-label="Expandir Caixas e Bancos" aria-expanded="false">CB</button>
+                  <span class="nav-label">Caixas e Bancos</span>
+                  <span class="nav-chevron">›</span>
+                </div>
+                <div class="submenu" aria-label="Submenu Caixas e Bancos">
+                  <a class="submenu-item" href="#"><span class="nav-icon">MV</span><span>Movimentações</span></a>
+                  <a class="submenu-item" href="#"><span class="nav-icon">EX</span><span>Extrato</span></a>
+                </div>
+              </div>
             </div>
           </div>
 
           <div class="menu-group">
             <div class="group-header">
-              <p class="group-title">GERENCIAL</p>
-              <span class="group-count">2</span>
+              <p class="group-title">ANALISE</p>
+              <span class="group-count">1</span>
             </div>
             <div class="menu-list">
               <a class="menu-item" href="#"><span class="nav-icon">GF</span><span class="nav-label">Gerencial Financeiro</span><span class="nav-chevron">›</span></a>
-              <a class="menu-item" href="#"><span class="nav-icon">CB</span><span class="nav-label">Caixas e Bancos</span><span class="nav-chevron">›</span></a>
             </div>
           </div>
 
@@ -751,6 +821,14 @@
 
       document.querySelector("#toggleHeight").addEventListener("click", () => {
         sidebar.classList.toggle("groups-compact");
+      });
+
+      document.querySelectorAll(".submenu-toggle").forEach((button) => {
+        button.addEventListener("click", () => {
+          const node = button.closest(".menu-node");
+          const isOpen = node.classList.toggle("submenu-open");
+          button.setAttribute("aria-expanded", String(isOpen));
+        });
       });
     </script>
   </body>

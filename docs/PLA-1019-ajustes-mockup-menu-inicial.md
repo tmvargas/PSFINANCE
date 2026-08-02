@@ -8,17 +8,20 @@ Flask, banco de dados, VPS (Servidor Virtual Privado) ou producao.
 
 ## Escopo executado
 
-- Reorganizado o menu lateral por grupos mais claros: `HOME`, `OPERACIONAL`,
-  `GERENCIAL` e `CADASTROS`.
-- Ajustados rotulos para plural e consistencia com as rotinas financeiras:
-  `Titulos`, `Baixas`, `Credores`, `Caixas e Bancos`, `Extrato` e
-  `Plano Financeiro`.
-- Substituidos icones improvisados por siglas curtas e consistentes para o
-  mockup, melhorando legibilidade em menu expandido e recolhido.
+- Reorganizado o menu `FINANCEIRO` com dois itens principais:
+  `Contas a Pagar` e `Caixas e Bancos`.
+- Posicionados `Titulos` e `Baixas` dentro de
+  `FINANCEIRO > CONTAS A PAGAR`.
+- Posicionados `Movimentacoes` e `Extrato` dentro de
+  `FINANCEIRO > CAIXAS E BANCOS`.
+- Incluido comportamento de expansao para a direita ao clicar no icone dos
+  itens principais `Contas a Pagar` e `Caixas e Bancos`.
+- Mantidos icones/siglas em todos os menus e submenus.
 - Incluido resumo visual do menu inicial e contadores por grupo para reforcar a
   estrutura de navegacao.
 - Ajustado comportamento responsivo para ocultar cabecalhos, contadores e
-  resumo no menu horizontal mobile.
+  resumo no menu horizontal mobile, preservando o submenu como painel associado
+  ao item principal.
 
 ## Regra aplicada
 
@@ -29,6 +32,9 @@ no produto. Nao houve alteracao de regra de negocio, rota, banco ou ambiente.
 ## Validacao local
 
 - Revisao estatica do HTML e CSS do arquivo `docs/mockups/PLA-1016-layout-inicial.html`.
+- Comparacao objetiva contra os quatro pontos solicitados por Thiago:
+  `Titulos`/`Baixas` sob `Contas a Pagar`, `Movimentacoes`/`Extrato` sob
+  `Caixas e Bancos`, expansao lateral pelo icone e icones em todos os menus.
 - Verificacao de que os ajustes permanecem restritos a `docs/mockups/` e
   documentacao.
 

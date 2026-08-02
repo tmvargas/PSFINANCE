@@ -134,5 +134,8 @@ Motivo: a demanda e um refinamento visual do menu inicial e depende da base do
 mockup ainda nao integrada a `staging`; implementar diretamente no produto antes
 da validacao visual quebraria a decisao da PLA-1016.
 
-Impacto: o menu inicial passa a ter grupos, rotulos e siglas mais coerentes para
-revisao executiva, mantendo o escopo restrito a documentacao/mockup.
+Impacto: o menu inicial passa a refletir a hierarquia solicitada por Thiago:
+`Titulos` e `Baixas` sob `FINANCEIRO > CONTAS A PAGAR`, `Movimentacoes` e
+`Extrato` sob `FINANCEIRO > CAIXAS E BANCOS`, com expansao lateral pelo icone e
+icones/siglas em todos os menus, mantendo o escopo restrito a
+documentacao/mockup.
