@@ -110,3 +110,17 @@ Impacto: a validacao oficial da porta `5001` passa a comprovar diretamente se o
 processo em execucao esta usando `PSFINANCE_STAGING_DATABASE_URL` e o dialeto
 PostgreSQL, reduzindo risco de nova evidencia ambigua. Producao, `main` e banco
 produtivo permanecem fora do escopo.
+
+## 2026-08-02 - PLA-1010 retomada do plano de producao do PSFINANCE
+
+Decisao: retomar a `PLA-1004` com base na evidencia da `PLA-1005` e preparar o
+pacote de producao usando o commit de `staging`
+`2976a64ea07e09b53a97dfcb8d6879edae4fe042`, sem executar producao.
+
+Motivo: a divergencia que mantinha a `PLA-1004` bloqueada foi resolvida; a
+porta corporativa `5001` confirma `db_dialect=postgresql` e
+`database_url_source=PSFINANCE_STAGING_DATABASE_URL`.
+
+Impacto: a recomendacao tecnica passa a ser "recomenda com ressalvas", exigindo
+autorizacao expressa para merge na `main`, deploy produtivo, estrategia de banco
+produtivo e qualquer copia de dados de `staging` para producao.
