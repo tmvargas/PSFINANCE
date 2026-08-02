@@ -123,3 +123,16 @@ comportamento de recolhimento vertical e horizontal.
 Impacto: a entrega permite revisao visual navegavel pelo CEO antes de qualquer
 implementacao no produto. A aplicacao PSFINANCE em staging permanece sem
 alteracao funcional nesta etapa.
+
+## 2026-08-02 - PLA-1019 ajustes do mockup de menu inicial
+
+Decisao: manter os ajustes da PLA-1019 no mesmo artefato estatico de mockup
+criado para a PLA-1016, em `docs/mockups/PLA-1016-layout-inicial.html`, sem
+alterar templates da aplicacao Flask, rotas, banco, VPS ou producao.
+
+Motivo: a demanda e um refinamento visual do menu inicial e depende da base do
+mockup ainda nao integrada a `staging`; implementar diretamente no produto antes
+da validacao visual quebraria a decisao da PLA-1016.
+
+Impacto: o menu inicial passa a ter grupos, rotulos e siglas mais coerentes para
+revisao executiva, mantendo o escopo restrito a documentacao/mockup.

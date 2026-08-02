@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>PLA-1016 - Mockup layout inicial PSFINANCE</title>
+    <title>PLA-1019 - Mockup menu inicial PSFINANCE</title>
     <style>
       :root {
         --bg: #f4f7f5;
@@ -46,7 +46,7 @@
         color: #ffffff;
         display: flex;
         flex-direction: column;
-        gap: 18px;
+        gap: 14px;
         padding: 18px 14px;
       }
 
@@ -107,8 +107,33 @@
         border-radius: 7px;
         color: #ffffff;
         display: inline-flex;
+        font-weight: 800;
         height: 38px;
         justify-content: center;
+      }
+
+      .menu-summary {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 8px;
+        padding: 10px;
+      }
+
+      .sidebar-compact .menu-summary {
+        display: none;
+      }
+
+      .menu-summary strong {
+        display: block;
+        font-size: 0.84rem;
+        margin-bottom: 3px;
+      }
+
+      .menu-summary span {
+        color: rgba(255, 255, 255, 0.62);
+        display: block;
+        font-size: 0.76rem;
+        line-height: 1.35;
       }
 
       .menu-group {
@@ -116,12 +141,35 @@
         padding-top: 13px;
       }
 
+      .group-header {
+        align-items: center;
+        display: flex;
+        gap: 8px;
+        justify-content: space-between;
+        margin-bottom: 8px;
+      }
+
       .group-title {
         color: rgba(255, 255, 255, 0.58);
         font-size: 0.72rem;
         font-weight: 800;
         letter-spacing: 0.08em;
-        margin: 0 0 8px;
+        margin: 0;
+      }
+
+      .group-count {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 999px;
+        color: rgba(255, 255, 255, 0.74);
+        font-size: 0.72rem;
+        font-weight: 800;
+        min-width: 26px;
+        padding: 3px 7px;
+        text-align: center;
+      }
+
+      .sidebar-compact .group-count {
+        display: none;
       }
 
       .menu-list {
@@ -138,7 +186,7 @@
         display: flex;
         gap: 10px;
         min-height: 42px;
-        padding: 9px 10px;
+        padding: 8px 9px;
         text-decoration: none;
       }
 
@@ -150,12 +198,20 @@
 
       .nav-icon {
         align-items: center;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
         display: inline-flex;
         flex: 0 0 auto;
-        font-size: 1.05rem;
+        font-size: 0.78rem;
+        font-weight: 800;
         height: 24px;
         justify-content: center;
         width: 24px;
+      }
+
+      .menu-item.active .nav-icon,
+      .menu-item:hover .nav-icon {
+        background: rgba(255, 255, 255, 0.18);
       }
 
       .nav-label {
@@ -172,6 +228,10 @@
       .sidebar.groups-compact .menu-item:not(.active) {
         min-height: 36px;
         padding-block: 6px;
+      }
+
+      .sidebar.groups-compact .menu-summary {
+        display: none;
       }
 
       .content {
@@ -445,6 +505,7 @@
         .brand,
         .sidebar-actions,
         .menu-group,
+        .group-header,
         .menu-list,
         .menu-item {
           display: inline-flex;
@@ -452,8 +513,10 @@
         }
 
         .group-title,
+        .group-count,
         .nav-chevron,
         .sidebar-compact .group-title,
+        .sidebar-compact .group-count,
         .sidebar-compact .nav-label,
         .sidebar-compact .nav-chevron {
           display: none;
@@ -466,6 +529,11 @@
         .menu-group {
           border-top: 0;
           padding-top: 0;
+        }
+
+        .menu-summary,
+        .sidebar-compact .menu-summary {
+          display: none;
         }
 
         .metrics,
@@ -519,38 +587,52 @@
           <div class="menu-group">
             <p class="group-title">HOME</p>
             <div class="menu-list">
-              <a class="menu-item active" href="#">
-                <span class="nav-icon">H</span>
+              <a class="menu-item active" href="#" aria-current="page">
+                <span class="nav-icon">IN</span>
                 <span class="nav-label">Home</span>
                 <span class="nav-chevron">›</span>
               </a>
             </div>
           </div>
 
+          <div class="menu-summary">
+            <strong>Menu inicial</strong>
+            <span>Organizado por rotina para validar a navegação antes da implementação no produto.</span>
+          </div>
+
           <div class="menu-group">
-            <p class="group-title">FINANCEIRO</p>
+            <div class="group-header">
+              <p class="group-title">OPERACIONAL</p>
+              <span class="group-count">5</span>
+            </div>
             <div class="menu-list">
-              <a class="menu-item" href="#"><span class="nav-icon">$</span><span class="nav-label">Contas a Pagar</span><span class="nav-chevron">›</span></a>
-              <a class="menu-item" href="#"><span class="nav-icon">T</span><span class="nav-label">Título</span><span class="nav-chevron">›</span></a>
-              <a class="menu-item" href="#"><span class="nav-icon">B</span><span class="nav-label">Baixa</span><span class="nav-chevron">›</span></a>
-              <a class="menu-item" href="#"><span class="nav-icon">C</span><span class="nav-label">Caixas e Bancos</span><span class="nav-chevron">›</span></a>
-              <a class="menu-item" href="#"><span class="nav-icon">M</span><span class="nav-label">Movimentações</span><span class="nav-chevron">›</span></a>
-              <a class="menu-item" href="#"><span class="nav-icon">E</span><span class="nav-label">Extrato</span><span class="nav-chevron">›</span></a>
+              <a class="menu-item" href="#"><span class="nav-icon">CP</span><span class="nav-label">Contas a Pagar</span><span class="nav-chevron">›</span></a>
+              <a class="menu-item" href="#"><span class="nav-icon">TT</span><span class="nav-label">Títulos</span><span class="nav-chevron">›</span></a>
+              <a class="menu-item" href="#"><span class="nav-icon">BX</span><span class="nav-label">Baixas</span><span class="nav-chevron">›</span></a>
+              <a class="menu-item" href="#"><span class="nav-icon">MV</span><span class="nav-label">Movimentações</span><span class="nav-chevron">›</span></a>
+              <a class="menu-item" href="#"><span class="nav-icon">EX</span><span class="nav-label">Extrato</span><span class="nav-chevron">›</span></a>
             </div>
           </div>
 
           <div class="menu-group">
-            <p class="group-title">GERENCIAL</p>
+            <div class="group-header">
+              <p class="group-title">GERENCIAL</p>
+              <span class="group-count">2</span>
+            </div>
             <div class="menu-list">
-              <a class="menu-item" href="#"><span class="nav-icon">G</span><span class="nav-label">Gerencial Financeiro</span><span class="nav-chevron">›</span></a>
+              <a class="menu-item" href="#"><span class="nav-icon">GF</span><span class="nav-label">Gerencial Financeiro</span><span class="nav-chevron">›</span></a>
+              <a class="menu-item" href="#"><span class="nav-icon">CB</span><span class="nav-label">Caixas e Bancos</span><span class="nav-chevron">›</span></a>
             </div>
           </div>
 
           <div class="menu-group">
-            <p class="group-title">APOIO</p>
+            <div class="group-header">
+              <p class="group-title">CADASTROS</p>
+              <span class="group-count">2</span>
+            </div>
             <div class="menu-list">
-              <a class="menu-item" href="#"><span class="nav-icon">P</span><span class="nav-label">Credor</span><span class="nav-chevron">›</span></a>
-              <a class="menu-item" href="#"><span class="nav-icon">F</span><span class="nav-label">Plano Financeiro</span><span class="nav-chevron">›</span></a>
+              <a class="menu-item" href="#"><span class="nav-icon">CR</span><span class="nav-label">Credores</span><span class="nav-chevron">›</span></a>
+              <a class="menu-item" href="#"><span class="nav-icon">PF</span><span class="nav-label">Plano Financeiro</span><span class="nav-chevron">›</span></a>
             </div>
           </div>
         </nav>
@@ -648,10 +730,10 @@
                 </div>
               </div>
               <div class="shortcut-list">
-                <a class="shortcut" href="#"><span class="shortcut-icon">$</span><span><strong>Caixas e Bancos</strong><span>Saldos, contas e conciliação.</span></span></a>
-                <a class="shortcut" href="#"><span class="shortcut-icon">E</span><span><strong>Extrato</strong><span>Movimentos por conta e período.</span></span></a>
-                <a class="shortcut" href="#"><span class="shortcut-icon">G</span><span><strong>Gerencial Financeiro</strong><span>Indicadores de acompanhamento.</span></span></a>
-                <a class="shortcut" href="#"><span class="shortcut-icon">F</span><span><strong>Plano Financeiro</strong><span>Classificação e apoio à análise.</span></span></a>
+                <a class="shortcut" href="#"><span class="shortcut-icon">CB</span><span><strong>Caixas e Bancos</strong><span>Saldos, contas e conciliação.</span></span></a>
+                <a class="shortcut" href="#"><span class="shortcut-icon">EX</span><span><strong>Extrato</strong><span>Movimentos por conta e período.</span></span></a>
+                <a class="shortcut" href="#"><span class="shortcut-icon">GF</span><span><strong>Gerencial Financeiro</strong><span>Indicadores de acompanhamento.</span></span></a>
+                <a class="shortcut" href="#"><span class="shortcut-icon">PF</span><span><strong>Plano Financeiro</strong><span>Classificação e apoio à análise.</span></span></a>
               </div>
             </div>
           </section>
