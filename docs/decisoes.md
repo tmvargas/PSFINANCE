@@ -94,3 +94,19 @@ Impacto: o script cria a estrutura pelo SQLAlchemy, copia os dados para um
 PostgreSQL vazio, preserva chaves e vinculos e preenche apenas campos tecnicos
 de auditoria ausentes. Producao, `main` e escrita em banco produtivo continuam
 fora do escopo.
+
+## 2026-08-02 - PLA-1005 evidencia oficial do backend PostgreSQL em staging
+
+Decisao: expor em `/health` e `/gate` metadados nao sensiveis do banco em uso
+pela aplicacao (`db_dialect` e `database_url_source`), sem retornar URL,
+usuario, senha ou qualquer conteudo de `.env`.
+
+Motivo: a divergencia da PLA-1004 foi causada por validacao manual sem carregar
+o `EnvironmentFile` do systemd, o que fazia a leitura local cair no fallback
+SQLite. Com o ambiente real do servico carregado, o staging usa PostgreSQL e as
+contagens operacionais foram preservadas.
+
+Impacto: a validacao oficial da porta `5001` passa a comprovar diretamente se o
+processo em execucao esta usando `PSFINANCE_STAGING_DATABASE_URL` e o dialeto
+PostgreSQL, reduzindo risco de nova evidencia ambigua. Producao, `main` e banco
+produtivo permanecem fora do escopo.
