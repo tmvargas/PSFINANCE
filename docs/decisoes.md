@@ -234,3 +234,8 @@ duplicar estrutura de menu ou alterar regras de negocio.
 Impacto: a entrega altera somente apresentacao, navegacao e estilos globais do
 template base. Nao altera models, controllers, services, banco de dados,
 variaveis de ambiente, VPS, `main` ou producao.
+
+Complemento de entrega: apos merge da branch da tarefa na `staging`, a VPS de
+teste foi atualizada pela propria `staging`. O metadado nao sensivel
+`GIT_COMMIT` do ambiente de staging foi ajustado para o commit validado, sem
+alterar segredos, banco de dados, `main` ou producao.
