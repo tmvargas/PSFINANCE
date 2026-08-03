@@ -3,16 +3,18 @@
 ## Objetivo
 
 Corrigir o estado fechado do menu no mockup estatico do PSFINANCE para que o
-parametro `?compact=1` mostre a barra lateral recolhida sem submenu aberto
-automaticamente, mantendo a entrega em `docs/mockups/` e sem alterar aplicacao
-Flask, banco de dados, VPS (Servidor Virtual Privado) ou producao.
+parametro `?compact=1` mostre a barra lateral recolhida sem lista de menus,
+icones de itens, rotulos ou grupos visiveis, mantendo apenas um controle minimo
+para reabrir o menu. A entrega permanece em `docs/mockups/` e nao altera
+aplicacao Flask, banco de dados, VPS (Servidor Virtual Privado) ou producao.
 
 ## Escopo executado
 
-- Ajustado o estado inicial do mockup para fechar todos os submenus quando a URL
-  usar `?compact=1` sem parametro `open`.
-- Preservado o suporte a evidencia de submenu especifico aberto com
-  `?compact=1&open=contas-pagar` e `?compact=1&open=caixas-bancos`.
+- Ajustado o estado fechado do mockup para ocultar marca, grupos, itens de menu,
+  icones de navegacao e submenus.
+- Mantido apenas o botao minimo para reabrir o menu lateral no estado fechado.
+- Ajustado o parametro `open` para funcionar somente com o menu aberto,
+  impedindo submenu visivel no estado fechado.
 - Ajustado o botao de recolhimento para fechar submenus ao compactar o menu
   pela propria interface.
 - Ajustado o clique nos itens expansivos para manter apenas um submenu aberto
@@ -31,20 +33,26 @@ infraestrutura ou ambiente.
 
 - Revisao estatica do HTML, CSS e JavaScript em
   `docs/mockups/PLA-1016-layout-inicial.html`.
-- Verificacao de que `?compact=1` inicia com menu recolhido e sem submenu
-  flutuante aberto.
-- Verificacao de que `?compact=1&open=contas-pagar` e
-  `?compact=1&open=caixas-bancos` continuam abrindo os submenus especificos.
+- Verificacao de que `?compact=1` inicia com menu recolhido limpo, sem grupos,
+  itens, icones de navegacao ou submenus visiveis.
+- Verificacao de que `?compact=1&open=contas-pagar` continua fechado, sem
+  exibir submenu no estado recolhido.
+- Verificacao de que `?open=contas-pagar` e `?open=caixas-bancos` continuam
+  abrindo os submenus especificos no estado aberto.
 - Evidencias visuais geradas:
-  `docs/mockups/evidencias/PLA-1031-menu-compact-fechado.png`,
-  `docs/mockups/evidencias/PLA-1031-menu-compact-contas-pagar.png` e
-  `docs/mockups/evidencias/PLA-1031-menu-compact-caixas-bancos.png`.
+  `docs/mockups/evidencias/PLA-1031-menu-fechado-limpo.png`,
+  `docs/mockups/evidencias/PLA-1031-menu-fechado-limpo-mobile.png`,
+  `docs/mockups/evidencias/PLA-1031-menu-fechado-ignora-open.png`,
+  `docs/mockups/evidencias/PLA-1031-menu-aberto-contas-pagar.png` e
+  `docs/mockups/evidencias/PLA-1031-menu-aberto-caixas-bancos.png`.
 
 ## Checklist dos criterios obrigatorios
 
-- [x] Menu recolhido fechado com `?compact=1`, sem submenu aberto por padrao.
+- [x] Menu recolhido fechado com `?compact=1`, sem itens de menu, icones de
+  navegacao, rotulos, grupos ou submenu visiveis.
+- [x] Controle minimo de reabertura preservado sem parecer item de menu.
 - [x] Parametros `open=contas-pagar` e `open=caixas-bancos` preservados para
-  evidencias de submenu aberto.
+  evidencias de submenu aberto somente no estado aberto.
 - [x] Hierarquia e icones reais da `PLA-1027` preservados.
 - [x] Escopo restrito a documentacao/mockup.
 
