@@ -202,3 +202,20 @@ Impacto: o gate publico
 `http://vps69143.publiccloud.com.br:5001/gate` passa a validar a publicacao do
 mockup na VPS de teste com status `healthy`, sem alterar producao, `main`,
 banco de dados, dados operacionais ou segredos.
+
+## 2026-08-02 - PLA-1036 menu encolhido com icones e flyout lateral
+
+Decisao: ajustar o estado encolhido do mockup estatico em
+`docs/mockups/PLA-1016-layout-inicial.html` para exibir uma coluna estreita com
+icones reais de navegacao e permitir flyout lateral dos submenus a partir dos
+icones.
+
+Motivo: a PLA-1036 altera o criterio visual da PLA-1031. O estado encolhido
+deixa de representar menu totalmente fechado e passa a representar navegacao
+compacta acionavel, mantendo rotulos ocultos e submenu lateral para os itens
+expansivos.
+
+Impacto: `?compact=1` mostra os icones do menu principal; `?compact=1&open=`
+permite evidenciar o flyout lateral de `contas-pagar` ou `caixas-bancos`. A
+alteracao permanece restrita ao mockup/documentacao, sem alterar aplicacao
+Flask, rotas, banco de dados, VPS, `main` ou producao.
