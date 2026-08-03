@@ -246,3 +246,20 @@ somente `Credor` e `Plano Financeiro` conforme a hierarquia aprovada por
 Thiago para a PLA-1015. As rotas e telas de contas existentes foram preservadas
 fora da navegacao aprovada, sem alterar regras de negocio, banco de dados,
 `main` ou producao.
+
+## 2026-08-03 - PLA-1062 reentrega do pacote de producao com revisao CEO nativa
+
+Decisao: reentregar o Pacote de Producao do PSFINANCE pela `PLA-1062`, que
+possui `executionPolicy` nativa com stage de `review` para o CEO, reaproveitando
+as evidencias tecnicas validas da `PLA-1010` e atualizando a analise para o
+commit atual da `staging`.
+
+Motivo: a `PLA-1010` foi criada sem fluxo nativo de revisao executiva e o
+Paperclip recusou mover a tarefa para `in_review` sem caminho real de revisao.
+A governanca CEO/GDSIS exige revisao executiva por `executionPolicy`, sem
+substituir por interacao solta em subtarefa tecnica.
+
+Impacto: a proxima acao valida passa a ser revisao executiva do CEO na
+`PLA-1062`. Producao, `main`, banco produtivo, migrations produtivas, reinicio
+de servico e copia de dados de `staging` para producao continuam proibidos sem
+autorizacao expressa de Thiago.
