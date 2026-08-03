@@ -219,3 +219,18 @@ Impacto: `?compact=1` mostra os icones do menu principal; `?compact=1&open=`
 permite evidenciar o flyout lateral de `contas-pagar` ou `caixas-bancos`. A
 alteracao permanece restrita ao mockup/documentacao, sem alterar aplicacao
 Flask, rotas, banco de dados, VPS, `main` ou producao.
+
+## 2026-08-03 - PLA-1043 aplicacao do layout aprovado nas rotinas
+
+Decisao: aplicar o layout aprovado do mockup ao produto real pelo template base
+`templates/base.html`, transformando a navbar superior antiga em shell com menu
+lateral, grupos `HOME`, `FINANCEIRO`, `GERENCIAL` e `APOIO`, submenus e modo
+compacto com flyout.
+
+Motivo: todas as rotinas da aplicacao Flask herdam o mesmo template base, entao
+centralizar a mudanca aplica o visual aprovado nas telas existentes sem
+duplicar estrutura de menu ou alterar regras de negocio.
+
+Impacto: a entrega altera somente apresentacao, navegacao e estilos globais do
+template base. Nao altera models, controllers, services, banco de dados,
+variaveis de ambiente, VPS, `main` ou producao.
