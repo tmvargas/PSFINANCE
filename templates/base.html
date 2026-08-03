@@ -729,13 +729,11 @@
               <div class="submenu" aria-label="Submenu Apoio">
                 <a class="submenu-item {% if endpoint in ['financeiro.listar_credores', 'financeiro.novo_credor', 'financeiro.editar_credor'] %}active{% endif %}" href="{{ url_for('financeiro.listar_credores') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-user"></use></svg></span><span>Credor</span></a>
                 <a class="submenu-item {% if endpoint in ['financeiro.listar_plano', 'financeiro.novo_plano', 'financeiro.editar_plano'] %}active{% endif %}" href="{{ url_for('financeiro.listar_plano') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-list-tree"></use></svg></span><span>Plano Financeiro</span></a>
-                <a class="submenu-item {% if endpoint in ['financeiro.listar_contas', 'financeiro.nova_conta', 'financeiro.editar_conta', 'financeiro.listar_contas_inativas'] %}active{% endif %}" href="{{ url_for('financeiro.listar_contas') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-landmark"></use></svg></span><span>Contas</span></a>
               </div>
             </div>
             <div class="menu-list">
               <a class="menu-item {% if endpoint in ['financeiro.listar_credores', 'financeiro.novo_credor', 'financeiro.editar_credor'] %}active{% endif %}" href="{{ url_for('financeiro.listar_credores') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-user"></use></svg></span><span class="nav-label">Credor</span><span class="nav-chevron">›</span></a>
               <a class="menu-item {% if endpoint in ['financeiro.listar_plano', 'financeiro.novo_plano', 'financeiro.editar_plano'] %}active{% endif %}" href="{{ url_for('financeiro.listar_plano') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-list-tree"></use></svg></span><span class="nav-label">Plano Financeiro</span><span class="nav-chevron">›</span></a>
-              <a class="menu-item {% if endpoint in ['financeiro.listar_contas', 'financeiro.nova_conta', 'financeiro.editar_conta', 'financeiro.listar_contas_inativas'] %}active{% endif %}" href="{{ url_for('financeiro.listar_contas') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-landmark"></use></svg></span><span class="nav-label">Contas</span><span class="nav-chevron">›</span></a>
             </div>
           </div>
         </nav>
