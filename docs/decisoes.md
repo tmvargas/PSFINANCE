@@ -186,3 +186,18 @@ um painel flutuante mesmo quando a URL indicava apenas menu recolhido.
 Impacto: o mockup passa a diferenciar corretamente menu recolhido fechado e
 menu recolhido com submenu aberto para evidencia visual, sem alterar aplicacao
 Flask, rotas, banco de dados, VPS ou producao.
+
+## 2026-08-02 - PLA-1031 publicacao do mockup em staging
+
+Decisao: integrar a cadeia visual do mockup na branch `staging`, atualizar a VPS
+de teste pela propria `staging` e ajustar apenas o metadado nao sensivel
+`GIT_COMMIT` do ambiente de staging para refletir o commit publicado no gate
+corporativo.
+
+Motivo: a governanca exige que a branch `staging`, a VPS de teste e a porta
+corporativa `5001` estejam coerentes antes de encaminhar a entrega para revisao.
+
+Impacto: o gate publico
+`http://vps69143.publiccloud.com.br:5001/gate` passa a validar a publicacao do
+mockup na VPS de teste com status `healthy`, sem alterar producao, `main`,
+banco de dados, dados operacionais ou segredos.
