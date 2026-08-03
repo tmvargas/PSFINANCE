@@ -38,7 +38,7 @@
       }
 
       .app.sidebar-compact {
-        grid-template-columns: 78px 1fr;
+        grid-template-columns: 54px 1fr;
       }
 
       .sidebar {
@@ -84,6 +84,17 @@
         display: none;
       }
 
+      .app.sidebar-compact .sidebar {
+        align-items: center;
+        padding: 18px 8px;
+      }
+
+      .app.sidebar-compact .brand,
+      .app.sidebar-compact .sidebar nav,
+      .app.sidebar-compact #toggleHeight {
+        display: none;
+      }
+
       .sidebar-actions {
         display: grid;
         gap: 8px;
@@ -92,6 +103,7 @@
 
       .sidebar-compact .sidebar-actions {
         grid-template-columns: 1fr;
+        width: 38px;
       }
 
       button {
@@ -265,18 +277,7 @@
       }
 
       .app.sidebar-compact .menu-node.submenu-open .submenu {
-        background: #173c28;
-        border: 1px solid rgba(255, 255, 255, 0.16);
-        border-radius: 8px;
-        box-shadow: 0 16px 34px rgba(0, 0, 0, 0.18);
-        display: grid;
-        left: calc(100% + 10px);
-        margin: 0;
-        min-width: 218px;
-        padding: 8px;
-        position: absolute;
-        top: 0;
-        z-index: 5;
+        display: none;
       }
 
       .content {
@@ -544,12 +545,19 @@
           grid-template-columns: 1fr;
         }
 
-        .sidebar,
-        .app.sidebar-compact .sidebar {
+        .sidebar {
           display: block;
           overflow-x: auto;
           padding: 12px;
           white-space: nowrap;
+        }
+
+        .app.sidebar-compact .sidebar {
+          align-items: center;
+          display: flex;
+          overflow-x: visible;
+          padding: 12px 8px;
+          white-space: normal;
         }
 
         .brand,
@@ -574,6 +582,10 @@
 
         .sidebar-actions {
           margin: 0 10px;
+        }
+
+        .app.sidebar-compact .sidebar-actions {
+          margin: 0;
         }
 
         .menu-group {
@@ -695,7 +707,7 @@
         </div>
 
         <div class="sidebar-actions">
-          <button class="icon-button" id="toggleWidth" title="Recolher menu lateral" type="button">‹</button>
+          <button class="icon-button" id="toggleWidth" title="Recolher menu lateral" aria-label="Recolher menu lateral" type="button">‹</button>
           <button class="icon-button" id="toggleHeight" title="Compactar grupos do menu" type="button">—</button>
         </div>
 
@@ -874,6 +886,7 @@
     <script>
       const app = document.querySelector("#app");
       const sidebar = document.querySelector("#sidebar");
+      const toggleWidth = document.querySelector("#toggleWidth");
       const params = new URLSearchParams(window.location.search);
       const startsCompact = params.get("compact") === "1";
 
@@ -899,22 +912,32 @@
         }
       }
 
+      function syncSidebarControls() {
+        const isCompact = app.classList.contains("sidebar-compact");
+        toggleWidth.textContent = isCompact ? "›" : "‹";
+        toggleWidth.setAttribute("title", isCompact ? "Abrir menu lateral" : "Recolher menu lateral");
+        toggleWidth.setAttribute("aria-label", isCompact ? "Abrir menu lateral" : "Recolher menu lateral");
+      }
+
       if (startsCompact) {
         app.classList.add("sidebar-compact");
       }
 
-      if (params.has("open")) {
+      if (startsCompact) {
+        closeSubmenus();
+      } else if (params.has("open")) {
         closeSubmenus();
         openSubmenu(params.get("open"));
-      } else if (startsCompact) {
-        closeSubmenus();
       }
 
-      document.querySelector("#toggleWidth").addEventListener("click", () => {
+      syncSidebarControls();
+
+      toggleWidth.addEventListener("click", () => {
         const isCompact = app.classList.toggle("sidebar-compact");
         if (isCompact) {
           closeSubmenus();
         }
+        syncSidebarControls();
       });
 
       document.querySelector("#toggleHeight").addEventListener("click", () => {

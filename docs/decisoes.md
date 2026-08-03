@@ -176,16 +176,17 @@ VPS ou producao.
 
 Decisao: corrigir o estado recolhido do mockup estatico em
 `docs/mockups/PLA-1016-layout-inicial.html` para que `?compact=1` represente o
-menu fechado sem submenu aberto automaticamente, preservando os estados de
-evidencia com `open=contas-pagar` e `open=caixas-bancos`.
+menu fechado limpo, sem grupos, itens, icones de navegacao, rotulos ou submenus
+visiveis, mantendo somente um controle minimo para reabrir o menu.
 
-Motivo: a tarefa solicita corrigir o estado fechado do menu no mockup. A versao
-anterior herdava o submenu `Contas a Pagar` aberto do estado desktop e exibia
-um painel flutuante mesmo quando a URL indicava apenas menu recolhido.
+Motivo: Thiago rejeitou a versao anterior com o criterio objetivo de que menu
+fechado nao deve aparecer nada. A versao anterior ainda deixava uma coluna de
+icones de navegacao visivel, o que parecia menu fechado com itens.
 
-Impacto: o mockup passa a diferenciar corretamente menu recolhido fechado e
-menu recolhido com submenu aberto para evidencia visual, sem alterar aplicacao
-Flask, rotas, banco de dados, VPS ou producao.
+Impacto: o mockup passa a diferenciar corretamente menu aberto acionavel e menu
+fechado limpo. Submenus continuam disponiveis no estado aberto para validar a
+hierarquia, sem alterar aplicacao Flask, rotas, banco de dados, VPS ou
+producao.
 
 ## 2026-08-02 - PLA-1031 publicacao do mockup em staging
 
