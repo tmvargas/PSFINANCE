@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>PLA-1031 - Mockup menu inicial PSFINANCE</title>
+    <title>PLA-1036 - Mockup menu inicial PSFINANCE</title>
     <style>
       :root {
         --bg: #f4f7f5;
@@ -38,7 +38,7 @@
       }
 
       .app.sidebar-compact {
-        grid-template-columns: 54px 1fr;
+        grid-template-columns: 72px 1fr;
       }
 
       .sidebar {
@@ -89,10 +89,18 @@
         padding: 18px 8px;
       }
 
-      .app.sidebar-compact .brand,
-      .app.sidebar-compact .sidebar nav,
-      .app.sidebar-compact #toggleHeight {
+      .app.sidebar-compact #toggleHeight,
+      .app.sidebar-compact .group-header {
         display: none;
+      }
+
+      .app.sidebar-compact .brand {
+        justify-content: center;
+      }
+
+      .app.sidebar-compact .brand-mark {
+        height: 38px;
+        width: 38px;
       }
 
       .sidebar-actions {
@@ -267,6 +275,53 @@
         color: #ffffff;
       }
 
+      .app.sidebar-compact nav {
+        display: grid;
+        gap: 12px;
+        width: 100%;
+      }
+
+      .app.sidebar-compact .menu-group {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 12px;
+        width: 100%;
+      }
+
+      .app.sidebar-compact .menu-list {
+        justify-items: center;
+      }
+
+      .app.sidebar-compact .menu-node,
+      .app.sidebar-compact .menu-item {
+        width: 38px;
+      }
+
+      .app.sidebar-compact .menu-item {
+        gap: 0;
+        justify-content: center;
+        min-height: 38px;
+        padding: 7px;
+      }
+
+      .app.sidebar-compact .nav-icon {
+        height: 24px;
+        width: 24px;
+      }
+
+      .app.sidebar-compact .submenu {
+        background: #173c28;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 8px;
+        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.24);
+        left: calc(100% + 10px);
+        margin: 0;
+        min-width: 220px;
+        padding: 8px;
+        position: absolute;
+        top: 0;
+        z-index: 10;
+      }
+
       .sidebar.groups-compact .menu-item:not(.active) {
         min-height: 36px;
         padding-block: 6px;
@@ -277,7 +332,7 @@
       }
 
       .app.sidebar-compact .menu-node.submenu-open .submenu {
-        display: none;
+        display: grid;
       }
 
       .content {
@@ -552,14 +607,6 @@
           white-space: nowrap;
         }
 
-        .app.sidebar-compact .sidebar {
-          align-items: center;
-          display: flex;
-          overflow-x: visible;
-          padding: 12px 8px;
-          white-space: normal;
-        }
-
         .brand,
         .sidebar-actions,
         .menu-group,
@@ -604,6 +651,50 @@
           position: absolute;
           top: calc(100% + 8px);
           z-index: 5;
+        }
+
+        .app.sidebar-compact {
+          grid-template-columns: 72px 1fr;
+        }
+
+        .app.sidebar-compact .sidebar {
+          align-items: center;
+          display: flex;
+          flex-direction: column;
+          min-height: 100vh;
+          overflow: visible;
+          padding: 12px 8px;
+          white-space: normal;
+        }
+
+        .app.sidebar-compact nav {
+          display: grid;
+          gap: 12px;
+          width: 100%;
+        }
+
+        .app.sidebar-compact .menu-group {
+          display: block;
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+          padding-top: 12px;
+          width: 100%;
+        }
+
+        .app.sidebar-compact .menu-list {
+          display: grid;
+        }
+
+        .app.sidebar-compact .menu-node {
+          display: block;
+        }
+
+        .app.sidebar-compact .menu-item {
+          display: flex;
+        }
+
+        .app.sidebar-compact .submenu {
+          left: calc(100% + 10px);
+          top: 0;
         }
 
         .metrics,
@@ -923,10 +1014,11 @@
         app.classList.add("sidebar-compact");
       }
 
-      if (startsCompact) {
+      if (startsCompact || params.has("open")) {
         closeSubmenus();
-      } else if (params.has("open")) {
-        closeSubmenus();
+      }
+
+      if (params.has("open")) {
         openSubmenu(params.get("open"));
       }
 
@@ -934,9 +1026,7 @@
 
       toggleWidth.addEventListener("click", () => {
         const isCompact = app.classList.toggle("sidebar-compact");
-        if (isCompact) {
-          closeSubmenus();
-        }
+        closeSubmenus();
         syncSidebarControls();
       });
 
