@@ -48,15 +48,20 @@ infraestrutura ou ambiente.
 - [x] Hierarquia e icones reais da `PLA-1027` preservados.
 - [x] Escopo restrito a documentacao/mockup.
 
-## Pendencias
+## Integracao e staging
 
 - A cadeia visual `PLA-1016`/`PLA-1019`/`PLA-1022`/`PLA-1027`/`PLA-1031` foi
-  integrada em `staging` no commit
-  `29ec18056fb710cb5f7d01cdc4038aaa08f51f04`.
-- A validacao direta da porta corporativa `5001` nao foi concluida neste
-  heartbeat porque `http://127.0.0.1:5001` nao respondeu no ambiente local
-  (`HTTP_STATUS=000`). A publicacao/validacao da VPS (Servidor Virtual Privado)
-  de teste permanece como pendencia de ambiente.
+  integrada em `staging`.
+- A VPS (Servidor Virtual Privado) de teste foi atualizada por fast-forward no
+  diretorio `/opt/plansmart/sistemas/psfinance/staging/repo`.
+- Os servicos `psfinance-staging.service` e `psfinance-staging-gate.service`
+  foram reiniciados e permaneceram `active`.
+- O metadado nao sensivel `GIT_COMMIT` do staging foi atualizado no arquivo de
+  ambiente da VPS para refletir o commit vigente da branch `staging`; foi criado
+  backup operacional do arquivo antes da alteracao.
+- A porta corporativa `5001` foi validada em
+  `http://vps69143.publiccloud.com.br:5001/gate` com HTTP 200, branch
+  `staging`, ambiente `staging-gate` e status `healthy`.
 
 ## Estado de GitHub
 
@@ -64,4 +69,9 @@ infraestrutura ou ambiente.
 - Commit da tarefa: `698e1ff20264fedea10d0b2070fc2790027dafef`.
 - PR (Pull Request, solicitacao de revisao): `https://github.com/tmvargas/PSFINANCE/pull/17`.
 - Base do PR: `staging`.
-- Merge em `staging`: `29ec18056fb710cb5f7d01cdc4038aaa08f51f04`.
+- PR complementar de documentacao: `https://github.com/tmvargas/PSFINANCE/pull/18`.
+
+## Pendencias
+
+- Revisao visual executiva do CEO sobre as evidencias geradas, antes de decidir
+  se o mockup deve virar implementacao na aplicacao Flask.
