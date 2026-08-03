@@ -171,3 +171,18 @@ entrega como artefato navegavel em HTML estatico.
 Impacto: grupos, menus, submenus e atalhos rapidos passam a exibir icones
 visuais em vez de siglas, sem alterar aplicacao Flask, rotas, banco de dados,
 VPS ou producao.
+
+## 2026-08-02 - PLA-1031 estado fechado do menu no mockup
+
+Decisao: corrigir o estado recolhido do mockup estatico em
+`docs/mockups/PLA-1016-layout-inicial.html` para que `?compact=1` represente o
+menu fechado sem submenu aberto automaticamente, preservando os estados de
+evidencia com `open=contas-pagar` e `open=caixas-bancos`.
+
+Motivo: a tarefa solicita corrigir o estado fechado do menu no mockup. A versao
+anterior herdava o submenu `Contas a Pagar` aberto do estado desktop e exibia
+um painel flutuante mesmo quando a URL indicava apenas menu recolhido.
+
+Impacto: o mockup passa a diferenciar corretamente menu recolhido fechado e
+menu recolhido com submenu aberto para evidencia visual, sem alterar aplicacao
+Flask, rotas, banco de dados, VPS ou producao.

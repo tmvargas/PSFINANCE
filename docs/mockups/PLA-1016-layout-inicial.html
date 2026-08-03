@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>PLA-1027 - Mockup menu inicial PSFINANCE</title>
+    <title>PLA-1031 - Mockup menu inicial PSFINANCE</title>
     <style>
       :root {
         --bg: #f4f7f5;
@@ -875,6 +875,7 @@
       const app = document.querySelector("#app");
       const sidebar = document.querySelector("#sidebar");
       const params = new URLSearchParams(window.location.search);
+      const startsCompact = params.get("compact") === "1";
 
       function closeSubmenus() {
         document.querySelectorAll(".menu-node").forEach((node) => {
@@ -898,17 +899,22 @@
         }
       }
 
-      if (params.get("compact") === "1") {
+      if (startsCompact) {
         app.classList.add("sidebar-compact");
       }
 
       if (params.has("open")) {
         closeSubmenus();
         openSubmenu(params.get("open"));
+      } else if (startsCompact) {
+        closeSubmenus();
       }
 
       document.querySelector("#toggleWidth").addEventListener("click", () => {
-        app.classList.toggle("sidebar-compact");
+        const isCompact = app.classList.toggle("sidebar-compact");
+        if (isCompact) {
+          closeSubmenus();
+        }
       });
 
       document.querySelector("#toggleHeight").addEventListener("click", () => {
@@ -918,8 +924,12 @@
       document.querySelectorAll(".submenu-toggle").forEach((button) => {
         button.addEventListener("click", () => {
           const node = button.closest(".menu-node");
-          const isOpen = node.classList.toggle("submenu-open");
-          button.setAttribute("aria-expanded", String(isOpen));
+          const wasOpen = node.classList.contains("submenu-open");
+          closeSubmenus();
+          if (!wasOpen) {
+            node.classList.add("submenu-open");
+            button.setAttribute("aria-expanded", "true");
+          }
         });
       });
     </script>
