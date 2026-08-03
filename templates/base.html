@@ -5,105 +5,841 @@
     <title>{% block title %}PlanSmart - App Financeiro{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- Bootstrap via CDN pra ficar bonitinho em desktop e iPhone -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
       rel="stylesheet"
     >
 
     <style>
-      /* Remove a setinha padrão do dropdown do Bootstrap */
-      .dropdown-toggle::after { display: none; }
+      :root {
+        --ps-bg: #f4f7f5;
+        --ps-surface: #ffffff;
+        --ps-surface-muted: #eef5f1;
+        --ps-border: #d6e1da;
+        --ps-text: #1b2520;
+        --ps-muted: #66756c;
+        --ps-green: #16834a;
+        --ps-green-dark: #0f5c36;
+        --ps-green-soft: #dff3e8;
+        --ps-sidebar: #11241a;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        background: var(--ps-bg);
+        color: var(--ps-text);
+        font-family: Inter, Arial, sans-serif;
+        margin: 0;
+      }
+
+      .dropdown-toggle::after {
+        display: none;
+      }
+
+      .app-shell {
+        display: grid;
+        grid-template-columns: 292px minmax(0, 1fr);
+        min-height: 100vh;
+        transition: grid-template-columns 180ms ease;
+      }
+
+      .app-shell.sidebar-compact {
+        grid-template-columns: 72px minmax(0, 1fr);
+      }
+
+      .sidebar {
+        background: var(--ps-sidebar);
+        color: #ffffff;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        min-width: 0;
+        padding: 18px 14px;
+      }
+
+      .brand {
+        align-items: center;
+        color: #ffffff;
+        display: flex;
+        gap: 10px;
+        min-height: 42px;
+        text-decoration: none;
+      }
+
+      .brand-mark {
+        align-items: center;
+        background: #ffffff;
+        border-radius: 7px;
+        color: var(--ps-green-dark);
+        display: inline-flex;
+        font-size: 0.78rem;
+        font-weight: 800;
+        height: 38px;
+        justify-content: center;
+        width: 42px;
+      }
+
+      .brand-name {
+        font-size: 1rem;
+        font-weight: 800;
+        letter-spacing: 0;
+        white-space: nowrap;
+      }
+
+      .sidebar-actions {
+        display: grid;
+        gap: 8px;
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .icon-button {
+        align-items: center;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 7px;
+        color: #ffffff;
+        cursor: pointer;
+        display: inline-flex;
+        font: inherit;
+        font-weight: 800;
+        height: 38px;
+        justify-content: center;
+      }
+
+      .menu-group {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 14px;
+      }
+
+      .group-header {
+        align-items: center;
+        display: flex;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+
+      .group-icon,
+      .nav-icon {
+        align-items: center;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        display: inline-flex;
+        flex: 0 0 auto;
+        height: 24px;
+        justify-content: center;
+        width: 24px;
+      }
+
+      .group-icon {
+        color: rgba(255, 255, 255, 0.78);
+      }
+
+      .icon {
+        display: block;
+        fill: none;
+        height: 16px;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 2;
+        width: 16px;
+      }
+
+      .group-title {
+        color: rgba(255, 255, 255, 0.58);
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        margin: 0;
+      }
+
+      .menu-list {
+        display: grid;
+        gap: 6px;
+        margin: 0;
+        padding: 0;
+      }
+
+      .menu-node {
+        position: relative;
+      }
+
+      .menu-node.compact-only {
+        display: none;
+      }
+
+      .menu-item {
+        align-items: center;
+        background: transparent;
+        border: 0;
+        border-radius: 7px;
+        color: rgba(255, 255, 255, 0.82);
+        display: flex;
+        gap: 10px;
+        min-height: 42px;
+        padding: 8px 9px;
+        text-align: left;
+        text-decoration: none;
+        width: 100%;
+      }
+
+      button.menu-item {
+        cursor: pointer;
+        font: inherit;
+      }
+
+      .menu-node.submenu-open > .menu-item,
+      .menu-item.active,
+      .menu-item:hover,
+      .menu-item:focus-visible {
+        background: var(--ps-green);
+        color: #ffffff;
+        outline: 0;
+      }
+
+      .menu-item.active .nav-icon,
+      .menu-item:hover .nav-icon,
+      .menu-node.submenu-open > .menu-item .nav-icon {
+        background: rgba(255, 255, 255, 0.18);
+      }
+
+      .submenu-toggle {
+        color: #ffffff;
+        padding: 8px 9px;
+      }
+
+      .nav-label {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .nav-chevron {
+        color: rgba(255, 255, 255, 0.46);
+      }
+
+      .submenu {
+        display: none;
+        gap: 4px;
+        margin: 4px 0 2px 34px;
+        padding: 0 0 0 10px;
+        position: static;
+      }
+
+      .menu-node.submenu-open .submenu {
+        display: grid;
+      }
+
+      .submenu-item {
+        align-items: center;
+        border-left: 2px solid rgba(255, 255, 255, 0.16);
+        border-radius: 0 7px 7px 0;
+        color: rgba(255, 255, 255, 0.78);
+        display: flex;
+        gap: 10px;
+        min-height: 34px;
+        padding: 6px 9px;
+        text-decoration: none;
+      }
+
+      .submenu-item.active,
+      .submenu-item:hover,
+      .submenu-item:focus-visible {
+        background: var(--ps-green);
+        color: #ffffff;
+        outline: 0;
+      }
+
+      .app-shell.sidebar-compact .sidebar {
+        align-items: center;
+        padding: 18px 8px;
+      }
+
+      .app-shell.sidebar-compact .brand {
+        justify-content: center;
+      }
+
+      .app-shell.sidebar-compact .brand-mark {
+        height: 38px;
+        width: 38px;
+      }
+
+      .app-shell.sidebar-compact .brand-name,
+      .app-shell.sidebar-compact .group-title,
+      .app-shell.sidebar-compact .nav-label,
+      .app-shell.sidebar-compact .nav-chevron,
+      .app-shell.sidebar-compact .group-header,
+      .app-shell.sidebar-compact #toggleGroups {
+        display: none;
+      }
+
+      .app-shell.sidebar-compact .sidebar-actions {
+        grid-template-columns: 1fr;
+        width: 38px;
+      }
+
+      .app-shell.sidebar-compact .app-nav {
+        display: grid;
+        gap: 12px;
+        width: 100%;
+      }
+
+      .app-shell.sidebar-compact .menu-group {
+        padding-top: 12px;
+        width: 100%;
+      }
+
+      .app-shell.sidebar-compact .menu-list {
+        justify-items: center;
+      }
+
+      .app-shell.sidebar-compact .menu-node,
+      .app-shell.sidebar-compact .menu-item {
+        width: 38px;
+      }
+
+      .app-shell.sidebar-compact .menu-node.compact-only {
+        display: block;
+        margin-inline: auto;
+      }
+
+      .app-shell.sidebar-compact .menu-item {
+        gap: 0;
+        justify-content: center;
+        min-height: 38px;
+        padding: 7px;
+      }
+
+      .app-shell.sidebar-compact .submenu {
+        background: #173c28;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 8px;
+        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.24);
+        left: calc(100% + 10px);
+        margin: 0;
+        min-width: 220px;
+        padding: 8px;
+        position: absolute;
+        top: 0;
+        z-index: 10;
+      }
+
+      .sidebar.groups-compact .menu-item:not(.active) {
+        min-height: 36px;
+        padding-block: 6px;
+      }
+
+      .content {
+        min-width: 0;
+      }
+
+      .topbar {
+        align-items: center;
+        background: var(--ps-surface);
+        border-bottom: 1px solid var(--ps-border);
+        display: flex;
+        gap: 16px;
+        justify-content: space-between;
+        min-height: 66px;
+        padding: 0 26px;
+      }
+
+      .search-shell {
+        background: var(--ps-surface-muted);
+        border: 1px solid var(--ps-border);
+        border-radius: 7px;
+        color: var(--ps-muted);
+        min-height: 38px;
+        padding: 9px 12px;
+        width: min(420px, 42vw);
+      }
+
+      .user-pill {
+        align-items: center;
+        background: var(--ps-green-soft);
+        border: 1px solid #bfe7cf;
+        border-radius: 999px;
+        color: var(--ps-green-dark);
+        display: inline-flex;
+        font-size: 0.86rem;
+        font-weight: 700;
+        min-height: 36px;
+        padding: 0 14px;
+        white-space: nowrap;
+      }
+
+      .content-main {
+        padding: 24px 26px 34px;
+      }
+
+      .content-main > .alert:first-child,
+      .flash-stack {
+        margin-bottom: 16px;
+      }
+
+      .card,
+      .modal-content {
+        border-color: var(--ps-border);
+        border-radius: 8px;
+      }
+
+      .btn {
+        border-radius: 7px;
+        font-weight: 700;
+        letter-spacing: 0;
+      }
+
+      .btn-primary,
+      .btn-success {
+        background-color: var(--ps-green);
+        border-color: var(--ps-green);
+      }
+
+      .btn-primary:hover,
+      .btn-success:hover {
+        background-color: var(--ps-green-dark);
+        border-color: var(--ps-green-dark);
+      }
+
+      .btn-outline-primary {
+        border-color: var(--ps-green);
+        color: var(--ps-green-dark);
+      }
+
+      .btn-outline-primary:hover {
+        background-color: var(--ps-green);
+        border-color: var(--ps-green);
+      }
+
+      .table {
+        --bs-table-bg: var(--ps-surface);
+        --bs-table-border-color: var(--ps-border);
+      }
+
+      @media (max-width: 980px) {
+        .app-shell {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+          display: block;
+          overflow-x: auto;
+          padding: 12px;
+          white-space: nowrap;
+        }
+
+        .brand,
+        .sidebar-actions,
+        .menu-group,
+        .group-header,
+        .menu-list,
+        .menu-node,
+        .menu-item {
+          display: inline-flex;
+          vertical-align: middle;
+        }
+
+        .group-title,
+        .nav-chevron,
+        .group-icon,
+        .app-shell.sidebar-compact .group-title,
+        .app-shell.sidebar-compact .nav-label,
+        .app-shell.sidebar-compact .nav-chevron {
+          display: none;
+        }
+
+        .sidebar-actions {
+          margin: 0 10px;
+        }
+
+        .menu-group {
+          border-top: 0;
+          padding-top: 0;
+        }
+
+        .submenu {
+          background: #173c28;
+          border: 1px solid rgba(255, 255, 255, 0.16);
+          border-radius: 8px;
+          left: 0;
+          margin: 0;
+          min-width: 210px;
+          padding: 8px;
+          position: absolute;
+          top: calc(100% + 8px);
+          z-index: 5;
+        }
+
+        .app-shell.sidebar-compact {
+          grid-template-columns: 72px minmax(0, 1fr);
+        }
+
+        .app-shell.sidebar-compact .sidebar {
+          align-items: center;
+          display: flex;
+          flex-direction: column;
+          min-height: 100vh;
+          overflow: visible;
+          padding: 12px 8px;
+          white-space: normal;
+        }
+
+        .app-shell.sidebar-compact .app-nav {
+          display: grid;
+          gap: 12px;
+          width: 100%;
+        }
+
+        .app-shell.sidebar-compact .menu-group {
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+          display: block;
+          padding-top: 12px;
+          width: 100%;
+        }
+
+        .app-shell.sidebar-compact .menu-list {
+          display: grid;
+        }
+
+        .app-shell.sidebar-compact .menu-node {
+          display: block;
+        }
+
+        .app-shell.sidebar-compact .menu-item {
+          display: flex;
+        }
+
+        .app-shell.sidebar-compact .submenu {
+          left: calc(100% + 10px);
+          top: 0;
+        }
+
+        .topbar {
+          align-items: stretch;
+          flex-direction: column;
+          padding: 14px;
+        }
+
+        .search-shell {
+          width: 100%;
+        }
+
+        .content-main {
+          padding: 18px 14px 28px;
+        }
+      }
     </style>
   </head>
 
-  <body class="bg-light">
-    <!-- NAVBAR PRINCIPAL -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-3">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="{{ url_for('financeiro.listar_titulos') }}">
-          PlanSmart Financeiro
+  <body>
+    {% set endpoint = request.endpoint or '' %}
+    {% set contas_pagar_endpoints = [
+      'financeiro.listar_titulos',
+      'financeiro.novo_titulo',
+      'financeiro.editar_titulo',
+      'financeiro.copiar_titulo',
+      'financeiro.baixar_titulo',
+      'financeiro.listar_baixas_titulo'
+    ] %}
+    {% set caixas_endpoints = [
+      'financeiro.listar_movimentacoes',
+      'financeiro.nova_movimentacao',
+      'financeiro.editar_movimentacao',
+      'financeiro.extrato_conta'
+    ] %}
+    {% set gerencial_endpoints = [
+      'financeiro.analise_resultados',
+      'financeiro.detalhe_conta_resultado'
+    ] %}
+    {% set apoio_endpoints = [
+      'financeiro.listar_credores',
+      'financeiro.novo_credor',
+      'financeiro.editar_credor',
+      'financeiro.listar_plano',
+      'financeiro.novo_plano',
+      'financeiro.editar_plano',
+      'financeiro.listar_contas',
+      'financeiro.nova_conta',
+      'financeiro.editar_conta',
+      'financeiro.listar_contas_inativas'
+    ] %}
+
+    <svg aria-hidden="true" style="display: none">
+      <symbol id="icon-home" viewBox="0 0 24 24">
+        <path d="m3 11 9-8 9 8"></path>
+        <path d="M5 10v10h14V10"></path>
+        <path d="M10 20v-6h4v6"></path>
+      </symbol>
+      <symbol id="icon-wallet" viewBox="0 0 24 24">
+        <path d="M19 7V6a2 2 0 0 0-2-2H5a2 2 0 0 0 0 4h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6"></path>
+        <path d="M16 13h.01"></path>
+      </symbol>
+      <symbol id="icon-file-text" viewBox="0 0 24 24">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <path d="M14 2v6h6"></path>
+        <path d="M8 13h8"></path>
+        <path d="M8 17h5"></path>
+      </symbol>
+      <symbol id="icon-check-circle" viewBox="0 0 24 24">
+        <path d="M22 11.1V12a10 10 0 1 1-5.9-9.1"></path>
+        <path d="m9 11 3 3L22 4"></path>
+      </symbol>
+      <symbol id="icon-landmark" viewBox="0 0 24 24">
+        <path d="m3 10 9-6 9 6"></path>
+        <path d="M4 10h16"></path>
+        <path d="M6 10v8"></path>
+        <path d="M10 10v8"></path>
+        <path d="M14 10v8"></path>
+        <path d="M18 10v8"></path>
+        <path d="M4 18h16"></path>
+      </symbol>
+      <symbol id="icon-repeat" viewBox="0 0 24 24">
+        <path d="m17 2 4 4-4 4"></path>
+        <path d="M3 11V9a3 3 0 0 1 3-3h15"></path>
+        <path d="m7 22-4-4 4-4"></path>
+        <path d="M21 13v2a3 3 0 0 1-3 3H3"></path>
+      </symbol>
+      <symbol id="icon-receipt" viewBox="0 0 24 24">
+        <path d="M4 2v20l3-2 3 2 3-2 3 2 3-2 1 .67V2z"></path>
+        <path d="M8 7h8"></path>
+        <path d="M8 11h8"></path>
+        <path d="M8 15h5"></path>
+      </symbol>
+      <symbol id="icon-chart" viewBox="0 0 24 24">
+        <path d="M3 3v18h18"></path>
+        <path d="m7 15 4-4 3 3 5-7"></path>
+      </symbol>
+      <symbol id="icon-user" viewBox="0 0 24 24">
+        <path d="M20 21a8 8 0 0 0-16 0"></path>
+        <circle cx="12" cy="7" r="4"></circle>
+      </symbol>
+      <symbol id="icon-list-tree" viewBox="0 0 24 24">
+        <path d="M6 6h.01"></path>
+        <path d="M10 6h8"></path>
+        <path d="M6 12h.01"></path>
+        <path d="M10 12h8"></path>
+        <path d="M6 18h.01"></path>
+        <path d="M10 18h8"></path>
+      </symbol>
+    </svg>
+
+    <div class="app-shell" id="appShell">
+      <aside class="sidebar" id="sidebar" aria-label="Menu lateral">
+        <a class="brand" href="{{ url_for('financeiro.dashboard_financeiro') }}">
+          <span class="brand-mark">PS</span>
+          <span class="brand-name">PSFINANCE</span>
         </a>
 
-        <div class="navbar-nav me-auto">
-          <a class="nav-link" href="{{ url_for('financeiro.listar_movimentacoes') }}">Movimentações</a>
-          <a class="nav-link" href="{{ url_for('financeiro.listar_titulos') }}">Títulos</a>
+        <div class="sidebar-actions">
+          <button class="icon-button" id="toggleSidebar" title="Recolher menu lateral" aria-label="Recolher menu lateral" type="button">&lsaquo;</button>
+          <button class="icon-button" id="toggleGroups" title="Compactar grupos do menu" aria-label="Compactar grupos do menu" type="button">-</button>
         </div>
 
-        <!-- AÇÕES À DIREITA: dropdown + Home -->
-        <div class="d-flex align-items-center gap-2">
-          <!-- Menu ☰ (dropdown) -->
-          <div class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle text-white px-2" href="#" id="menuDropdown"
-               role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Menu">
-              ☰
-            </a>
-
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="menuDropdown">
-              <!-- Seção: Relatórios / Análises -->
-              <li>
-                <a class="dropdown-item" href="{{ url_for('financeiro.analise_resultados') }}">
-                  Análise de resultados
-                </a>
-              </li>
-
-              <li><hr class="dropdown-divider"></li>
-
-              <!-- Seção: Tabelas auxiliares -->
-              <li class="dropdown-header">Tabelas auxiliares</li>
-
-              <li>
-                <a class="dropdown-item" href="{{ url_for('financeiro.listar_contas') }}">
-                  Contas
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item" href="{{ url_for('financeiro.listar_credores') }}">
-                  Credores
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item" href="{{ url_for('financeiro.listar_plano') }}">
-                  Plano financeiro
-                </a>
-              </li>
-            </ul>
+        <nav class="app-nav">
+          <div class="menu-group">
+            <div class="group-header">
+              <span class="group-icon"><svg class="icon"><use href="#icon-home"></use></svg></span>
+              <p class="group-title">HOME</p>
+            </div>
+            <div class="menu-list">
+              <a class="menu-item {% if endpoint == 'financeiro.dashboard_financeiro' %}active{% endif %}" href="{{ url_for('financeiro.dashboard_financeiro') }}" {% if endpoint == 'financeiro.dashboard_financeiro' %}aria-current="page"{% endif %}>
+                <span class="nav-icon"><svg class="icon"><use href="#icon-home"></use></svg></span>
+                <span class="nav-label">Home</span>
+                <span class="nav-chevron">›</span>
+              </a>
+            </div>
           </div>
 
-          <!-- Botão Home visível em todas as telas -->
-          <a
-            href="{{ url_for('financeiro.dashboard_financeiro') }}"
-            class="btn btn-outline-light btn-sm"
-          >
-            ⬅ Home
-          </a>
-        </div>
+          <div class="menu-group">
+            <div class="group-header">
+              <span class="group-icon"><svg class="icon"><use href="#icon-wallet"></use></svg></span>
+              <p class="group-title">FINANCEIRO</p>
+            </div>
+            <div class="menu-list">
+              <div class="menu-node {% if endpoint in contas_pagar_endpoints %}submenu-open{% endif %}" data-menu-node="contas-pagar">
+                <button class="menu-item submenu-toggle {% if endpoint in contas_pagar_endpoints %}active{% endif %}" type="button" aria-label="Expandir Contas a Pagar" aria-expanded="{% if endpoint in contas_pagar_endpoints %}true{% else %}false{% endif %}">
+                  <span class="nav-icon"><svg class="icon"><use href="#icon-wallet"></use></svg></span>
+                  <span class="nav-label">Contas a Pagar</span>
+                  <span class="nav-chevron">›</span>
+                </button>
+                <div class="submenu" aria-label="Submenu Contas a Pagar">
+                  <a class="submenu-item {% if endpoint in ['financeiro.listar_titulos', 'financeiro.novo_titulo', 'financeiro.editar_titulo', 'financeiro.copiar_titulo'] %}active{% endif %}" href="{{ url_for('financeiro.listar_titulos') }}">
+                    <span class="nav-icon"><svg class="icon"><use href="#icon-file-text"></use></svg></span><span>Título</span>
+                  </a>
+                  <a class="submenu-item {% if endpoint in ['financeiro.baixar_titulo', 'financeiro.listar_baixas_titulo'] %}active{% endif %}" href="{{ url_for('financeiro.listar_titulos') }}">
+                    <span class="nav-icon"><svg class="icon"><use href="#icon-check-circle"></use></svg></span><span>Baixa</span>
+                  </a>
+                </div>
+              </div>
 
+              <div class="menu-node {% if endpoint in caixas_endpoints %}submenu-open{% endif %}" data-menu-node="caixas-bancos">
+                <button class="menu-item submenu-toggle {% if endpoint in caixas_endpoints %}active{% endif %}" type="button" aria-label="Expandir Caixas e Bancos" aria-expanded="{% if endpoint in caixas_endpoints %}true{% else %}false{% endif %}">
+                  <span class="nav-icon"><svg class="icon"><use href="#icon-landmark"></use></svg></span>
+                  <span class="nav-label">Caixas e Bancos</span>
+                  <span class="nav-chevron">›</span>
+                </button>
+                <div class="submenu" aria-label="Submenu Caixas e Bancos">
+                  <a class="submenu-item {% if endpoint in ['financeiro.listar_movimentacoes', 'financeiro.nova_movimentacao', 'financeiro.editar_movimentacao'] %}active{% endif %}" href="{{ url_for('financeiro.listar_movimentacoes') }}">
+                    <span class="nav-icon"><svg class="icon"><use href="#icon-repeat"></use></svg></span><span>Movimentações</span>
+                  </a>
+                  <a class="submenu-item {% if endpoint == 'financeiro.extrato_conta' %}active{% endif %}" href="{{ url_for('financeiro.extrato_conta') }}">
+                    <span class="nav-icon"><svg class="icon"><use href="#icon-receipt"></use></svg></span><span>Extrato</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="menu-group">
+            <div class="group-header">
+              <span class="group-icon"><svg class="icon"><use href="#icon-chart"></use></svg></span>
+              <p class="group-title">GERENCIAL</p>
+            </div>
+            <div class="menu-list">
+              <div class="menu-node {% if endpoint in gerencial_endpoints %}submenu-open{% endif %}" data-menu-node="gerencial">
+                <button class="menu-item submenu-toggle {% if endpoint in gerencial_endpoints %}active{% endif %}" type="button" aria-label="Expandir Gerencial Financeiro" aria-expanded="{% if endpoint in gerencial_endpoints %}true{% else %}false{% endif %}">
+                  <span class="nav-icon"><svg class="icon"><use href="#icon-chart"></use></svg></span>
+                  <span class="nav-label">Gerencial Financeiro</span>
+                  <span class="nav-chevron">›</span>
+                </button>
+                <div class="submenu" aria-label="Submenu Gerencial">
+                  <a class="submenu-item {% if endpoint in gerencial_endpoints %}active{% endif %}" href="{{ url_for('financeiro.analise_resultados') }}">
+                    <span class="nav-icon"><svg class="icon"><use href="#icon-chart"></use></svg></span><span>Gerencial Financeiro</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="menu-group">
+            <div class="group-header">
+              <span class="group-icon"><svg class="icon"><use href="#icon-user"></use></svg></span>
+              <p class="group-title">APOIO</p>
+            </div>
+            <div class="menu-node compact-only {% if endpoint in apoio_endpoints %}submenu-open{% endif %}" data-menu-node="apoio">
+              <button class="menu-item submenu-toggle {% if endpoint in apoio_endpoints %}active{% endif %}" type="button" aria-label="Expandir Apoio" aria-expanded="{% if endpoint in apoio_endpoints %}true{% else %}false{% endif %}">
+                <span class="nav-icon"><svg class="icon"><use href="#icon-user"></use></svg></span>
+                <span class="nav-label">APOIO</span>
+                <span class="nav-chevron">›</span>
+              </button>
+              <div class="submenu" aria-label="Submenu Apoio">
+                <a class="submenu-item {% if endpoint in ['financeiro.listar_credores', 'financeiro.novo_credor', 'financeiro.editar_credor'] %}active{% endif %}" href="{{ url_for('financeiro.listar_credores') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-user"></use></svg></span><span>Credor</span></a>
+                <a class="submenu-item {% if endpoint in ['financeiro.listar_plano', 'financeiro.novo_plano', 'financeiro.editar_plano'] %}active{% endif %}" href="{{ url_for('financeiro.listar_plano') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-list-tree"></use></svg></span><span>Plano Financeiro</span></a>
+                <a class="submenu-item {% if endpoint in ['financeiro.listar_contas', 'financeiro.nova_conta', 'financeiro.editar_conta', 'financeiro.listar_contas_inativas'] %}active{% endif %}" href="{{ url_for('financeiro.listar_contas') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-landmark"></use></svg></span><span>Contas</span></a>
+              </div>
+            </div>
+            <div class="menu-list">
+              <a class="menu-item {% if endpoint in ['financeiro.listar_credores', 'financeiro.novo_credor', 'financeiro.editar_credor'] %}active{% endif %}" href="{{ url_for('financeiro.listar_credores') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-user"></use></svg></span><span class="nav-label">Credor</span><span class="nav-chevron">›</span></a>
+              <a class="menu-item {% if endpoint in ['financeiro.listar_plano', 'financeiro.novo_plano', 'financeiro.editar_plano'] %}active{% endif %}" href="{{ url_for('financeiro.listar_plano') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-list-tree"></use></svg></span><span class="nav-label">Plano Financeiro</span><span class="nav-chevron">›</span></a>
+              <a class="menu-item {% if endpoint in ['financeiro.listar_contas', 'financeiro.nova_conta', 'financeiro.editar_conta', 'financeiro.listar_contas_inativas'] %}active{% endif %}" href="{{ url_for('financeiro.listar_contas') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-landmark"></use></svg></span><span class="nav-label">Contas</span><span class="nav-chevron">›</span></a>
+            </div>
+          </div>
+        </nav>
+      </aside>
+
+      <div class="content">
+        <header class="topbar">
+          <div class="search-shell">Buscar título, credor, contas ou movimentações</div>
+          <div class="user-pill">Staging PSFINANCE</div>
+        </header>
+
+        <main class="content-main">
+          {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              <div class="flash-stack">
+                {% for category, msg in messages %}
+                  {% if category == 'erro' %}
+                    <div class="alert alert-danger py-2">{{ msg }}</div>
+                  {% elif category == 'sucesso' %}
+                    <div class="alert alert-success py-2">{{ msg }}</div>
+                  {% else %}
+                    <div class="alert alert-info py-2">{{ msg }}</div>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            {% endif %}
+          {% endwith %}
+
+          {% block content %}{% endblock %}
+        </main>
       </div>
-    </nav>
-
-    <main class="container mb-4">
-      <!-- mensagens flash -->
-      {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-          <div class="mt-2">
-            {% for category, msg in messages %}
-              {% if category == 'erro' %}
-                <div class="alert alert-danger alert-sm py-2">{{ msg }}</div>
-              {% elif category == 'sucesso' %}
-                <div class="alert alert-success alert-sm py-2">{{ msg }}</div>
-              {% else %}
-                <div class="alert alert-info alert-sm py-2">{{ msg }}</div>
-              {% endif %}
-            {% endfor %}
-          </div>
-        {% endif %}
-      {% endwith %}
-
-      <!-- ÚNICO bloco de conteúdo -->
-      {% block content %}{% endblock %}
-    </main>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      const appShell = document.querySelector("#appShell");
+      const sidebar = document.querySelector("#sidebar");
+      const toggleSidebar = document.querySelector("#toggleSidebar");
+      const toggleGroups = document.querySelector("#toggleGroups");
+      const params = new URLSearchParams(window.location.search);
+
+      function closeSubmenus() {
+        document.querySelectorAll(".menu-node").forEach((node) => {
+          node.classList.remove("submenu-open");
+          const button = node.querySelector(".submenu-toggle");
+          if (button) {
+            button.setAttribute("aria-expanded", "false");
+          }
+        });
+      }
+
+      function syncSidebarControls() {
+        const isCompact = appShell.classList.contains("sidebar-compact");
+        toggleSidebar.innerHTML = isCompact ? "&rsaquo;" : "&lsaquo;";
+        toggleSidebar.setAttribute("title", isCompact ? "Abrir menu lateral" : "Recolher menu lateral");
+        toggleSidebar.setAttribute("aria-label", isCompact ? "Abrir menu lateral" : "Recolher menu lateral");
+      }
+
+      function openSubmenu(menuId) {
+        const node = document.querySelector(`[data-menu-node="${menuId}"]`);
+        if (!node) {
+          return;
+        }
+        node.classList.add("submenu-open");
+        const button = node.querySelector(".submenu-toggle");
+        if (button) {
+          button.setAttribute("aria-expanded", "true");
+        }
+      }
+
+      if (params.get("compact") === "1" || localStorage.getItem("psfinanceSidebarCompact") === "1") {
+        appShell.classList.add("sidebar-compact");
+        closeSubmenus();
+      }
+
+      if (params.has("open")) {
+        closeSubmenus();
+        openSubmenu(params.get("open"));
+      }
+
+      syncSidebarControls();
+
+      toggleSidebar.addEventListener("click", () => {
+        const isCompact = appShell.classList.toggle("sidebar-compact");
+        localStorage.setItem("psfinanceSidebarCompact", isCompact ? "1" : "0");
+        closeSubmenus();
+        syncSidebarControls();
+      });
+
+      toggleGroups.addEventListener("click", () => {
+        sidebar.classList.toggle("groups-compact");
+      });
+
+      document.querySelectorAll(".submenu-toggle").forEach((button) => {
+        button.addEventListener("click", () => {
+          const node = button.closest(".menu-node");
+          const wasOpen = node.classList.contains("submenu-open");
+          closeSubmenus();
+          if (!wasOpen) {
+            node.classList.add("submenu-open");
+            button.setAttribute("aria-expanded", "true");
+          }
+        });
+      });
+    </script>
   </body>
 </html>
