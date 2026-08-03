@@ -239,3 +239,10 @@ Complemento de entrega: apos merge da branch da tarefa na `staging`, a VPS de
 teste foi atualizada pela propria `staging`. O metadado nao sensivel
 `GIT_COMMIT` do ambiente de staging foi ajustado para o commit validado, sem
 alterar segredos, banco de dados, `main` ou producao.
+
+Complemento de correcao: apos revisao executiva complementar, o item `Contas`
+foi removido do grupo `APOIO` no menu aberto e no flyout compacto, mantendo
+somente `Credor` e `Plano Financeiro` conforme a hierarquia aprovada por
+Thiago para a PLA-1015. As rotas e telas de contas existentes foram preservadas
+fora da navegacao aprovada, sem alterar regras de negocio, banco de dados,
+`main` ou producao.
