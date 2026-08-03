@@ -156,3 +156,18 @@ Impacto: a `PLA-1022` mantem a hierarquia financeira ja solicitada, corrige
 `GERENCIAL`, `APOIO`, `Título`, `Baixa` e `Credor`, e entrega um menu mais
 simples para revisao executiva, sem alterar aplicacao Flask, rotas, banco, VPS
 ou producao.
+
+## 2026-08-02 - PLA-1027 icones reais no mockup de menu
+
+Decisao: substituir as siglas usadas como marcadores visuais no mockup
+estatico por icones SVG embutidos em
+`docs/mockups/PLA-1016-layout-inicial.html`, preservando a hierarquia e o
+comportamento do menu da `PLA-1022`.
+
+Motivo: a tarefa solicita corrigir o mockup com icones reais no menu. Manter os
+icones embutidos evita dependencia externa para a revisao visual e preserva a
+entrega como artefato navegavel em HTML estatico.
+
+Impacto: grupos, menus, submenus e atalhos rapidos passam a exibir icones
+visuais em vez de siglas, sem alterar aplicacao Flask, rotas, banco de dados,
+VPS ou producao.
