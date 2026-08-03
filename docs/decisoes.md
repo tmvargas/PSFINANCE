@@ -110,3 +110,79 @@ Impacto: a validacao oficial da porta `5001` passa a comprovar diretamente se o
 processo em execucao esta usando `PSFINANCE_STAGING_DATABASE_URL` e o dialeto
 PostgreSQL, reduzindo risco de nova evidencia ambigua. Producao, `main` e banco
 produtivo permanecem fora do escopo.
+
+## 2026-08-02 - PLA-1016 mockup estatico do layout inicial do PSFINANCE
+
+Decisao: entregar a PLA-1016 como mockup HTML estatico em `docs/mockups/`,
+sem alterar templates da aplicacao Flask, banco, rotas, VPS ou producao.
+
+Motivo: a tarefa solicita validacao visual antes de implementacao em codigo e
+define como requisitos a referencia ABF, variacao verde e menu lateral com
+comportamento de recolhimento vertical e horizontal.
+
+Impacto: a entrega permite revisao visual navegavel pelo CEO antes de qualquer
+implementacao no produto. A aplicacao PSFINANCE em staging permanece sem
+alteracao funcional nesta etapa.
+
+## 2026-08-02 - PLA-1019 ajustes do mockup de menu inicial
+
+Decisao: manter os ajustes da PLA-1019 no mesmo artefato estatico de mockup
+criado para a PLA-1016, em `docs/mockups/PLA-1016-layout-inicial.html`, sem
+alterar templates da aplicacao Flask, rotas, banco, VPS ou producao.
+
+Motivo: a demanda e um refinamento visual do menu inicial e depende da base do
+mockup ainda nao integrada a `staging`; implementar diretamente no produto antes
+da validacao visual quebraria a decisao da PLA-1016.
+
+Impacto: o menu inicial passa a refletir a hierarquia solicitada por Thiago:
+`Titulos` e `Baixas` sob `FINANCEIRO > CONTAS A PAGAR`, `Movimentacoes` e
+`Extrato` sob `FINANCEIRO > CAIXAS E BANCOS`, com expansao lateral pelo icone e
+icones/siglas em todos os menus, mantendo o escopo restrito a
+documentacao/mockup.
+
+## 2026-08-02 - PLA-1022 refacao do mockup de menu rejeitado
+
+Decisao: refazer o menu do mockup estatico em
+`docs/mockups/PLA-1016-layout-inicial.html`, corrigindo nomes e grupos para os
+termos exatos da tarefa, removendo resumo e contadores do menu lateral e
+mantendo evidencia reproduzivel de submenu expandido a direita quando o menu
+esta recolhido.
+
+Motivo: a versao anterior da `PLA-1019` foi rejeitada por Thiago e o screenshot
+evidenciava sobreposicao do submenu sobre a area principal, alem de ruido visual
+no menu lateral para uma tela operacional.
+
+Impacto: a `PLA-1022` mantem a hierarquia financeira ja solicitada, corrige
+`GERENCIAL`, `APOIO`, `Título`, `Baixa` e `Credor`, e entrega um menu mais
+simples para revisao executiva, sem alterar aplicacao Flask, rotas, banco, VPS
+ou producao.
+
+## 2026-08-02 - PLA-1027 icones reais no mockup de menu
+
+Decisao: substituir as siglas usadas como marcadores visuais no mockup
+estatico por icones SVG embutidos em
+`docs/mockups/PLA-1016-layout-inicial.html`, preservando a hierarquia e o
+comportamento do menu da `PLA-1022`.
+
+Motivo: a tarefa solicita corrigir o mockup com icones reais no menu. Manter os
+icones embutidos evita dependencia externa para a revisao visual e preserva a
+entrega como artefato navegavel em HTML estatico.
+
+Impacto: grupos, menus, submenus e atalhos rapidos passam a exibir icones
+visuais em vez de siglas, sem alterar aplicacao Flask, rotas, banco de dados,
+VPS ou producao.
+
+## 2026-08-02 - PLA-1031 estado fechado do menu no mockup
+
+Decisao: corrigir o estado recolhido do mockup estatico em
+`docs/mockups/PLA-1016-layout-inicial.html` para que `?compact=1` represente o
+menu fechado sem submenu aberto automaticamente, preservando os estados de
+evidencia com `open=contas-pagar` e `open=caixas-bancos`.
+
+Motivo: a tarefa solicita corrigir o estado fechado do menu no mockup. A versao
+anterior herdava o submenu `Contas a Pagar` aberto do estado desktop e exibia
+um painel flutuante mesmo quando a URL indicava apenas menu recolhido.
+
+Impacto: o mockup passa a diferenciar corretamente menu recolhido fechado e
+menu recolhido com submenu aberto para evidencia visual, sem alterar aplicacao
+Flask, rotas, banco de dados, VPS ou producao.
