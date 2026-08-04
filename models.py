@@ -25,6 +25,48 @@ class TimestampMixin:
 
 
 # ---------------------------------------------------------------------
+# EMPRESA
+# ---------------------------------------------------------------------
+class Empresa(Base, TimestampMixin):
+    __tablename__ = "empresa"
+
+    id_empresa = Column(Integer, primary_key=True, autoincrement=True)
+    uuid = Column(String(36), default=lambda: str(uuid.uuid4()), unique=True, nullable=False)
+
+    codigo = Column(String(50), nullable=False)
+    nome = Column(String(255), nullable=False)
+    tipo_empresa = Column(String(20), nullable=False)
+    codigo_externo = Column(String(100), nullable=True)
+    observacao = Column(String(1000), nullable=True)
+
+    centros_custo = relationship("CentroCusto", back_populates="empresa")
+
+    def __repr__(self):
+        return f"<Empresa {self.codigo} - {self.nome}>"
+
+
+# ---------------------------------------------------------------------
+# CENTRO DE CUSTO
+# ---------------------------------------------------------------------
+class CentroCusto(Base, TimestampMixin):
+    __tablename__ = "centro_custo"
+
+    id_centro_custo = Column(Integer, primary_key=True, autoincrement=True)
+    uuid = Column(String(36), default=lambda: str(uuid.uuid4()), unique=True, nullable=False)
+
+    id_empresa = Column(Integer, ForeignKey("empresa.id_empresa"), nullable=False)
+    codigo = Column(String(50), nullable=False)
+    nome = Column(String(255), nullable=False)
+    codigo_externo = Column(String(100), nullable=True)
+    observacao = Column(String(1000), nullable=True)
+
+    empresa = relationship("Empresa", back_populates="centros_custo")
+
+    def __repr__(self):
+        return f"<CentroCusto {self.codigo} - {self.nome}>"
+
+
+# ---------------------------------------------------------------------
 # DOCUMENTO (AV / CT / REC / NF)
 # ---------------------------------------------------------------------
 class Documento(Base, TimestampMixin):

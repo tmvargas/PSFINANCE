@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Centros de Custo{% endblock %}
+
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">Centros de Custo</h1>
+
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('financeiro.novo_centro_custo') }}" class="btn btn-sm btn-primary">
+        Novo centro de custo
+      </a>
+    </div>
+  </div>
+
+  {% if centros %}
+    <div class="table-responsive">
+      <table class="table table-sm table-striped table-hover align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th style="width: 90px;">ID</th>
+            <th>Empresa</th>
+            <th>Código</th>
+            <th>Nome</th>
+            <th>Código externo</th>
+            <th style="width: 210px;" class="text-center">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for centro in centros %}
+            <tr>
+              <td>{{ centro.id }}</td>
+              <td>{{ centro.empresa_codigo }} - {{ centro.empresa }}</td>
+              <td>{{ centro.codigo }}</td>
+              <td>{{ centro.nome }}</td>
+              <td>{{ centro.codigo_externo or '-' }}</td>
+              <td class="text-center">
+                <a
+                  href="{{ url_for('financeiro.editar_centro_custo', id_centro_custo=centro.id) }}"
+                  class="btn btn-sm btn-outline-secondary"
+                >
+                  Editar
+                </a>
+                <form
+                  method="post"
+                  action="{{ url_for('financeiro.desativar_centro_custo', id_centro_custo=centro.id) }}"
+                  class="d-inline"
+                >
+                  <button type="submit" class="btn btn-sm btn-outline-danger">
+                    Desativar
+                  </button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p>Não há centros de custo cadastrados.</p>
+  {% endif %}
+{% endblock %}

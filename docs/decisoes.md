@@ -246,3 +246,26 @@ somente `Credor` e `Plano Financeiro` conforme a hierarquia aprovada por
 Thiago para a PLA-1015. As rotas e telas de contas existentes foram preservadas
 fora da navegacao aprovada, sem alterar regras de negocio, banco de dados,
 `main` ou producao.
+
+
+## 2026-08-04 - PLA-1235 cadastros Empresa e Centro de Custo PSFINANCE
+
+Decisao: implementar os cadastros funcionais `APOIO > Empresa` e
+`APOIO > Centro de Custo` no PSFINANCE, conforme arquitetura aprovada na
+`PLA-1221`.
+
+Motivo: a `PLA-1221` consolidou a nomenclatura funcional e tecnica, mas nao
+entregou diff funcional. A `PLA-1235` atende a etapa seguinte, criando os
+modelos, rotas e telas minimas para que empresas e centros de custo possam ser
+cadastrados antes da aplicacao do isolamento financeiro completo por
+`id_empresa` e `id_centro_custo`.
+
+Regra aplicada: `Empresa` aceita somente os tipos `EMPRESA`, `SPE` e `SCP`.
+`Centro de Custo` exige vinculo com uma empresa ativa. Codigos ativos ficam
+unicos por cadastro de empresa e por empresa no cadastro de centro de custo.
+Desativacao de empresa com centro de custo ativo fica bloqueada.
+
+Impacto: a entrega cria tabelas novas via `Base.metadata.create_all` quando a
+aplicacao inicializar em ambiente sem essas tabelas. Nao altera tabelas
+operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
+`main` ou producao.
