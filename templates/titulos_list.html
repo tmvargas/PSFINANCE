@@ -49,6 +49,8 @@
             <th>Documento</th>
             <th>Número</th>
             <th>Credor</th>
+            <th>Empresa</th>
+            <th>Centro de Custo</th>
             <th>Plano</th>
             <th>Vencimento</th>
             <th class="text-end">Valor</th>
@@ -70,6 +72,8 @@
               <td>{{ t.doc_label }}</td>
               <td>{{ t.nr_documento }}</td>
               <td>{{ t.credor }}</td>
+              <td>{{ t.empresa or '-' }}</td>
+              <td>{{ t.centro_custo or '-' }}</td>
               <td>{{ t.plano }}</td>
               <td>{{ t.vencimento }}</td>
 
@@ -129,7 +133,7 @@
 
         <tfoot>
           <tr class="fw-bold">
-            <td colspan="8" class="text-end">Total saldo em aberto:</td>
+            <td colspan="10" class="text-end">Total saldo em aberto:</td>
             <td class="text-end">R$ {{ "%.2f"|format(ns.total_aberto) }}</td>
             <td></td>
           </tr>

@@ -40,6 +40,8 @@ class Empresa(Base, TimestampMixin):
     observacao = Column(String(1000), nullable=True)
 
     centros_custo = relationship("CentroCusto", back_populates="empresa")
+    titulos = relationship("Titulo", back_populates="empresa")
+    movimentacoes = relationship("MovimentacaoConta", back_populates="empresa")
 
     def __repr__(self):
         return f"<Empresa {self.codigo} - {self.nome}>"
@@ -61,6 +63,8 @@ class CentroCusto(Base, TimestampMixin):
     observacao = Column(String(1000), nullable=True)
 
     empresa = relationship("Empresa", back_populates="centros_custo")
+    titulos = relationship("Titulo", back_populates="centro_custo")
+    movimentacoes = relationship("MovimentacaoConta", back_populates="centro_custo")
 
     def __repr__(self):
         return f"<CentroCusto {self.codigo} - {self.nome}>"
@@ -228,6 +232,8 @@ class Titulo(Base, TimestampMixin):
     nr_documento = Column(String(50), nullable=False)
 
     id_credor = Column(Integer, ForeignKey("credor.id_credor"), nullable=False)
+    id_empresa = Column(Integer, ForeignKey("empresa.id_empresa"), nullable=True)
+    id_centro_custo = Column(Integer, ForeignKey("centro_custo.id_centro_custo"), nullable=True)
     id_plano = Column(Integer, ForeignKey("plano_de_contas.id_plano"), nullable=False)
 
     valor = Column(Numeric(15, 2), nullable=False)
@@ -238,6 +244,8 @@ class Titulo(Base, TimestampMixin):
 
     documento = relationship("Documento", back_populates="titulos")
     credor = relationship("Credor", back_populates="titulos")
+    empresa = relationship("Empresa", back_populates="titulos")
+    centro_custo = relationship("CentroCusto", back_populates="titulos")
     plano = relationship("PlanoDeContas", back_populates="titulos")
     baixas = relationship("Baixa", back_populates="titulo")
 
@@ -328,6 +336,8 @@ class MovimentacaoConta(Base, TimestampMixin):
 
     id_conta_origem = Column(Integer, ForeignKey("conta.id_conta"), nullable=True)
     id_conta_destino = Column(Integer, ForeignKey("conta.id_conta"), nullable=True)
+    id_empresa = Column(Integer, ForeignKey("empresa.id_empresa"), nullable=True)
+    id_centro_custo = Column(Integer, ForeignKey("centro_custo.id_centro_custo"), nullable=True)
 
     conta_origem = relationship(
         "Conta",
@@ -344,6 +354,8 @@ class MovimentacaoConta(Base, TimestampMixin):
     id_plano = Column(Integer, ForeignKey("plano_de_contas.id_plano"), nullable=True)
     plano = relationship("PlanoDeContas", back_populates="movimentos")
 
+    empresa = relationship("Empresa", back_populates="movimentacoes")
+    centro_custo = relationship("CentroCusto", back_populates="movimentacoes")
     documento = relationship("Documento", back_populates="movimentacoes")
 
     conciliado = Column(Boolean, default=False, nullable=False)

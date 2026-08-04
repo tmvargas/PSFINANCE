@@ -30,6 +30,8 @@
         <th style="width: 110px;" class="text-end">Valor</th>
         <th style="width: 180px;">Conta origem</th>
         <th style="width: 180px;">Conta destino</th>
+        <th style="width: 180px;">Empresa</th>
+        <th style="width: 200px;">Centro de Custo</th>
         <th style="width: 220px;">Plano financeiro</th>
         <th style="width: 130px;" class="text-center">Ações</th>
       </tr>
@@ -78,6 +80,8 @@
 
         <td>{{ m.conta_origem or '-' }}</td>
         <td>{{ m.conta_destino or '-' }}</td>
+        <td>{{ m.empresa or '-' }}</td>
+        <td>{{ m.centro_custo or '-' }}</td>
         <td>{{ m.plano or '-' }}</td>
 
         <td class="text-center text-nowrap">

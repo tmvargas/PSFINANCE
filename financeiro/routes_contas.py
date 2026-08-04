@@ -5,6 +5,7 @@ from flask import render_template, request, redirect, url_for, flash
 from datetime import date
 
 from . import bp_financeiro
+from .regras_empresa_centro import listar_empresas_centros_ativos, validar_empresa_centro
 from database import SessionLocal
 
 from models import (
@@ -341,6 +342,8 @@ def nova_movimentacao():
         nr_documento = (request.form.get("nr_documento") or "NA").strip() or "NA"
         descricao = (request.form.get("descricao") or "").strip()
         valor_raw = (request.form.get("valor") or "").strip()
+        id_empresa = request.form.get("id_empresa", type=int)
+        id_centro_custo = request.form.get("id_centro_custo", type=int)
 
         # Campos conforme tipo
         id_conta_unica = request.form.get("id_conta")               # Entrada / Saída
@@ -355,6 +358,20 @@ def nova_movimentacao():
 
         if tipo not in ("E", "S", "T"):
             erros.append("Selecione um tipo de movimentação válido.")
+        erros_empresa_centro, _empresa, _centro = validar_empresa_centro(session, id_empresa, id_centro_custo)
+        erros.extend(erros_empresa_centro)
+
+        doc_obj = None
+        if not documento:
+            erros.append("Selecione o documento.")
+        else:
+            doc_obj = (
+                session.query(Documento)
+                .filter(Documento.deleted.is_(False), Documento.tipo_doc == documento)
+                .first()
+            )
+            if not doc_obj:
+                erros.append("Documento inválido.")
 
         # data
         try:
@@ -481,22 +498,6 @@ def nova_movimentacao():
             for e in erros:
                 flash(e, "erro")
         else:
-
-            documento_tipo = request.form.get("documento")  # vem tipo_doc (string)
-
-            doc_obj = None
-            if not documento_tipo:
-                erros.append("Selecione o documento.")
-            else:
-                doc_obj = (
-                    session.query(Documento)
-                    .filter(Documento.deleted.is_(False), Documento.tipo_doc == documento_tipo)
-                    .first()
-                )
-                if not doc_obj:
-                    erros.append("Documento inválido.")
-
-
             mov = MovimentacaoConta(
                 tipo=tipo,
                 data=data_mov,
@@ -506,6 +507,8 @@ def nova_movimentacao():
                 valor=valor,
                 id_conta_origem=conta_origem.id_conta if conta_origem else None,
                 id_conta_destino=conta_destino.id_conta if conta_destino else None,
+                id_empresa=id_empresa,
+                id_centro_custo=id_centro_custo,
                 id_plano=plano.id_plano if plano else None,
             )
             session.add(mov)
@@ -546,6 +549,7 @@ def nova_movimentacao():
         .order_by(Documento.tipo_doc)
         .all()
     )
+    empresas_view, centros_custo_view = listar_empresas_centros_ativos(session)
 
     contas_view = [
         {"id": c.id_conta, "descricao": c.descricao}
@@ -561,8 +565,6 @@ def nova_movimentacao():
         for p in planos_saida
     ]
 
-    print (planos_saida_view)
-
     session.close()
     return render_template(
         "movimentacao_form.html",
@@ -571,6 +573,8 @@ def nova_movimentacao():
         planos_entrada=planos_entrada_view,
         planos_saida=planos_saida_view,
         documentos=documentos,
+        empresas=empresas_view,
+        centros_custo=centros_custo_view,
         hoje=date.today().isoformat(),
     )
 
@@ -615,6 +619,8 @@ def listar_movimentacoes():
             "valor": float(m.valor or 0),
             "conta_origem": conta_origem_desc,
             "conta_destino": conta_destino_desc,
+            "empresa": f"{m.empresa.codigo} - {m.empresa.nome}" if m.empresa else "",
+            "centro_custo": f"{m.centro_custo.codigo} - {m.centro_custo.nome}" if m.centro_custo else "",
             "plano": plano_desc,
         })
 
@@ -644,11 +650,9 @@ def editar_movimentacao(id_mov):
         return redirect(url_for("financeiro.listar_movimentacoes"))
 
     if request.method == "POST":
+        erros = []
         tipo = (request.form.get("tipo") or "").strip()  # E / S / T
         data_str = (request.form.get("data") or "").strip()
-        documento_sigla = request.form.get("documento")
-        doc_obj = session.query(Documento).filter(Documento.tipo_doc == documento_sigla, Documento.deleted.is_(False)).first()
-        # mov.documento = doc_obj
 
         # --- documento (vem do <select name="documento"> como sigla: "AV", "NF", etc)
         doc_sigla = (request.form.get("documento") or "").strip()
@@ -668,6 +672,8 @@ def editar_movimentacao(id_mov):
         nr_documento = (request.form.get("nr_documento") or "NA").strip() or "NA"
         descricao = (request.form.get("descricao") or "").strip()
         valor_raw = (request.form.get("valor") or "").strip()
+        id_empresa = request.form.get("id_empresa", type=int)
+        id_centro_custo = request.form.get("id_centro_custo", type=int)
 
         id_conta_unica = request.form.get("id_conta")
         id_conta_origem = request.form.get("id_conta_origem")
@@ -676,10 +682,10 @@ def editar_movimentacao(id_mov):
         id_plano = request.form.get("id_plano")
 
 
-        erros = []
-
         if tipo not in ("E", "S", "T"):
             erros.append("Selecione um tipo de movimentação válido.")
+        erros_empresa_centro, _empresa, _centro = validar_empresa_centro(session, id_empresa, id_centro_custo)
+        erros.extend(erros_empresa_centro)
 
         # data
         try:
@@ -810,6 +816,8 @@ def editar_movimentacao(id_mov):
             mov.valor = valor
             mov.id_conta_origem = conta_origem.id_conta if conta_origem else None
             mov.id_conta_destino = conta_destino.id_conta if conta_destino else None
+            mov.id_empresa = id_empresa
+            mov.id_centro_custo = id_centro_custo
             mov.id_plano = plano.id_plano if plano else None
 
             session.commit()
@@ -869,6 +877,7 @@ def editar_movimentacao(id_mov):
         "tipo": (p.tipo or "").lower(),
     } for p in planos_saida]
 
+    empresas_view, centros_custo_view = listar_empresas_centros_ativos(session)
 
     mov_view = {
         "id": mov.id_movimentacao,
@@ -883,6 +892,8 @@ def editar_movimentacao(id_mov):
         # Para T:
         "id_conta_origem": mov.id_conta_origem,
         "id_conta_destino": mov.id_conta_destino,
+        "id_empresa": getattr(mov, "id_empresa", None),
+        "id_centro_custo": getattr(mov, "id_centro_custo", None),
         "id_plano": mov.id_plano,
     }
 
@@ -903,6 +914,8 @@ def editar_movimentacao(id_mov):
         planos_entrada=planos_entrada_view,
         planos_saida=planos_saida_view,
         documentos=documentos,
+        empresas=empresas_view,
+        centros_custo=centros_custo_view,
         hoje=date.today().isoformat(),
     )
 

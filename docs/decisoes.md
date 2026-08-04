@@ -270,3 +270,15 @@ aplicacao inicializar em ambiente sem essas tabelas e tambem prepara script SQL
 versionado para staging. O script nao foi executado neste heartbeat. Nao altera
 tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
 `main` ou producao.
+## 2026-08-04 - PLA-1235 - Empresa e centro de custo em titulos e movimentacoes
+
+- Projeto: PSFINANCE.
+- Decisao: novos titulos e movimentacoes financeiras devem exigir empresa ativa
+  e centro de custo ativo pertencente a empresa selecionada.
+- Aplicacao: a validacao foi centralizada em `financeiro/regras_empresa_centro.py`
+  e reutilizada nos fluxos de titulos e movimentacoes.
+- Banco: as colunas preparadas em `titulo` e `movimentacao_conta` permanecem
+  opcionais na migration para preservar dados historicos; a obrigatoriedade
+  vale no backend para novos registros e edicoes.
+- Producao: nenhuma migration ou escrita em producao esta autorizada por esta
+  decisao.

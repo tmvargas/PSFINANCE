@@ -41,3 +41,23 @@ CREATE INDEX IF NOT EXISTS ix_centro_custo_empresa_codigo_ativo
 CREATE INDEX IF NOT EXISTS ix_centro_custo_empresa_ativo
     ON centro_custo (id_empresa)
     WHERE deleted = FALSE;
+
+ALTER TABLE titulo
+    ADD COLUMN IF NOT EXISTS id_empresa INTEGER REFERENCES empresa (id_empresa);
+
+ALTER TABLE titulo
+    ADD COLUMN IF NOT EXISTS id_centro_custo INTEGER REFERENCES centro_custo (id_centro_custo);
+
+CREATE INDEX IF NOT EXISTS ix_titulo_empresa_centro_custo
+    ON titulo (id_empresa, id_centro_custo)
+    WHERE deleted = FALSE;
+
+ALTER TABLE movimentacao_conta
+    ADD COLUMN IF NOT EXISTS id_empresa INTEGER REFERENCES empresa (id_empresa);
+
+ALTER TABLE movimentacao_conta
+    ADD COLUMN IF NOT EXISTS id_centro_custo INTEGER REFERENCES centro_custo (id_centro_custo);
+
+CREATE INDEX IF NOT EXISTS ix_movimentacao_empresa_centro_custo
+    ON movimentacao_conta (id_empresa, id_centro_custo)
+    WHERE deleted = FALSE;
