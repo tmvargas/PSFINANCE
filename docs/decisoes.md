@@ -266,6 +266,7 @@ unicos por cadastro de empresa e por empresa no cadastro de centro de custo.
 Desativacao de empresa com centro de custo ativo fica bloqueada.
 
 Impacto: a entrega cria tabelas novas via `Base.metadata.create_all` quando a
-aplicacao inicializar em ambiente sem essas tabelas. Nao altera tabelas
-operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
+aplicacao inicializar em ambiente sem essas tabelas e tambem prepara script SQL
+versionado para staging. O script nao foi executado neste heartbeat. Nao altera
+tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
 `main` ou producao.

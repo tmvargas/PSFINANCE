@@ -25,6 +25,9 @@ arquitetural consolidada na `PLA-1221`.
 - `templates/base.html` recebeu os itens `Empresa` e `Centro de Custo` no menu
   `APOIO`.
 - As telas novas seguem o padrao Bootstrap ja usado nos cadastros existentes.
+- `migrations/versions/20260804_pla1235_empresa_centro_custo.sql` prepara o
+  SQL versionado para criacao das tabelas em staging, sem execucao neste
+  heartbeat.
 
 ## Validacao executada
 
@@ -48,4 +51,4 @@ arquitetural consolidada na `PLA-1221`.
 Esta entrega cria tabelas novas quando a aplicacao inicializar em ambiente sem
 essas tabelas, pelo mecanismo atual `Base.metadata.create_all`. Nao altera
 tabelas operacionais existentes, nao faz backfill de dados historicos, nao
-cria migration produtiva, nao altera VPS, `main` ou producao.
+executa migration produtiva, nao altera VPS, `main` ou producao.
