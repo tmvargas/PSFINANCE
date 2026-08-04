@@ -246,3 +246,21 @@ somente `Credor` e `Plano Financeiro` conforme a hierarquia aprovada por
 Thiago para a PLA-1015. As rotas e telas de contas existentes foram preservadas
 fora da navegacao aprovada, sem alterar regras de negocio, banco de dados,
 `main` ou producao.
+
+## 2026-08-04 - PLA-1220 planejamento multiempresa/multicentro do PSFINANCE
+
+Decisao: recomendar para o PSFINANCE um modelo multiempresa/multicentro em
+banco unico por ambiente, com escopo por colunas `id_empresa` e `id_centro` nas
+tabelas de negocio, antes de qualquer uso produtivo com mais de uma empresa ou
+centro.
+
+Motivo: o levantamento da `PLA-1220` confirmou que o sistema Flask atual opera
+como base financeira unica, sem contexto de empresa, centro, tenant ou usuario
+logado. A skill do PSFINANCE ja exige decisao de modelo multicliente antes de
+uso produtivo, e filtro apenas visual nao isola dados no backend.
+
+Impacto: a implementacao deve comecar em staging apos aprovacao funcional sobre
+o significado de centro, compartilhamento de plano/credor, transferencia
+interempresa e tratamento de dados historicos. Nenhuma migration, escrita em
+banco produtivo, copia de dados ou deploy em producao fica autorizado por esta
+decisao documental.
