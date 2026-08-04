@@ -282,3 +282,15 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   vale no backend para novos registros e edicoes.
 - Producao: nenhuma migration ou escrita em producao esta autorizada por esta
   decisao.
+
+## 2026-08-04 - PLA-1290 - Backfill empresa 1 centro 1001 nos lancamentos
+
+- Projeto: PSFINANCE.
+- Decisao: preparar script PostgreSQL para preencher lancamentos historicos
+  ativos de `titulo` e `movimentacao_conta` ainda sem empresa ou centro de
+  custo com a empresa ativa de codigo `1` e o centro de custo ativo de codigo
+  `1001` pertencente a essa empresa.
+- Seguranca: o script aborta quando os cadastros esperados nao existem ou
+  quando existe ambiguidade de empresa/centro ativo.
+- Limite: script preparado para staging; nenhuma escrita em producao, merge em
+  `main`, copia de dados entre ambientes ou deploy produtivo esta autorizado.
