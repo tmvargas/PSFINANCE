@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% if centro and centro.id %}
+  {% set titulo_pagina = "Editar centro de custo" %}
+{% else %}
+  {% set titulo_pagina = "Novo centro de custo" %}
+{% endif %}
+
+{% block title %}{{ titulo_pagina }}{% endblock %}
+
+{% block content %}
+  <h1 class="h4 mb-3">{{ titulo_pagina }}</h1>
+
+  <form method="post" class="border rounded p-3 bg-white">
+    <div class="row g-3 mb-3">
+      <div class="col-md-5">
+        <label class="form-label">Empresa</label>
+        <select name="id_empresa" class="form-select" required>
+          {% set empresa_sel = centro.id_empresa if centro else none %}
+          <option value="">Selecione...</option>
+          {% for empresa in empresas %}
+            <option value="{{ empresa.id }}" {% if empresa_sel == empresa.id %}selected{% endif %}>
+              {{ empresa.label }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label">Código</label>
+        <input
+          type="text"
+          name="codigo"
+          class="form-control"
+          required
+          value="{{ centro.codigo if centro else '' }}"
+        >
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">Nome do centro de custo</label>
+        <input
+          type="text"
+          name="nome"
+          class="form-control"
+          required
+          value="{{ centro.nome if centro else '' }}"
+        >
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">Código externo</label>
+        <input
+          type="text"
+          name="codigo_externo"
+          class="form-control"
+          value="{{ centro.codigo_externo if centro else '' }}"
+        >
+      </div>
+
+      <div class="col-md-8">
+        <label class="form-label">Observação</label>
+        <input
+          type="text"
+          name="observacao"
+          class="form-control"
+          value="{{ centro.observacao if centro else '' }}"
+        >
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-success" {% if not empresas %}disabled{% endif %}>Salvar</button>
+    <a href="{{ url_for('financeiro.listar_centros_custo') }}" class="btn btn-secondary">Cancelar</a>
+
+    {% if not empresas %}
+      <div class="alert alert-warning mt-3 mb-0">
+        Cadastre uma empresa ativa antes de criar centro de custo.
+      </div>
+    {% endif %}
+  </form>
+{% endblock %}

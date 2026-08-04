@@ -17,6 +17,7 @@ from sqlalchemy.orm import joinedload
 from sqlalchemy import func
 
 from . import bp_financeiro
+from .regras_empresa_centro import listar_empresas_centros_ativos, validar_empresa_centro
 from database import SessionLocal
 from models import Baixa, Conta, Credor, Documento, PlanoDeContas, Titulo, TituloAnexo
 
@@ -117,6 +118,8 @@ def listar_titulos():
         session.query(Titulo)
         .options(
             joinedload(Titulo.credor),
+            joinedload(Titulo.empresa),
+            joinedload(Titulo.centro_custo),
             joinedload(Titulo.plano),
             joinedload(Titulo.documento),  # requer relationship via id_doc
         )
@@ -169,6 +172,8 @@ def listar_titulos():
                 "doc_label": doc_label,
                 "nr_documento": t.nr_documento,
                 "credor": t.credor.nome if t.credor else "",
+                "empresa": f"{t.empresa.codigo} - {t.empresa.nome}" if t.empresa else "",
+                "centro_custo": f"{t.centro_custo.codigo} - {t.centro_custo.nome}" if t.centro_custo else "",
                 "plano": f"{t.plano.cod_estrutural} - {t.plano.nome_conta}" if t.plano else "",
                 "emissao": t.emissao.strftime("%d/%m/%Y") if t.emissao else "",
                 "vencimento": t.vencimento.strftime("%d/%m/%Y") if t.vencimento else "",
@@ -232,6 +237,8 @@ def _upsert_titulo(id_titulo: int | None, id_titulo_copia: int | None = None):
             .options(
                 joinedload(Titulo.anexos),
                 joinedload(Titulo.credor),
+                joinedload(Titulo.empresa),
+                joinedload(Titulo.centro_custo),
                 joinedload(Titulo.plano),
                 joinedload(Titulo.documento),
             )
@@ -272,11 +279,14 @@ def _upsert_titulo(id_titulo: int | None, id_titulo_copia: int | None = None):
         .order_by(Documento.tipo_doc)
         .all()
     )
+    empresas_view, centros_custo_view = listar_empresas_centros_ativos(session)
 
     if request.method == "POST":
         id_doc = request.form.get("id_doc", type=int)
         nr_documento = (request.form.get("nr_documento") or "").strip()
         id_credor = request.form.get("id_credor", type=int)
+        id_empresa = request.form.get("id_empresa", type=int)
+        id_centro_custo = request.form.get("id_centro_custo", type=int)
         id_plano = request.form.get("id_plano", type=int)
         valor = _parse_float(request.form.get("valor"))
         emissao = _parse_date(request.form.get("emissao"))
@@ -291,6 +301,8 @@ def _upsert_titulo(id_titulo: int | None, id_titulo_copia: int | None = None):
             erros.append("Número do documento é obrigatório.")
         if not id_credor:
             erros.append("Credor é obrigatório.")
+        erros_empresa_centro, _empresa, _centro = validar_empresa_centro(session, id_empresa, id_centro_custo)
+        erros.extend(erros_empresa_centro)
         if not id_plano:
             erros.append("Plano financeiro é obrigatório.")
         if valor is None or valor <= 0:
@@ -318,6 +330,8 @@ def _upsert_titulo(id_titulo: int | None, id_titulo_copia: int | None = None):
                     id_doc=id_doc,
                     nr_documento=nr_documento,
                     id_credor=id_credor,
+                    id_empresa=id_empresa,
+                    id_centro_custo=id_centro_custo,
                     id_plano=id_plano,
                     valor=valor,
                     emissao=emissao,
@@ -342,6 +356,8 @@ def _upsert_titulo(id_titulo: int | None, id_titulo_copia: int | None = None):
                 titulo_obj.id_doc = id_doc
                 titulo_obj.nr_documento = nr_documento
                 titulo_obj.id_credor = id_credor
+                titulo_obj.id_empresa = id_empresa
+                titulo_obj.id_centro_custo = id_centro_custo
                 titulo_obj.id_plano = id_plano
                 titulo_obj.valor = valor
                 titulo_obj.emissao = emissao
@@ -396,6 +412,8 @@ def _upsert_titulo(id_titulo: int | None, id_titulo_copia: int | None = None):
             "id_doc": getattr(titulo_ref, "id_doc", None),
             "nr_documento": titulo_ref.nr_documento,
             "id_credor": titulo_ref.id_credor,
+            "id_empresa": getattr(titulo_ref, "id_empresa", None),
+            "id_centro_custo": getattr(titulo_ref, "id_centro_custo", None),
             "id_plano": titulo_ref.id_plano,
             "valor": float(titulo_ref.valor or 0),
             "emissao": titulo_ref.emissao,        # date (tem isoformat)
@@ -423,6 +441,8 @@ def _upsert_titulo(id_titulo: int | None, id_titulo_copia: int | None = None):
         titulo=titulo_view,
         anexos=anexos_view,
         credores=credores_view,
+        empresas=empresas_view,
+        centros_custo=centros_custo_view,
         planos=planos_view,
         documentos=documentos_view,
         hoje=hoje_str,

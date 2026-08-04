@@ -70,6 +70,34 @@
 
   <div class="row mb-3">
     <div class="col-md-6">
+      <label class="form-label">Empresa</label>
+      <select name="id_empresa" id="id_empresa" class="form-select" required>
+        <option value="">Selecione...</option>
+        {% for e in empresas %}
+          <option value="{{ e.id }}"
+            {% if titulo and titulo.id_empresa == e.id %}selected{% endif %}>
+            {{ e.label }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Centro de Custo</label>
+      <select name="id_centro_custo" id="id_centro_custo" class="form-select" required>
+        <option value="">Selecione...</option>
+        {% for cc in centros_custo %}
+          <option value="{{ cc.id }}" data-empresa="{{ cc.id_empresa }}"
+            {% if titulo and titulo.id_centro_custo == cc.id %}selected{% endif %}>
+            {{ cc.label }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-md-6">
       <label class="form-label">Plano Financeiro (Grupo 2)</label>
 
       <select name="id_plano" class="form-select" required>
@@ -263,6 +291,29 @@
       if (el.value) el.value = formatAsCents(el.value);
     });
   });
+})();
+</script>
+
+<script>
+(function () {
+  const empresa = document.getElementById("id_empresa");
+  const centro = document.getElementById("id_centro_custo");
+
+  function filtrarCentros() {
+    const idEmpresa = empresa.value || "";
+    Array.from(centro.options).forEach((option) => {
+      if (!option.value) {
+        option.hidden = false;
+        return;
+      }
+      const visivel = !idEmpresa || option.dataset.empresa === idEmpresa;
+      option.hidden = !visivel;
+      if (!visivel && option.selected) centro.value = "";
+    });
+  }
+
+  empresa.addEventListener("change", filtrarCentros);
+  filtrarCentros();
 })();
 </script>
 {% endblock %}
