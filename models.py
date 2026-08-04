@@ -11,7 +11,6 @@ from sqlalchemy import (
     DateTime,
     Boolean,
     ForeignKey,
-    UniqueConstraint,
 )
 from sqlalchemy.orm import declarative_base, relationship
 
@@ -23,57 +22,6 @@ class TimestampMixin:
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     deleted = Column(Boolean, default=False, nullable=False)
-
-
-TIPOS_EMPRESA = ("EMPRESA", "SPE", "SCP")
-
-
-# ---------------------------------------------------------------------
-# EMPRESA
-# ---------------------------------------------------------------------
-class Empresa(Base, TimestampMixin):
-    __tablename__ = "empresa"
-    __table_args__ = (UniqueConstraint("codigo_externo", name="uq_empresa_codigo_externo"),)
-
-    id_empresa = Column(Integer, primary_key=True, autoincrement=True)
-    uuid = Column(String(36), default=lambda: str(uuid.uuid4()), unique=True, nullable=False)
-    nome = Column(String(255), nullable=False)
-    cnpj = Column(String(20), nullable=True)
-    tipo_empresa = Column(String(20), nullable=False, default="EMPRESA")
-    codigo_externo = Column(String(50), nullable=True)
-    ativa = Column(Boolean, default=True, nullable=False)
-
-    centros_custo = relationship("CentroCusto", back_populates="empresa")
-    contas = relationship("Conta", back_populates="empresa")
-    titulos = relationship("Titulo", back_populates="empresa")
-    movimentacoes = relationship("MovimentacaoConta", back_populates="empresa")
-
-    def __repr__(self):
-        return f"<Empresa {self.nome} ({self.tipo_empresa})>"
-
-
-# ---------------------------------------------------------------------
-# CENTRO DE CUSTO
-# ---------------------------------------------------------------------
-class CentroCusto(Base, TimestampMixin):
-    __tablename__ = "centro_custo"
-    __table_args__ = (UniqueConstraint("id_empresa", "codigo", name="uq_centro_custo_empresa_codigo"),)
-
-    id_centro_custo = Column(Integer, primary_key=True, autoincrement=True)
-    uuid = Column(String(36), default=lambda: str(uuid.uuid4()), unique=True, nullable=False)
-    id_empresa = Column(Integer, ForeignKey("empresa.id_empresa"), nullable=False)
-    codigo = Column(String(50), nullable=False)
-    nome = Column(String(255), nullable=False)
-    codigo_externo = Column(String(50), nullable=True)
-    ativo = Column(Boolean, default=True, nullable=False)
-
-    empresa = relationship("Empresa", back_populates="centros_custo")
-    contas = relationship("Conta", back_populates="centro_custo")
-    titulos = relationship("Titulo", back_populates="centro_custo")
-    movimentacoes = relationship("MovimentacaoConta", back_populates="centro_custo")
-
-    def __repr__(self):
-        return f"<CentroCusto {self.codigo} - {self.nome}>"
 
 
 # ---------------------------------------------------------------------
@@ -147,8 +95,6 @@ class Conta(Base, TimestampMixin):
     uuid = Column(String(36), default=lambda: str(uuid.uuid4()), unique=True, nullable=False)
 
     descricao = Column(String(255), nullable=False)
-    id_empresa = Column(Integer, ForeignKey("empresa.id_empresa"), nullable=True)
-    id_centro_custo = Column(Integer, ForeignKey("centro_custo.id_centro_custo"), nullable=True)
     id_banco = Column(String(50), nullable=True)
     # 'corrente', 'aplicacao', 'caixa'
     tipo = Column(String(20), nullable=False)
@@ -157,8 +103,6 @@ class Conta(Base, TimestampMixin):
     data_saldo_inicial = Column(Date, nullable=True)
 
     baixas = relationship("Baixa", back_populates="conta")
-    empresa = relationship("Empresa", back_populates="contas")
-    centro_custo = relationship("CentroCusto", back_populates="contas")
 
     movimentos_origem = relationship(
         "MovimentacaoConta",
@@ -241,8 +185,6 @@ class Titulo(Base, TimestampMixin):
 
     nr_documento = Column(String(50), nullable=False)
 
-    id_empresa = Column(Integer, ForeignKey("empresa.id_empresa"), nullable=True)
-    id_centro_custo = Column(Integer, ForeignKey("centro_custo.id_centro_custo"), nullable=True)
     id_credor = Column(Integer, ForeignKey("credor.id_credor"), nullable=False)
     id_plano = Column(Integer, ForeignKey("plano_de_contas.id_plano"), nullable=False)
 
@@ -253,8 +195,6 @@ class Titulo(Base, TimestampMixin):
     observacao = Column(String(1000), nullable=True)
 
     documento = relationship("Documento", back_populates="titulos")
-    empresa = relationship("Empresa", back_populates="titulos")
-    centro_custo = relationship("CentroCusto", back_populates="titulos")
     credor = relationship("Credor", back_populates="titulos")
     plano = relationship("PlanoDeContas", back_populates="titulos")
     baixas = relationship("Baixa", back_populates="titulo")
@@ -344,8 +284,6 @@ class MovimentacaoConta(Base, TimestampMixin):
     descricao = Column(String, nullable=True)
     valor = Column(Numeric(15, 2), nullable=False)
 
-    id_empresa = Column(Integer, ForeignKey("empresa.id_empresa"), nullable=True)
-    id_centro_custo = Column(Integer, ForeignKey("centro_custo.id_centro_custo"), nullable=True)
     id_conta_origem = Column(Integer, ForeignKey("conta.id_conta"), nullable=True)
     id_conta_destino = Column(Integer, ForeignKey("conta.id_conta"), nullable=True)
 
@@ -365,8 +303,6 @@ class MovimentacaoConta(Base, TimestampMixin):
     plano = relationship("PlanoDeContas", back_populates="movimentos")
 
     documento = relationship("Documento", back_populates="movimentacoes")
-    empresa = relationship("Empresa", back_populates="movimentacoes")
-    centro_custo = relationship("CentroCusto", back_populates="movimentacoes")
 
     conciliado = Column(Boolean, default=False, nullable=False)
 
