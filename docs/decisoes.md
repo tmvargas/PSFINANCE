@@ -251,12 +251,12 @@ fora da navegacao aprovada, sem alterar regras de negocio, banco de dados,
 
 Decisao: consolidar a recomendacao da `PLA-1220` para evoluir o PSFINANCE em
 base unica por ambiente, com isolamento obrigatorio por `id_empresa` e
-`id_centro`, antes de qualquer uso produtivo multiempresa/multicentro.
+`id_centro_custo`, antes de qualquer uso produtivo multiempresa/multicentro.
 
 Motivo: o modelo atual do PSFINANCE e global por tabela e as rotas consultam
 contas, titulos, baixas, movimentacoes, plano financeiro, credores e anexos sem
-escopo de empresa ou centro. Implementar apenas filtros visuais criaria risco
-de mistura de dados financeiros.
+escopo de empresa ou centro de custo. Implementar apenas filtros visuais criaria
+risco de mistura de dados financeiros.
 
 Impacto: a implementacao futura deve ocorrer em subtarefa propria, com migration
 versionada, backfill controlado dos dados existentes em staging, filtros
@@ -268,9 +268,9 @@ ambiente, alteracoes na VPS, `main` ou producao nesta etapa.
 ## 2026-08-04 - PLA-1220 planejamento multiempresa/multicentro do PSFINANCE
 
 Decisao: recomendar para o PSFINANCE um modelo multiempresa/multicentro em
-banco unico por ambiente, com escopo por colunas `id_empresa` e `id_centro` nas
-tabelas de negocio, antes de qualquer uso produtivo com mais de uma empresa ou
-centro.
+banco unico por ambiente, com escopo por colunas `id_empresa` e
+`id_centro_custo` nas tabelas de negocio, antes de qualquer uso produtivo com
+mais de uma empresa ou centro de custo.
 
 Motivo: o levantamento da `PLA-1220` confirmou que o sistema Flask atual opera
 como base financeira unica, sem contexto de empresa, centro, tenant ou usuario
@@ -282,3 +282,11 @@ o significado de centro, compartilhamento de plano/credor, transferencia
 interempresa e tratamento de dados historicos. Nenhuma migration, escrita em
 banco produtivo, copia de dados ou deploy em producao fica autorizado por esta
 decisao documental.
+
+Complemento de revisao executiva: o termo funcional recomendado passa a ser
+`Centro de Custo`, nao `centro` generico. O menu `APOIO` deve receber os
+submenus `EMPRESA` e `CENTRO DE CUSTO`. O cadastro `EMPRESA` deve contemplar
+classificacao `EMPRESA`, `SPE` e `SCP`; o cadastro `CENTRO DE CUSTO` deve ser
+vinculado obrigatoriamente a uma empresa. A nomenclatura tecnica sugerida para
+banco e codigo e `centro_custo`/`id_centro_custo`, preservando clareza funcional
+e evitando mistura com obra, filial ou unidade operacional futura.

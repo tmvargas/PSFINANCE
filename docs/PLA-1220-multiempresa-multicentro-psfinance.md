@@ -45,7 +45,8 @@ financeiras atuais e governanca de producao.
 ## Problema tecnico atual
 
 O PSFINANCE esta funcional para uma base financeira unica. Se mais de uma
-empresa ou centro usar a mesma base sem mudanca estrutural, havera mistura de:
+empresa ou centro de custo usar a mesma base sem mudanca estrutural, havera
+mistura de:
 
 - contas bancarias e caixas;
 - credores;
@@ -64,6 +65,16 @@ Essa mistura afeta confidencialidade, calculo de saldo, conciliacao e auditoria.
 ### Empresa
 
 Unidade juridica ou operacional que possui dados financeiros proprios.
+O cadastro deve permitir classificar a empresa para atender o objetivo da
+`PLA-1179`:
+
+- `EMPRESA`: empresa operacional comum.
+- `SPE`: Sociedade de Proposito Especifico.
+- `SCP`: Sociedade em Conta de Participacao.
+
+Essa classificacao deve ser atributo do cadastro de empresa, nao uma tabela ou
+menu separado, para preservar uma unica regra de escopo financeiro por
+`id_empresa`.
 
 Proposta de tabela:
 
@@ -73,6 +84,7 @@ empresa
 - uuid
 - nome
 - cnpj
+- tipo_empresa
 - codigo_externo
 - ativa
 - created_at
@@ -80,22 +92,26 @@ empresa
 - deleted
 ```
 
-### Centro
+### Centro de custo
 
-Unidade de agrupamento gerencial dentro de uma empresa. Pode representar centro
-de custo, obra, filial, empreendimento ou unidade de resultado, conforme regra
-funcional a ser confirmada.
+Decisao proposta: usar o termo funcional `centro de custo`, em vez de `centro`
+generico, porque a demanda original solicita explicitamente o submenu
+`APOIO > CENTRO DE CUSTO` e porque titulos e movimentacoes financeiras devem
+apropriar valores por centro de custo em logica semelhante ao Sienge.
+
+O modelo fisico pode usar nome tecnico curto, como `centro_custo`, mas a tela,
+menu, rotas e documentacao operacional devem apresentar `Centro de Custo`.
 
 Proposta de tabela:
 
 ```text
-centro
-- id_centro
+centro_custo
+- id_centro_custo
 - uuid
 - id_empresa
 - codigo
 - nome
-- tipo
+- codigo_externo
 - ativo
 - created_at
 - updated_at
@@ -105,21 +121,21 @@ centro
 ### Contexto operacional
 
 O contexto ativo da operacao deve conter `id_empresa` e, quando aplicavel,
-`id_centro`. Esse contexto deve ser escolhido pelo usuario ou definido por
-permissao. Ate existir autenticacao, o contexto nao deve ser inferido de forma
-oculta.
+`id_centro_custo`. Esse contexto deve ser escolhido pelo usuario ou definido
+por permissao. Ate existir autenticacao, o contexto nao deve ser inferido de
+forma oculta.
 
 ## Modelo recomendado
 
 Recomendacao tecnica do GDSIS: usar banco unico por ambiente com colunas de
-escopo (`id_empresa` e `id_centro`) nas tabelas de negocio.
+escopo (`id_empresa` e `id_centro_custo`) nas tabelas de negocio.
 
 Motivos:
 
 - mantem a arquitetura atual Flask + SQLAlchemy;
 - evita criar um banco por cliente antes de existir governanca operacional
   madura;
-- facilita relatorio consolidado por empresa ou centro;
+- facilita relatorio consolidado por empresa ou centro de custo;
 - permite indices, constraints e validacoes de vinculo;
 - reduz custo operacional na VPS Sistemas;
 - preserva o padrao ja planejado de banco separado por ambiente:
@@ -139,20 +155,20 @@ Alternativas avaliadas:
 ### Tabelas mestres
 
 - `empresa`: nova tabela obrigatoria.
-- `centro`: nova tabela vinculada a `empresa`.
+- `centro_custo`: nova tabela vinculada a `empresa`.
 - `documento`: pode continuar global inicialmente, salvo decisao de variacao por
   empresa.
-- `plano_de_contas`: recomendado vincular a `empresa`; `id_centro` nao deve ser
-  obrigatorio no plano, porque o plano e estrutura contabil/financeira.
+- `plano_de_contas`: recomendado vincular a `empresa`; `id_centro_custo` nao
+  deve ser obrigatorio no plano, porque o plano e estrutura contabil/financeira.
 - `credor`: recomendado vincular a `empresa`; credor global so deve existir se
   houver regra explicita de compartilhamento.
-- `conta`: deve vincular a `empresa` e, opcionalmente, a `centro`.
+- `conta`: deve vincular a `empresa` e, opcionalmente, a `centro_custo`.
 
 ### Tabelas transacionais
 
-- `titulo`: deve vincular a `empresa` e, opcionalmente, a `centro`.
+- `titulo`: deve vincular a `empresa` e, opcionalmente, a `centro_custo`.
 - `baixa`: deve herdar coerencia de empresa e centro pelo titulo e pela conta.
-- `movimentacao_conta`: deve vincular a `empresa`; `id_centro` deve ser
+- `movimentacao_conta`: deve vincular a `empresa`; `id_centro_custo` deve ser
   obrigatorio para entrada/saida se o centro for criterio de apropriacao, e
   opcional ou derivado para transferencia conforme decisao funcional.
 - `titulo_anexo`: deve permanecer vinculado ao titulo; o caminho fisico deve
@@ -166,7 +182,7 @@ Alternativas avaliadas:
 - Uma movimentacao deve usar conta e plano da mesma empresa.
 - Uma transferencia deve ocorrer entre contas da mesma empresa, salvo regra
   explicita de transferencia interempresa.
-- O centro escolhido deve pertencer a empresa selecionada.
+- O centro de custo escolhido deve pertencer a empresa selecionada.
 - Consultas de listagem e dashboard devem sempre filtrar pelo contexto ativo.
 - Operacoes sem contexto valido devem falhar de forma explicita, nao cair em
   base global.
@@ -177,10 +193,15 @@ Alternativas avaliadas:
 
 Arquivos provaveis:
 
-- `models.py` - Incluir modelos `Empresa` e `Centro` e colunas de escopo nas
-  entidades financeiras.
+- `models.py` - Incluir modelos `Empresa` e `CentroCusto` e colunas de escopo
+  nas entidades financeiras.
 - `database.py` - Preservar selecao de banco por ambiente, sem expor URL.
-- `financeiro/routes_home.py` - Filtrar dashboard por empresa/centro ativo.
+- `financeiro/routes_empresa.py` - Criar cadastro de empresas no grupo
+  `APOIO > EMPRESA`, contemplando tipos `EMPRESA`, `SPE` e `SCP`.
+- `financeiro/routes_centro_custo.py` - Criar cadastro de centros de custo no
+  grupo `APOIO > CENTRO DE CUSTO`, vinculado obrigatoriamente a uma empresa.
+- `financeiro/routes_home.py` - Filtrar dashboard por empresa/centro de custo
+  ativo.
 - `financeiro/routes_contas.py` - Filtrar e validar contas, movimentacoes e
   transferencias por contexto.
 - `financeiro/routes_titulos.py` - Filtrar e validar titulos, baixas, credores,
@@ -192,8 +213,14 @@ Arquivos provaveis:
 
 Arquivos provaveis:
 
-- `templates/base.html` - Incluir seletor de empresa/centro quando a regra de
-  autenticacao/contexto for aprovada.
+- `templates/base.html` - Incluir no menu `APOIO` os submenus `EMPRESA` e
+  `CENTRO DE CUSTO`, alem do seletor de empresa/centro de custo quando a regra
+  de autenticacao/contexto for aprovada.
+- `templates/empresa_list.html` e `templates/empresa_form.html` - Criar
+  listagem e formulario de empresas, com classificacao `EMPRESA`, `SPE` ou
+  `SCP`.
+- `templates/centro_custo_list.html` e `templates/centro_custo_form.html` -
+  Criar listagem e formulario de centros de custo por empresa.
 - `templates/dashboard_financeiro.html` - Exibir saldos filtrados pelo contexto.
 - `templates/contas_list.html` e `templates/conta_form.html` - Associar contas
   ao contexto.
@@ -201,7 +228,7 @@ Arquivos provaveis:
   titulos ao contexto.
 - `templates/movimentacao_form.html` - Exigir centro quando aplicavel.
 - `templates/extrato_conta.html` e telas de analise - Garantir que filtros e
-  totais respeitem empresa/centro.
+  totais respeitem empresa/centro de custo.
 
 ### Banco
 
@@ -209,12 +236,20 @@ Alteracoes futuras exigirao migration ou script transacional, com backup de
 staging antes da execucao. Producao exigira Pacote de Producao e autorizacao
 expressa.
 
+Arquivos provaveis:
+
+- `migrations/versions/*_empresa_centro_custo.py` ou script SQL versionado -
+  Criar tabelas `empresa` e `centro_custo`, colunas `id_empresa` e
+  `id_centro_custo`, indices e constraints.
+- `scripts/migrate_sqlite_to_postgres.py` - Revisar somente se houver backfill
+  de dados historicos durante migracao ou equalizacao controlada em staging.
+
 ## Plano de execucao recomendado
 
 ### Fase 1 - Decisao funcional e modelo
 
-1. Confirmar se "centro" significa centro de custo, obra, filial,
-   empreendimento ou outra unidade.
+1. Confirmar `Centro de Custo` como nome funcional oficial da estrutura de
+   apropriacao financeira.
 2. Confirmar se um usuario podera acessar uma ou varias empresas.
 3. Confirmar se o plano financeiro e por empresa ou compartilhado.
 4. Confirmar se credores podem ser compartilhados entre empresas.
@@ -224,10 +259,10 @@ Resultado esperado: decisao funcional registrada antes de migration.
 
 ### Fase 2 - Preparacao tecnica segura
 
-1. Criar migration de staging para tabelas `empresa` e `centro`.
+1. Criar migration de staging para tabelas `empresa` e `centro_custo`.
 2. Inserir uma empresa inicial de configuracao para enquadrar os dados atuais.
 3. Popular `id_empresa` nos dados existentes de staging.
-4. Definir regras para `id_centro` nos dados historicos:
+4. Definir regras para `id_centro_custo` nos dados historicos:
    - nulo permitido ate classificacao manual; ou
    - centro padrao de implantacao, se Thiago aprovar.
 5. Criar indices e constraints de integridade.
@@ -248,17 +283,18 @@ contexto ativo.
 
 ### Fase 4 - Interface operacional
 
-1. Incluir seletor de empresa/centro no shell da aplicacao.
+1. Incluir seletor de empresa/centro de custo no shell da aplicacao.
 2. Criar telas minimas de cadastro/gestao de empresa e centro.
 3. Ajustar formularios de contas, titulos e movimentacoes.
 4. Exibir contexto ativo em telas financeiras criticas.
 
-Resultado esperado: usuario opera conscientemente dentro de empresa/centro.
+Resultado esperado: usuario opera conscientemente dentro de empresa/centro de
+custo.
 
 ### Fase 5 - QA e staging
 
 1. Testar dashboard por empresa.
-2. Testar contas e saldos por empresa/centro.
+2. Testar contas e saldos por empresa/centro de custo.
 3. Testar titulos, baixas e saldo aberto sem cruzamento entre empresas.
 4. Testar movimentacao de entrada, saida e transferencia.
 5. Testar anexos de titulos.
@@ -283,7 +319,7 @@ Resultado esperado: evidencia objetiva de isolamento e preservacao dos dados.
 
 - Ausencia de autenticacao/contexto pode levar a isolamento apenas parcial se
   for implementado diretamente sem decisao funcional.
-- Dados historicos sem centro exigem decisao de classificacao.
+- Dados historicos sem centro de custo exigem decisao de classificacao.
 - Credores e plano financeiro podem ser compartilhaveis ou especificos por
   empresa; aplicar uma regra errada gera retrabalho e risco de duplicidade.
 - Constraints compostas exigem cuidado com chaves existentes e PostgreSQL.
@@ -296,15 +332,16 @@ Nao ha bloqueio para o planejamento.
 
 Ha bloqueio funcional para iniciar implementacao/migration: Thiago ou CEO deve
 confirmar as decisoes da Fase 1, principalmente o significado de centro, regras
-de compartilhamento e tratamento dos dados historicos sem centro.
+de compartilhamento e tratamento dos dados historicos sem centro de custo.
 
 ## Recomendacao do GDSIS
 
 Avancar com o modelo de banco unico por ambiente e escopo por colunas
-`id_empresa` e `id_centro`, comecando em staging por uma empresa inicial que
-preserve os dados existentes. Nao executar migration em producao nem copiar
-dados de staging para producao sem Pacote de Producao e autorizacao expressa de
-Thiago.
+`id_empresa` e `id_centro_custo`, comecando em staging por uma empresa inicial
+que preserve os dados existentes. Os submenus `APOIO > EMPRESA` e
+`APOIO > CENTRO DE CUSTO` devem ser a primeira interface administrativa dessa
+estrutura. Nao executar migration em producao nem copiar dados de staging para
+producao sem Pacote de Producao e autorizacao expressa de Thiago.
 
 ## Proxima acao
 
