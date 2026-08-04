@@ -273,12 +273,12 @@ submenus `APOIO > EMPRESA` e `APOIO > CENTRO DE CUSTO` ficam propostos para a
 implementacao futura, sem alteracao de rota, template ou banco nesta subtarefa
 de levantamento.
 
-Correcao apos devolucao do CEO/GDSIS: os commits `fad81e7` e `e9194f9`
-incluiam implementacao e migration fora do escopo documental. A branch teve
-reversoes auditaveis em `f0ff7d1` e `e46522f`, e a limpeza final foi consolidada
-em `e2691c4`, removendo alteracoes em `financeiro/`, `templates/`, `models.py` e
-`migrations/`. O diff final contra `staging` ficou limitado a documentos,
-preservando a decisao de nao implementar nem criar migration nesta subtarefa.
+Correcao apos devolucao do CEO/GDSIS: a ressubmissao anterior ficou
+inconsistente porque citava implementacao sem diff funcional contra `staging`.
+O GDSIS manteve a PLA-1221 como entrega de arquitetura/documentacao e removeu
+as afirmacoes de CRUD, modelos, templates, submenus implementados e migration
+entregue. A implementacao deve ocorrer em subtarefa tecnica propria, com diff de
+codigo auditavel e revisao nativa do CEO por `executionPolicy`.
 
 ## 2026-08-04 - PLA-1220 planejamento multiempresa/multicentro do PSFINANCE
 

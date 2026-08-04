@@ -31,8 +31,9 @@ centros, titulos, contas e anexos.
   e `id_centro_custo` como implementacao minima.
 - A skill de VPS Sistemas registra bancos separados por sistema e por ambiente,
   nao por empresa ou centro de custo.
-- A governanca proibe criar banco, tabela, usuario ou migration nesta fase sem
-  autorizacao.
+- Esta branch consolida arquitetura e plano de execucao. Nao entrega CRUD,
+  rotas, templates, migration executavel, alteracao de banco, VPS, `main` ou
+  producao.
 
 ## Estado atual do modelo
 
@@ -247,9 +248,9 @@ Atendimento documental nesta branch:
   `SCP`.
 - `CentroCusto` deve ser obrigatoriamente vinculado a uma empresa ativa.
 - `APOIO` deve receber os submenus `Empresa` e `Centro de Custo` no menu aberto
-  e no flyout compacto quando a implementacao for aprovada.
+  e no flyout compacto quando a implementacao for autorizada.
 - Nenhuma rota, modelo, template, migration, banco, VPS, `main` ou producao foi
-  alterado nesta subtarefa de levantamento.
+  alterado nesta subtarefa de arquitetura.
 
 ## Validacao executada neste heartbeat
 
@@ -264,25 +265,37 @@ Atendimento documental nesta branch:
     `staging`.
 - revisao de `git diff --name-status staging..HEAD`
 
-Resultado:
+Resultado antes desta correcao:
 
-- Validado que a entrega desta subtarefa e documental.
-- A implementacao parcial gerada fora do escopo foi removida do workspace antes
-  do reenvio para revisao.
-- O diff final contra `staging` ficou restrito a documentacao:
-  - `docs/PLA-1220-multiempresa-multicentro-psfinance.md`;
-  - `docs/PLA-1221-multiempresa-multicentro-psfinance.md`;
-  - `docs/arquitetura.md`;
-  - `docs/decisoes.md`.
-- Nenhum script SQL foi criado ou executado contra banco de staging ou producao.
-- Nenhuma rota, template, modelo, VPS, `main` ou producao foi alterado.
-- A API do Paperclip retornou `Unauthorized` ao tentar consultar/comentar a
-  issue com as variaveis de execucao disponiveis; isso foi tratado como falha
-  administrativa, sem interromper o trabalho tecnico seguro.
+- O diff final contra `staging` ficou restrito a documentacao, apesar da
+  ressubmissao citar implementacao.
+- A revisao executiva devolveu a PLA-1221 por inconsistencia entre resumo, PR
+  e evidencias.
+
+## Correcao aplicada apos devolucao por inconsistencia
+
+Escopo definido pelo GDSIS apos a devolucao: a PLA-1221 fica limitada a
+arquitetura/documentacao. A ressubmissao anterior citava arquivos funcionais que
+nao existiam no diff liquido contra `staging`; por isso, as afirmacoes de CRUD,
+modelos, templates, submenus implementados e migration entregue foram removidas
+da entrega.
+
+Arquivos funcionais nao entregues nesta branch:
+
+- `models.py`;
+- `financeiro/routes_empresa.py`;
+- `financeiro/routes_centro_custo.py`;
+- `financeiro/__init__.py`;
+- `templates/base.html`;
+- `templates/empresa_list.html`;
+- `templates/empresa_form.html`;
+- `templates/centro_custo_list.html`;
+- `templates/centro_custo_form.html`;
+- `migrations/versions/*_empresa_centro_custo.sql`.
 
 ## Bloqueios e decisoes pendentes
 
-Bloqueio funcional:
+Pendente funcional:
 
 - falta aprovacao explicita do modelo de isolamento multiempresa/multicentro,
   incluindo `Centro de Custo` como termo funcional oficial.
@@ -315,6 +328,6 @@ obrigatorio por `id_empresa` e `id_centro_custo`, criar primeiro os cadastros
 interempresa nesta fase e executar a implementacao em subtarefa tecnica propria
 com revisao nativa do CEO por `executionPolicy`.
 
-Nao recomendo criar migration ou alterar codigo operacional nesta PLA-1221 antes
-da decisao funcional, porque o risco de mistura ou classificacao incorreta de
-dados financeiros e alto.
+Nao recomendo promover esta PLA-1221 como entrega funcional, porque ela e
+documental. A implementacao deve ser feita em nova subtarefa tecnica com diff de
+codigo, testes HTTP e evidencia visual das telas.
