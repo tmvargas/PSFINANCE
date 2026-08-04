@@ -247,6 +247,24 @@ Thiago para a PLA-1015. As rotas e telas de contas existentes foram preservadas
 fora da navegacao aprovada, sem alterar regras de negocio, banco de dados,
 `main` ou producao.
 
+## 2026-08-04 - PLA-1221 arquitetura multiempresa/multicentro do PSFINANCE
+
+Decisao: consolidar a recomendacao da `PLA-1220` para evoluir o PSFINANCE em
+base unica por ambiente, com isolamento obrigatorio por `id_empresa` e
+`id_centro`, antes de qualquer uso produtivo multiempresa/multicentro.
+
+Motivo: o modelo atual do PSFINANCE e global por tabela e as rotas consultam
+contas, titulos, baixas, movimentacoes, plano financeiro, credores e anexos sem
+escopo de empresa ou centro. Implementar apenas filtros visuais criaria risco
+de mistura de dados financeiros.
+
+Impacto: a implementacao futura deve ocorrer em subtarefa propria, com migration
+versionada, backfill controlado dos dados existentes em staging, filtros
+obrigatorios no backend e validacao na porta `5001`. `tenant_id` fica como
+camada futura/opcional se Thiago confirmar necessidade de multiplos tenants na
+mesma base. Nao foram criadas tabelas, migrations, bancos, variaveis de
+ambiente, alteracoes na VPS, `main` ou producao nesta etapa.
+
 ## 2026-08-04 - PLA-1220 planejamento multiempresa/multicentro do PSFINANCE
 
 Decisao: recomendar para o PSFINANCE um modelo multiempresa/multicentro em
