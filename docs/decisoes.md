@@ -265,6 +265,14 @@ camada futura/opcional se Thiago confirmar necessidade de multiplos tenants na
 mesma base. Nao foram criadas tabelas, migrations, bancos, variaveis de
 ambiente, alteracoes na VPS, `main` ou producao nesta etapa.
 
+Complemento de revisao executiva: `Centro de Custo` passa a ser o nome
+funcional oficial. A nomenclatura tecnica proposta passa a ser `centro_custo` e
+`id_centro_custo`. O cadastro `Empresa` deve aceitar somente `EMPRESA`, `SPE` e
+`SCP`; o cadastro `Centro de Custo` deve exigir vinculo com empresa ativa. Os
+submenus `APOIO > EMPRESA` e `APOIO > CENTRO DE CUSTO` ficam propostos para a
+implementacao futura, sem alteracao de rota, template ou banco nesta subtarefa
+de levantamento.
+
 ## 2026-08-04 - PLA-1220 planejamento multiempresa/multicentro do PSFINANCE
 
 Decisao: recomendar para o PSFINANCE um modelo multiempresa/multicentro em

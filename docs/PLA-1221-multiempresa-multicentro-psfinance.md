@@ -195,15 +195,16 @@ titulos, baixas ou movimentacoes vinculadas. O padrao recomendado e manter
 
 ## Arquivos e camadas impactadas na implementacao futura
 
-- `models.py`: criacao de modelos de empresa e centro de custo; inclusao de
-  chaves estrangeiras e constraints de escopo.
+- `models.py`: criacao dos modelos `Empresa` e `CentroCusto`; inclusao inicial
+  de `id_empresa` e `id_centro_custo` em `conta`, `titulo` e
+  `movimentacao_conta`.
 - `financeiro/routes_empresa.py`: rotas de listagem, criacao, edicao,
   inativacao e validacao do cadastro `APOIO > EMPRESA`, incluindo tipos
   `EMPRESA`, `SPE` e `SCP`.
 - `financeiro/routes_centro_custo.py`: rotas de listagem, criacao, edicao,
   inativacao e validacao do cadastro `APOIO > CENTRO DE CUSTO`.
-- `financeiro/__init__.py`: registrar os novos blueprints de apoio, mantendo
-  o padrao atual de rotas financeiras.
+- `financeiro/__init__.py`: registro das novas rotas de apoio, mantendo
+  o padrao atual do blueprint financeiro.
 - `database.py`: sem mudanca obrigatoria prevista para conexao; migrations
   devem ser versionadas fora do `create_all`.
 - `financeiro/routes_home.py`: filtro de dashboard por escopo.
@@ -215,8 +216,8 @@ titulos, baixas ou movimentacoes vinculadas. O padrao recomendado e manter
   empresas ou por empresa.
 - `financeiro/routes_plano.py`: regra de compartilhamento do plano financeiro.
 - `templates/*.html`: seletores e exibicao do escopo quando aplicavel.
-- `templates/base.html`: incluir os submenus `EMPRESA` e `CENTRO DE CUSTO`
-  abaixo de `APOIO`.
+- `templates/base.html`: inclusao dos submenus `Empresa` e `Centro de Custo`
+  abaixo de `APOIO`, no menu aberto e no flyout compacto.
 - `templates/empresa_list.html`: listagem do cadastro de empresas.
 - `templates/empresa_form.html`: formulario de empresa com tipo `EMPRESA`,
   `SPE` ou `SCP`.
@@ -225,24 +226,45 @@ titulos, baixas ou movimentacoes vinculadas. O padrao recomendado e manter
   a empresa.
 - `static/css/*` ou bloco CSS existente em `templates/base.html`: ajuste visual
   dos novos itens de menu e formularios, conforme o padrao atual do sistema.
-- `migrations/versions/*_empresa_centro_custo.py` ou script SQL versionado:
-  criar tabelas e colunas de escopo com backfill controlado em staging.
+- `migrations/versions/*_empresa_centro_custo.sql` ou script SQL versionado:
+  criar tabelas e colunas de escopo em staging, sem execucao automatica e com
+  backfill ainda dependente de aprovacao funcional.
 - `scripts/migrate_sqlite_to_postgres.py`: revisar se houver backfill de dados
   existentes para PostgreSQL.
+
+## Correcao aplicada apos revisao executiva
+
+A revisao do CEO solicitou consolidar explicitamente `Centro de Custo`,
+`id_centro_custo`, os submenus futuros `APOIO > EMPRESA` e
+`APOIO > CENTRO DE CUSTO`, alem dos tipos `EMPRESA`, `SPE` e `SCP`.
+
+Atendimento documental nesta branch:
+
+- `Centro de Custo` fica como nome funcional oficial no menu e nas telas.
+- `centro_custo` e `id_centro_custo` ficam como nomenclatura tecnica proposta
+  para modelo e migration futura.
+- `Empresa` deve possuir classificacao obrigatoria entre `EMPRESA`, `SPE` e
+  `SCP`.
+- `CentroCusto` deve ser obrigatoriamente vinculado a uma empresa ativa.
+- `APOIO` deve receber os submenus `Empresa` e `Centro de Custo` no menu aberto
+  e no flyout compacto quando a implementacao for aprovada.
+- Nenhuma rota, modelo, template, migration, banco, VPS, `main` ou producao foi
+  alterado nesta subtarefa de levantamento.
 
 ## Validacao executada neste heartbeat
 
 - `git fetch origin`
 - `git ls-remote --heads origin staging main`
 - `git status --short --branch`
-- `python3 -m compileall src financeiro models.py database.py`
+- revisao de `git diff --name-only`
 
 Resultado:
 
-- Sintaxe Python validada com `python3`.
-- A tentativa com `python` falhou porque o binario nao existe no ambiente local;
-  a validacao equivalente foi executada com `python3`.
-- Nenhuma rota, tabela, migration, banco, VPS, `main` ou producao foi alterado.
+- Validado que a entrega desta subtarefa e documental.
+- A implementacao parcial gerada fora do escopo foi removida do workspace antes
+  do reenvio para revisao.
+- Nenhum script SQL foi criado ou executado contra banco de staging ou producao.
+- Nenhuma rota, template, modelo, VPS, `main` ou producao foi alterado.
 - A API do Paperclip retornou `Unauthorized` ao tentar consultar/comentar a
   issue com as variaveis de execucao disponiveis; isso foi tratado como falha
   administrativa, sem interromper o trabalho tecnico seguro.

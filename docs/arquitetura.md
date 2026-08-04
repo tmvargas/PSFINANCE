@@ -27,7 +27,7 @@ documentada em `docs/PLA-1221-multiempresa-multicentro-psfinance.md`.
 Diretriz tecnica:
 
 - manter uma base por ambiente nesta fase;
-- isolar registros operacionais por `id_empresa` e `id_centro`;
+- isolar registros operacionais por `id_empresa` e `id_centro_custo`;
 - aplicar filtro de escopo em todas as consultas operacionais;
 - validar compatibilidade de escopo antes de baixas, movimentacoes,
   transferencias, anexos e relatorios;
