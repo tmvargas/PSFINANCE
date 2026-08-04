@@ -246,3 +246,62 @@ somente `Credor` e `Plano Financeiro` conforme a hierarquia aprovada por
 Thiago para a PLA-1015. As rotas e telas de contas existentes foram preservadas
 fora da navegacao aprovada, sem alterar regras de negocio, banco de dados,
 `main` ou producao.
+
+## 2026-08-04 - PLA-1221 arquitetura multiempresa/multicentro do PSFINANCE
+
+Decisao: consolidar a recomendacao da `PLA-1220` para evoluir o PSFINANCE em
+base unica por ambiente, com isolamento obrigatorio por `id_empresa` e
+`id_centro_custo`, antes de qualquer uso produtivo multiempresa/multicentro.
+
+Motivo: o modelo atual do PSFINANCE e global por tabela e as rotas consultam
+contas, titulos, baixas, movimentacoes, plano financeiro, credores e anexos sem
+escopo de empresa ou centro de custo. Implementar apenas filtros visuais criaria
+risco de mistura de dados financeiros.
+
+Impacto: a implementacao futura deve ocorrer em subtarefa propria, com migration
+versionada, backfill controlado dos dados existentes em staging, filtros
+obrigatorios no backend e validacao na porta `5001`. `tenant_id` fica como
+camada futura/opcional se Thiago confirmar necessidade de multiplos tenants na
+mesma base. Nao foram criadas tabelas, migrations, bancos, variaveis de
+ambiente, alteracoes na VPS, `main` ou producao nesta etapa.
+
+Complemento de revisao executiva: `Centro de Custo` passa a ser o nome
+funcional oficial. A nomenclatura tecnica proposta passa a ser `centro_custo` e
+`id_centro_custo`. O cadastro `Empresa` deve aceitar somente `EMPRESA`, `SPE` e
+`SCP`; o cadastro `Centro de Custo` deve exigir vinculo com empresa ativa. Os
+submenus `APOIO > EMPRESA` e `APOIO > CENTRO DE CUSTO` ficam propostos para a
+implementacao futura, sem alteracao de rota, template ou banco nesta subtarefa
+de levantamento.
+
+Correcao apos devolucao do CEO/GDSIS: os commits `fad81e7` e `e9194f9`
+incluiam implementacao e migration fora do escopo documental. A branch teve
+reversoes auditaveis em `f0ff7d1` e `e46522f`, e a limpeza final foi consolidada
+em `e2691c4`, removendo alteracoes em `financeiro/`, `templates/`, `models.py` e
+`migrations/`. O diff final contra `staging` ficou limitado a documentos,
+preservando a decisao de nao implementar nem criar migration nesta subtarefa.
+
+## 2026-08-04 - PLA-1220 planejamento multiempresa/multicentro do PSFINANCE
+
+Decisao: recomendar para o PSFINANCE um modelo multiempresa/multicentro em
+banco unico por ambiente, com escopo por colunas `id_empresa` e
+`id_centro_custo` nas tabelas de negocio, antes de qualquer uso produtivo com
+mais de uma empresa ou centro de custo.
+
+Motivo: o levantamento da `PLA-1220` confirmou que o sistema Flask atual opera
+como base financeira unica, sem contexto de empresa, centro, tenant ou usuario
+logado. A skill do PSFINANCE ja exige decisao de modelo multicliente antes de
+uso produtivo, e filtro apenas visual nao isola dados no backend.
+
+Impacto: a implementacao deve comecar em staging apos aprovacao funcional sobre
+o significado de centro, compartilhamento de plano/credor, transferencia
+interempresa e tratamento de dados historicos. Nenhuma migration, escrita em
+banco produtivo, copia de dados ou deploy em producao fica autorizado por esta
+decisao documental.
+
+Complemento de revisao executiva: o termo funcional recomendado passa a ser
+`Centro de Custo`, nao `centro` generico. O menu `APOIO` deve receber os
+submenus `EMPRESA` e `CENTRO DE CUSTO`. O cadastro `EMPRESA` deve contemplar
+classificacao `EMPRESA`, `SPE` e `SCP`; o cadastro `CENTRO DE CUSTO` deve ser
+vinculado obrigatoriamente a uma empresa. A nomenclatura tecnica sugerida para
+banco e codigo e `centro_custo`/`id_centro_custo`, preservando clareza funcional
+e evitando mistura com obra, filial ou unidade operacional futura.
