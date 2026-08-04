@@ -257,12 +257,23 @@ Atendimento documental nesta branch:
 - `git ls-remote --heads origin staging main`
 - `git status --short --branch`
 - revisao de `git diff --name-only`
+- reversao auditavel dos commits fora do escopo documental:
+  - `f0ff7d1` reverte `fad81e7`;
+  - `e46522f` reverte `e9194f9`;
+  - `e2691c4` remove a reaplicacao residual de arquivos funcionais contra
+    `staging`.
+- revisao de `git diff --name-status staging..HEAD`
 
 Resultado:
 
 - Validado que a entrega desta subtarefa e documental.
 - A implementacao parcial gerada fora do escopo foi removida do workspace antes
   do reenvio para revisao.
+- O diff final contra `staging` ficou restrito a documentacao:
+  - `docs/PLA-1220-multiempresa-multicentro-psfinance.md`;
+  - `docs/PLA-1221-multiempresa-multicentro-psfinance.md`;
+  - `docs/arquitetura.md`;
+  - `docs/decisoes.md`.
 - Nenhum script SQL foi criado ou executado contra banco de staging ou producao.
 - Nenhuma rota, template, modelo, VPS, `main` ou producao foi alterado.
 - A API do Paperclip retornou `Unauthorized` ao tentar consultar/comentar a
