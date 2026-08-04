@@ -39,6 +39,9 @@ arquitetural consolidada na `PLA-1221`.
   - duplicidade de centro de custo ativo por empresa foi bloqueada;
   - edicao de centro de custo retornou sucesso;
   - desativacao de empresa com centro de custo ativo foi bloqueada.
+- Screenshot local com Playwright:
+  - `docs/mockups/evidencias/PLA-1235-empresas.png`;
+  - `docs/mockups/evidencias/PLA-1235-centros-custo.png`.
 
 ## Impacto e limites
 
