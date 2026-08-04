@@ -280,6 +280,35 @@ nao existiam no diff liquido contra `staging`; por isso, as afirmacoes de CRUD,
 modelos, templates, submenus implementados e migration entregue foram removidas
 da entrega.
 
+## Correcao aplicada apos revisao de conformidade
+
+A revisao executiva devolveu a ressubmissao porque a evidencia citava apenas
+parte dos arquivos alterados, enquanto o diff real contra `origin/staging`
+contem quatro arquivos. Esta correcao registra explicitamente todos os arquivos
+do diff e justifica a permanencia do artefato da `PLA-1220`.
+
+Arquivos alterados no diff real contra `origin/staging`:
+
+- `docs/PLA-1220-multiempresa-multicentro-psfinance.md` - Mantido como
+  levantamento herdado da subtarefa substituida `PLA-1220`, consolidado nesta
+  `PLA-1221` para preservar rastreabilidade e evitar perda do material
+  operacional ja produzido.
+- `docs/PLA-1221-multiempresa-multicentro-psfinance.md` - Consolidada a
+  arquitetura documental da `PLA-1221`, incluindo escopo, riscos, regras
+  minimas, ordem de execucao, bloqueios e esta evidencia corrigida de arquivos.
+- `docs/arquitetura.md` - Atualizada a arquitetura geral do PSFINANCE para
+  referenciar a diretriz multiempresa/multicentro e o isolamento por
+  `id_empresa` e `id_centro_custo`.
+- `docs/decisoes.md` - Registradas as decisoes de arquitetura da `PLA-1221` e
+  da `PLA-1220`, incluindo base unica por ambiente, centro de custo como termo
+  funcional e limites de nao implementacao nesta etapa.
+
+Justificativa de escopo: os quatro arquivos sao documentais e pertencem ao
+pacote de arquitetura da `PLA-1221`. O arquivo da `PLA-1220` nao representa nova
+subtarefa operacional ativa; ele e evidencia historica consolidada porque a
+`PLA-1221` substituiu a `PLA-1220` no fluxo correto com `executionPolicy` nativa
+de revisao do CEO.
+
 Arquivos funcionais nao entregues nesta branch:
 
 - `models.py`;

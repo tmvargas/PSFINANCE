@@ -280,6 +280,15 @@ as afirmacoes de CRUD, modelos, templates, submenus implementados e migration
 entregue. A implementacao deve ocorrer em subtarefa tecnica propria, com diff de
 codigo auditavel e revisao nativa do CEO por `executionPolicy`.
 
+Correcao apos revisao de conformidade: a evidencia da `PLA-1221` deve listar os
+quatro arquivos existentes no diff real contra `origin/staging`:
+`docs/PLA-1220-multiempresa-multicentro-psfinance.md`,
+`docs/PLA-1221-multiempresa-multicentro-psfinance.md`,
+`docs/arquitetura.md` e `docs/decisoes.md`. O artefato da `PLA-1220` permanece
+no escopo desta branch como levantamento herdado e consolidado pela subtarefa
+substituta `PLA-1221`, nao como subtarefa operacional paralela ou entrega
+funcional.
+
 ## 2026-08-04 - PLA-1220 planejamento multiempresa/multicentro do PSFINANCE
 
 Decisao: recomendar para o PSFINANCE um modelo multiempresa/multicentro em
