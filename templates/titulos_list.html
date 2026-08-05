@@ -361,9 +361,9 @@
                   <td>
                     <div
                       class="titles-text-main titles-truncate"
-                      title="Título #{{ t.id }}{% if t.doc_label %} - {{ t.doc_label }}{% endif %}"
+                      title="Título {{ t.id }}{% if t.doc_label %} - {{ t.doc_label }}{% endif %}"
                     >
-                      #{{ t.id }}{% if t.doc_label %} - {{ t.doc_label }}{% endif %}
+                      {{ t.id }}{% if t.doc_label %} - {{ t.doc_label }}{% endif %}
                     </div>
                     <div class="titles-text-muted titles-truncate" title="{{ t.nr_documento or '-' }}">
                       Nº {{ t.nr_documento or '-' }}
