@@ -294,3 +294,15 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   quando existe ambiguidade de empresa/centro ativo.
 - Limite: script preparado para staging; nenhuma escrita em producao, merge em
   `main`, copia de dados entre ambientes ou deploy produtivo esta autorizado.
+
+## 2026-08-05 - PLA-1359 - Layout da consulta de titulos a pagar
+
+- Projeto: PSFINANCE.
+- Decisao: melhorar a tela de consulta de titulos a pagar no template
+  `templates/titulos_list.html`, mantendo a consulta, filtros por vencimento,
+  totais e acoes existentes sem alterar backend, banco de dados ou rotas.
+- Motivo: a consulta possuia tabela larga com muitas acoes textuais por linha,
+  dificultando leitura operacional. A tela passa a ter resumo financeiro,
+  filtros destacados, status visual e acoes agrupadas por titulo.
+- Limite: alteracao restrita a apresentacao. Nao autoriza mudanca em `main`,
+  deploy produtivo, migration ou escrita em banco de producao.

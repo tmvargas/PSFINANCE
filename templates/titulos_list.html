@@ -3,144 +3,448 @@
 {% block title %}Títulos{% endblock %}
 
 {% block content %}
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h4 mb-0">Títulos</h1>
+  <style>
+    .titles-page {
+      display: grid;
+      gap: 18px;
+    }
 
-    <div class="d-flex align-items-center gap-2">
+    .titles-header {
+      align-items: start;
+      display: flex;
+      gap: 14px;
+      justify-content: space-between;
+    }
 
-      {# SUA ROTA LÊ mes=int e ano=int (request.args.get("mes", type=int)) #}
-      {# então aqui usamos selects pra enviar mes/ano compatíveis #}
-      <form method="get" class="d-flex align-items-center gap-2">
-        <label class="form-label mb-0">Vencimento:</label>
+    .titles-kicker {
+      color: var(--ps-green-dark);
+      font-size: 0.75rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
 
-        <select name="mes" class="form-select form-select-sm" style="max-width: 90px;">
-          {% for m, nome in meses %}
-            <option value="{{ m }}" {% if mes == m %}selected{% endif %}>{{ nome }}</option>
-          {% endfor %}
-        </select>
+    .titles-period {
+      color: var(--ps-muted);
+      margin: 4px 0 0;
+    }
 
-        <select name="ano" class="form-select form-select-sm" style="max-width: 110px;">
-          {% for a in anos %}
-            <option value="{{ a }}" {% if ano == a %}selected{% endif %}>{{ a }}</option>
-          {% endfor %}
-        </select>
+    .titles-filter {
+      align-items: end;
+      background: var(--ps-surface);
+      border: 1px solid var(--ps-border);
+      border-radius: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+      padding: 12px;
+    }
 
-        <button type="submit" class="btn btn-sm btn-outline-primary">
-          Filtrar
-        </button>
+    .titles-filter-field {
+      display: grid;
+      gap: 4px;
+      min-width: 112px;
+    }
 
-        <a href="{{ url_for('financeiro.listar_titulos') }}" class="btn btn-sm btn-outline-secondary">
-          Mês atual
-        </a>
-      </form>
+    .titles-filter-field label {
+      color: var(--ps-muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .titles-summary {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .titles-metric {
+      background: var(--ps-surface);
+      border: 1px solid var(--ps-border);
+      border-radius: 8px;
+      min-width: 0;
+      padding: 14px;
+    }
+
+    .titles-metric span {
+      color: var(--ps-muted);
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    .titles-metric strong {
+      color: var(--ps-text);
+      display: block;
+      font-size: 1.05rem;
+      line-height: 1.25;
+      overflow-wrap: anywhere;
+    }
+
+    .titles-table-shell {
+      background: var(--ps-surface);
+      border: 1px solid var(--ps-border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .titles-table {
+      margin-bottom: 0;
+      min-width: 920px;
+    }
+
+    .titles-table thead th {
+      background: #173c28;
+      border-bottom: 0;
+      color: #ffffff;
+      font-size: 0.74rem;
+      letter-spacing: 0;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .titles-table td {
+      vertical-align: middle;
+    }
+
+    .titles-col-id {
+      width: 58px;
+    }
+
+    .titles-col-date {
+      width: 104px;
+    }
+
+    .titles-col-values {
+      width: 144px;
+    }
+
+    .titles-col-actions {
+      width: 88px;
+    }
+
+    .titles-text-main {
+      font-weight: 700;
+      max-width: 220px;
+    }
+
+    .titles-text-muted {
+      color: var(--ps-muted);
+      font-size: 0.82rem;
+      max-width: 220px;
+    }
+
+    .titles-truncate {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .titles-status {
+      border-radius: 999px;
+      display: inline-flex;
+      font-size: 0.76rem;
+      font-weight: 800;
+      justify-content: center;
+      min-width: 72px;
+      padding: 4px 9px;
+    }
+
+    .titles-status-open {
+      background: #fff2d6;
+      color: #815100;
+    }
+
+    .titles-status-paid {
+      background: var(--ps-green-soft);
+      color: var(--ps-green-dark);
+    }
+
+    .titles-values {
+      display: grid;
+      gap: 2px;
+    }
+
+    .titles-value-row {
+      display: flex;
+      gap: 8px;
+      justify-content: space-between;
+      white-space: nowrap;
+    }
+
+    .titles-value-row span {
+      color: var(--ps-muted);
+      font-size: 0.76rem;
+      font-weight: 700;
+    }
+
+    .titles-empty {
+      background: var(--ps-surface);
+      border: 1px solid var(--ps-border);
+      border-radius: 8px;
+      color: var(--ps-muted);
+      padding: 28px;
+      text-align: center;
+    }
+
+    @media (max-width: 980px) {
+      .titles-header {
+        display: grid;
+      }
+
+      .titles-filter {
+        justify-content: stretch;
+      }
+
+      .titles-filter .btn,
+      .titles-filter-field {
+        flex: 1 1 140px;
+      }
+
+      .titles-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 560px) {
+      .titles-summary {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+
+  <div class="titles-page">
+    <div class="titles-header">
+      <div>
+        <div class="titles-kicker">Contas a pagar</div>
+        <h1 class="h4 mb-0">Consulta de títulos</h1>
+        <p class="titles-period">
+          Vencimentos filtrados por
+          {% for m, nome in meses %}{% if mes == m %}{{ nome }}{% endif %}{% endfor %}
+          / {{ ano }}.
+        </p>
+      </div>
 
       <a href="{{ url_for('financeiro.novo_titulo') }}" class="btn btn-primary btn-sm">
         Novo título
       </a>
     </div>
-  </div>
 
-  {% if titulos %}
-    <div class="table-responsive">
-      <table class="table table-sm table-striped table-hover align-middle">
-        <thead class="table-dark">
-          <tr>
-            <th>ID</th>
-            <th>Documento</th>
-            <th>Número</th>
-            <th>Credor</th>
-            <th>Empresa</th>
-            <th>Centro de Custo</th>
-            <th>Plano</th>
-            <th>Vencimento</th>
-            <th class="text-end">Valor</th>
-            <th class="text-end">Baixado</th>
-            <th class="text-end">Saldo</th>
-            <th class="text-center">Ações</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {% set ns = namespace(total_aberto=0) %}
-
-          {% for t in titulos %}
-            {% set aberto = (t.aberto or 0) %}
-            {% set ns.total_aberto = ns.total_aberto + aberto %}
-
-            <tr>
-              <td>{{ t.id }}</td>
-              <td>{{ t.doc_label }}</td>
-              <td>{{ t.nr_documento }}</td>
-              <td>{{ t.credor }}</td>
-              <td>{{ t.empresa or '-' }}</td>
-              <td>{{ t.centro_custo or '-' }}</td>
-              <td>{{ t.plano }}</td>
-              <td>{{ t.vencimento }}</td>
-
-              <td class="text-end">R$ {{ "%.2f"|format(t.valor or 0) }}</td>
-              <td class="text-end">R$ {{ "%.2f"|format(t.baixado or 0) }}</td>
-              <td class="text-end">R$ {{ "%.2f"|format(aberto) }}</td>
-
-              <td class="text-center">
-                <a
-                  href="{{ url_for('financeiro.baixar_titulo', id_titulo=t.id) }}"
-                  class="btn btn-sm btn-outline-success me-1 {% if aberto <= 0 %}disabled{% endif %}"
-                >
-                  Baixar
-                </a>
-
-                {% if (t.baixado or 0) > 0 %}
-                  <a
-                    href="{{ url_for('financeiro.listar_baixas_titulo', id_titulo=t.id) }}"
-                    class="btn btn-sm btn-outline-info me-1"
-                  >
-                    Baixas
-                  </a>
-                {% endif %}
-
-                <a
-                  href="{{ url_for('financeiro.editar_titulo', id_titulo=t.id) }}"
-                  class="btn btn-sm btn-outline-secondary me-1"
-                >
-                  Editar
-                </a>
-
-                <a
-                  href="{{ url_for('financeiro.copiar_titulo', id_titulo=t.id) }}"
-                  class="btn btn-sm btn-outline-primary me-1"
-                >
-                  Copiar
-                </a>
-
-                <form
-                  method="post"
-                  action="{{ url_for('financeiro.excluir_titulo', id_titulo=t.id) }}"
-                  style="display:inline"
-                  onsubmit="return confirm('Confirma exclusão do título {{ t.doc_label }} {{ t.nr_documento }}?');"
-                >
-                  <button
-                    type="submit"
-                    class="btn btn-sm btn-outline-danger"
-                    {% if (t.baixado or 0) > 0 %}disabled title="Título possui baixa e não pode ser excluído"{% endif %}
-                  >
-                    Excluir
-                  </button>
-                </form>
-              </td>
-            </tr>
+    <form method="get" class="titles-filter" aria-label="Filtros da consulta de títulos">
+      <div class="titles-filter-field">
+        <label for="mes">Mês de vencimento</label>
+        <select id="mes" name="mes" class="form-select form-select-sm">
+          {% for m, nome in meses %}
+            <option value="{{ m }}" {% if mes == m %}selected{% endif %}>{{ nome }}</option>
           {% endfor %}
-        </tbody>
+        </select>
+      </div>
 
-        <tfoot>
-          <tr class="fw-bold">
-            <td colspan="10" class="text-end">Total saldo em aberto:</td>
-            <td class="text-end">R$ {{ "%.2f"|format(ns.total_aberto) }}</td>
-            <td></td>
-          </tr>
-        </tfoot>
-      </table>
+      <div class="titles-filter-field">
+        <label for="ano">Ano</label>
+        <select id="ano" name="ano" class="form-select form-select-sm">
+          {% for a in anos %}
+            <option value="{{ a }}" {% if ano == a %}selected{% endif %}>{{ a }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-sm btn-outline-primary">
+        Filtrar
+      </button>
+
+      <a href="{{ url_for('financeiro.listar_titulos') }}" class="btn btn-sm btn-outline-secondary">
+        Mês atual
+      </a>
+    </form>
+
+    <div class="titles-summary" aria-label="Resumo financeiro dos títulos filtrados">
+      <div class="titles-metric">
+        <span>Títulos filtrados</span>
+        <strong>{{ titulos|length }}</strong>
+      </div>
+      <div class="titles-metric">
+        <span>Valor original</span>
+        <strong>R$ {{ "%.2f"|format(total_valor or 0) }}</strong>
+      </div>
+      <div class="titles-metric">
+        <span>Valor baixado</span>
+        <strong>R$ {{ "%.2f"|format(total_baixado or 0) }}</strong>
+      </div>
+      <div class="titles-metric">
+        <span>Saldo em aberto</span>
+        <strong>R$ {{ "%.2f"|format(total_aberto or 0) }}</strong>
+      </div>
     </div>
-  {% else %}
-    <p>Não há títulos cadastrados.</p>
-  {% endif %}
+
+    {% if titulos %}
+      <div class="titles-table-shell">
+        <div class="table-responsive">
+          <table class="table table-sm table-hover align-middle titles-table">
+            <thead>
+              <tr>
+                <th class="titles-col-id">ID</th>
+                <th>Documento</th>
+                <th>Credor e plano</th>
+                <th>Empresa e centro</th>
+                <th class="titles-col-date">Vencimento</th>
+                <th class="titles-col-values text-end">Valores</th>
+                <th class="text-center">Status</th>
+                <th class="titles-col-actions text-center">Ações</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {% for t in titulos %}
+                {% set aberto = (t.aberto or 0) %}
+
+                <tr>
+                  <td class="text-nowrap fw-bold">#{{ t.id }}</td>
+                  <td>
+                    <div class="titles-text-main titles-truncate" title="{{ t.doc_label or '-' }}">
+                      {{ t.doc_label or '-' }}
+                    </div>
+                    <div class="titles-text-muted titles-truncate" title="{{ t.nr_documento or '-' }}">
+                      Nº {{ t.nr_documento or '-' }}
+                    </div>
+                  </td>
+                  <td>
+                    <div class="titles-text-main titles-truncate" title="{{ t.credor or '-' }}">
+                      {{ t.credor or '-' }}
+                    </div>
+                    <div class="titles-text-muted titles-truncate" title="{{ t.plano or '-' }}">
+                      {{ t.plano or '-' }}
+                    </div>
+                  </td>
+                  <td>
+                    <div class="titles-text-main titles-truncate" title="{{ t.empresa or '-' }}">
+                      {{ t.empresa or '-' }}
+                    </div>
+                    <div class="titles-text-muted titles-truncate" title="{{ t.centro_custo or '-' }}">
+                      {{ t.centro_custo or '-' }}
+                    </div>
+                  </td>
+                  <td class="text-nowrap">{{ t.vencimento or '-' }}</td>
+
+                  <td class="text-end">
+                    <div class="titles-values">
+                      <div class="titles-value-row">
+                        <span>Valor</span>
+                        <strong>R$ {{ "%.2f"|format(t.valor or 0) }}</strong>
+                      </div>
+                      <div class="titles-value-row">
+                        <span>Baixado</span>
+                        <strong>R$ {{ "%.2f"|format(t.baixado or 0) }}</strong>
+                      </div>
+                      <div class="titles-value-row">
+                        <span>Saldo</span>
+                        <strong>R$ {{ "%.2f"|format(aberto) }}</strong>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td class="text-center">
+                    {% if aberto <= 0 %}
+                      <span class="titles-status titles-status-paid">Baixado</span>
+                    {% else %}
+                      <span class="titles-status titles-status-open">Aberto</span>
+                    {% endif %}
+                  </td>
+
+                  <td class="text-center">
+                    <div class="dropdown">
+                      <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Ações
+                      </button>
+                      <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                          <a
+                            href="{{ url_for('financeiro.baixar_titulo', id_titulo=t.id) }}"
+                            class="dropdown-item {% if aberto <= 0 %}disabled{% endif %}"
+                          >
+                            Baixar
+                          </a>
+                        </li>
+                        {% if (t.baixado or 0) > 0 %}
+                          <li>
+                            <a
+                              href="{{ url_for('financeiro.listar_baixas_titulo', id_titulo=t.id) }}"
+                              class="dropdown-item"
+                            >
+                              Baixas
+                            </a>
+                          </li>
+                        {% endif %}
+                        <li>
+                          <a
+                            href="{{ url_for('financeiro.editar_titulo', id_titulo=t.id) }}"
+                            class="dropdown-item"
+                          >
+                            Editar
+                          </a>
+                        </li>
+                        <li>
+                          <a
+                            href="{{ url_for('financeiro.copiar_titulo', id_titulo=t.id) }}"
+                            class="dropdown-item"
+                          >
+                            Copiar
+                          </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                          <form
+                            method="post"
+                            action="{{ url_for('financeiro.excluir_titulo', id_titulo=t.id) }}"
+                            onsubmit="return confirm('Confirma exclusão do título {{ t.doc_label }} {{ t.nr_documento }}?');"
+                          >
+                            <button
+                              type="submit"
+                              class="dropdown-item text-danger"
+                              {% if (t.baixado or 0) > 0 %}disabled title="Título possui baixa e não pode ser excluído"{% endif %}
+                            >
+                              Excluir
+                            </button>
+                          </form>
+                        </li>
+                      </ul>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+
+            <tfoot>
+              <tr class="fw-bold">
+                <td colspan="4" class="text-end">Totais do período:</td>
+                <td class="text-end">
+                  <div class="titles-values">
+                    <div class="titles-value-row">
+                      <span>Valor</span>
+                      <strong>R$ {{ "%.2f"|format(total_valor or 0) }}</strong>
+                    </div>
+                    <div class="titles-value-row">
+                      <span>Baixado</span>
+                      <strong>R$ {{ "%.2f"|format(total_baixado or 0) }}</strong>
+                    </div>
+                    <div class="titles-value-row">
+                      <span>Saldo</span>
+                      <strong>R$ {{ "%.2f"|format(total_aberto or 0) }}</strong>
+                    </div>
+                  </div>
+                </td>
+                <td colspan="2"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    {% else %}
+      <div class="titles-empty">
+        Não há títulos cadastrados para o período selecionado.
+      </div>
+    {% endif %}
+  </div>
 {% endblock %}
