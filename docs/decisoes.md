@@ -318,6 +318,7 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   documento em uma unica coluna operacional.
 - Motivo: evitar a separacao entre `ID` e `Documento` na listagem, deixando a
   identificacao do titulo mais direta para consulta e acoes por linha.
+- Evidencia visual: `docs/mockups/evidencias/PLA-1370-titulos-coluna-titulo.png`.
 - Limite: alteracao restrita ao template `templates/titulos_list.html`. Nao
   altera consulta, regra de negocio, banco de dados, variaveis, VPS, `main` ou
   producao.
