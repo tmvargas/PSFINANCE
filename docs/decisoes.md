@@ -306,3 +306,6 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   filtros destacados, status visual e acoes agrupadas por titulo.
 - Limite: alteracao restrita a apresentacao. Nao autoriza mudanca em `main`,
   deploy produtivo, migration ou escrita em banco de producao.
+- Complemento: as acoes por titulo foram ajustadas para botoes compactos com
+  icones e atributos `title`/`aria-label`, atendendo ao pedido de reduzir
+  botoes textuais grandes na consulta.

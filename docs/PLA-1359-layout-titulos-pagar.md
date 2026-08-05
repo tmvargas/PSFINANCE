@@ -47,7 +47,8 @@ ou scripts de banco.
 - Tabela passou a agrupar dados correlatos para reduzir largura operacional:
   documento e numero, credor e plano, empresa e centro, valores, status e acoes.
 - Status visual `Aberto`/`Baixado` foi adicionado com base no saldo em aberto.
-- Acoes por titulo foram agrupadas em menu para reduzir ruido horizontal.
+- Acoes por titulo foram convertidas em botoes compactos com icones, `title`
+  e `aria-label`, reduzindo ruido horizontal sem remover comandos.
 - Estado vazio passou a ter mensagem contextual ao periodo filtrado.
 
 ## Validacao local
@@ -80,7 +81,7 @@ Evidencias:
 
 Resultado observado:
 
-- desktop com filtros, resumo, tabela, status e acoes visiveis;
+- desktop com filtros, resumo, tabela, status e acoes por icone visiveis;
 - mobile com cabecalho, filtros e resumo empilhados sem sobreposicao;
 - tabela permanece dentro de `table-responsive` para telas estreitas.
 
