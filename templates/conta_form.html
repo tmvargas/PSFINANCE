@@ -14,6 +14,18 @@
   <form method="post" class="border rounded p-3 bg-white">
     <div class="row mb-3">
       <div class="col-md-6">
+        <label class="form-label">Empresa</label>
+        <select name="id_empresa" class="form-select" required>
+          {% set empresa_sel = conta.id_empresa if conta else none %}
+          <option value="">Selecione...</option>
+          {% for empresa in empresas %}
+            <option value="{{ empresa.id }}" {% if empresa_sel == empresa.id %}selected{% endif %}>
+              {{ empresa.label }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-6">
         <label class="form-label">Descrição</label>
         <input
           type="text"
@@ -23,6 +35,9 @@
           value="{{ conta.descricao if conta else '' }}"
         >
       </div>
+    </div>
+
+    <div class="row mb-3">
       <div class="col-md-3">
         <label class="form-label">Tipo</label>
         <select name="tipo" class="form-select" required>
@@ -68,16 +83,21 @@
           type="date"
           name="data_saldo_inicial"
           class="form-control"
-          value="{{ conta.data_saldo_inicial if conta and conta.data_saldo_inicial else '' }}"
+          value="{{ conta.data_saldo_inicial_input if conta and conta.data_saldo_inicial_input else '' }}"
         >
       </div>
     </div>
 
-    <button type="submit" class="btn btn-success">
+    <button type="submit" class="btn btn-success" {% if not empresas %}disabled{% endif %}>
       Salvar
     </button>
     <a href="{{ url_for('financeiro.listar_contas') }}" class="btn btn-secondary">
       Cancelar
     </a>
   </form>
+  {% if not empresas %}
+    <div class="alert alert-warning mt-3">
+      Cadastre uma empresa ativa antes de criar ou editar contas.
+    </div>
+  {% endif %}
 {% endblock %}

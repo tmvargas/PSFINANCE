@@ -17,6 +17,7 @@
         <thead class="table-dark">
           <tr>
             <th>ID</th>
+            <th>Empresa</th>
             <th>Descrição</th>
             <th>Tipo</th>
             <th class="text-end">Saldo inicial</th>
@@ -29,6 +30,7 @@
           {% for c in contas %}
             <tr>
               <td>{{ c.id }}</td>
+              <td>{{ c.empresa or '-' }}</td>
               <td>{{ c.descricao }}</td>
               <td>{{ c.tipo }}</td>
               <td class="text-end">R$ {{ '%.2f'|format(c.saldo_inicial) }}</td>
@@ -51,7 +53,7 @@
         </tbody>
         <tfoot>
           <tr class="fw-bold">
-            <td colspan="5" class="text-end">Total geral (inativas):</td>
+            <td colspan="6" class="text-end">Total geral (inativas):</td>
             <td class="text-end">R$ {{ '%.2f'|format(total_saldo) }}</td>
             <td></td>
           </tr>

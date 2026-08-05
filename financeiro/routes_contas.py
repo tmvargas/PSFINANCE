@@ -5,7 +5,11 @@ from flask import render_template, request, redirect, url_for, flash
 from datetime import date
 
 from . import bp_financeiro
-from .regras_empresa_centro import listar_empresas_centros_ativos, validar_empresa_centro
+from .regras_empresa_centro import (
+    listar_empresas_centros_ativos,
+    validar_empresa_ativa,
+    validar_empresa_centro,
+)
 from database import SessionLocal
 
 from models import (
@@ -39,6 +43,22 @@ def parse_money_ptbr(valor_str: str) -> float:
     return float(s)
 
 
+def conta_to_view(conta):
+    empresa = getattr(conta, "empresa", None)
+    return {
+        "id": conta.id_conta,
+        "descricao": conta.descricao,
+        "empresa": f"{empresa.codigo} - {empresa.nome}" if empresa else "",
+        "id_empresa": getattr(conta, "id_empresa", None),
+        "tipo": conta.tipo,
+        "id_banco": conta.id_banco or "",
+        "saldo_inicial": float(conta.saldo_inicial or 0),
+        "data_saldo_inicial": conta.data_saldo_inicial.strftime("%d/%m/%Y") if conta.data_saldo_inicial else "",
+        "data_saldo_inicial_input": conta.data_saldo_inicial.strftime("%Y-%m-%d") if conta.data_saldo_inicial else "",
+        "saldo_atual": conta.saldo_atual,
+    }
+
+
 # ----------------------------------------------------------------------
 # LISTAGEM DE CONTAS (com saldo)
 # ----------------------------------------------------------------------
@@ -60,14 +80,7 @@ def listar_contas():
         saldo_atual = c.saldo_atual
         total_saldo += saldo_atual
 
-        contas_view.append({
-            "id": c.id_conta,
-            "descricao": c.descricao,
-            "tipo": c.tipo,
-            "saldo_inicial": float(c.saldo_inicial or 0),
-            "data_saldo_inicial": c.data_saldo_inicial.strftime("%d/%m/%Y") if c.data_saldo_inicial else "",
-            "saldo_atual": saldo_atual,
-        })
+        contas_view.append(conta_to_view(c))
 
     session.close()
     return render_template(
@@ -86,6 +99,7 @@ def nova_conta():
 
     if request.method == "POST":
         descricao = (request.form.get("descricao") or "").strip()
+        id_empresa = request.form.get("id_empresa", type=int)
         tipo = (request.form.get("tipo") or "").strip()  # corrente, aplicacao, caixa
         id_banco = (request.form.get("id_banco") or "").strip()
         saldo_inicial_str = (request.form.get("saldo_inicial") or "").replace(",", ".").strip()
@@ -95,6 +109,8 @@ def nova_conta():
 
         if not descricao:
             erros.append("Descrição da conta é obrigatória.")
+        erros_empresa, _empresa = validar_empresa_ativa(session, id_empresa)
+        erros.extend(erros_empresa)
 
         if tipo not in ("corrente", "aplicacao", "caixa"):
             erros.append("Tipo de conta inválido. Use corrente, aplicação ou caixa.")
@@ -124,6 +140,7 @@ def nova_conta():
         else:
             conta = Conta(
                 descricao=descricao,
+                id_empresa=id_empresa,
                 tipo=tipo,
                 id_banco=id_banco or None,
                 saldo_inicial=saldo_inicial,
@@ -137,12 +154,14 @@ def nova_conta():
             return redirect(url_for("financeiro.listar_contas"))
 
     hoje = date.today().isoformat()
+    empresas_view, _centros_custo_view = listar_empresas_centros_ativos(session)
     session.close()
 
     # conta=None porque é cadastro
     return render_template(
         "conta_form.html",
         conta=None,
+        empresas=empresas_view,
         hoje=hoje,
     )
 
@@ -167,6 +186,7 @@ def editar_conta(id_conta):
 
     if request.method == "POST":
         descricao = (request.form.get("descricao") or "").strip()
+        id_empresa = request.form.get("id_empresa", type=int)
         tipo = (request.form.get("tipo") or "").strip()
         id_banco = (request.form.get("id_banco") or "").strip()
         saldo_inicial_str = (request.form.get("saldo_inicial") or "").replace(",", ".").strip()
@@ -176,6 +196,8 @@ def editar_conta(id_conta):
 
         if not descricao:
             erros.append("Descrição da conta é obrigatória.")
+        erros_empresa, _empresa = validar_empresa_ativa(session, id_empresa)
+        erros.extend(erros_empresa)
 
         if tipo not in ("corrente", "aplicacao", "caixa"):
             erros.append("Tipo de conta inválido. Use corrente, aplicação ou caixa.")
@@ -207,6 +229,7 @@ def editar_conta(id_conta):
                 flash(e, "erro")
         else:
             conta.descricao = descricao
+            conta.id_empresa = id_empresa
             conta.tipo = tipo
             conta.id_banco = id_banco or None
             conta.saldo_inicial = saldo_inicial
@@ -222,20 +245,15 @@ def editar_conta(id_conta):
     hoje = date.today().isoformat()
 
     # valor default dos campos
-    conta_view = {
-        "id": conta.id_conta,
-        "descricao": conta.descricao,
-        "tipo": conta.tipo,
-        "id_banco": conta.id_banco or "",
-        "saldo_inicial": float(conta.saldo_inicial or 0),
-        "data_saldo_inicial": conta.data_saldo_inicial.strftime("%Y-%m-%d") if conta.data_saldo_inicial else "",
-    }
+    conta_view = conta_to_view(conta)
+    empresas_view, _centros_custo_view = listar_empresas_centros_ativos(session)
 
     session.close()
 
     return render_template(
         "conta_form.html",
         conta=conta_view,
+        empresas=empresas_view,
         hoje=hoje,
     )
 
@@ -284,14 +302,7 @@ def listar_contas_inativas():
         saldo_atual = c.saldo_atual
         total_saldo += saldo_atual
 
-        contas_view.append({
-            "id": c.id_conta,
-            "descricao": c.descricao,
-            "tipo": c.tipo,
-            "saldo_inicial": float(c.saldo_inicial or 0),
-            "data_saldo_inicial": c.data_saldo_inicial.strftime("%d/%m/%Y") if c.data_saldo_inicial else "",
-            "saldo_atual": saldo_atual,
-        })
+        contas_view.append(conta_to_view(c))
 
     session.close()
     return render_template(
@@ -314,6 +325,17 @@ def reativar_conta(id_conta):
     if not conta:
         session.close()
         flash("Conta não encontrada ou já está ativa.", "erro")
+        return redirect(url_for("financeiro.listar_contas_inativas"))
+
+    erros_empresa, _empresa = validar_empresa_ativa(
+        session,
+        conta.id_empresa,
+        "Conta sem empresa vinculada não pode ser reativada.",
+    )
+    if erros_empresa:
+        session.close()
+        for erro in erros_empresa:
+            flash(erro, "erro")
         return redirect(url_for("financeiro.listar_contas_inativas"))
 
     conta.deleted = False
