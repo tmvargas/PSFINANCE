@@ -2,7 +2,7 @@ from flask import flash, redirect, render_template, request, url_for
 
 from . import bp_financeiro
 from database import SessionLocal
-from models import CentroCusto, Empresa
+from models import CentroCusto, Conta, Empresa
 
 
 TIPOS_EMPRESA = ("EMPRESA", "SPE", "SCP")
@@ -191,6 +191,19 @@ def desativar_empresa(id_empresa):
     if centro_ativo:
         session.close()
         flash("Empresa possui centro de custo ativo e não pode ser desativada.", "erro")
+        return redirect(url_for("financeiro.listar_empresas"))
+
+    conta_ativa = (
+        session.query(Conta)
+        .filter(
+            Conta.id_empresa == empresa.id_empresa,
+            Conta.deleted.is_(False),
+        )
+        .first()
+    )
+    if conta_ativa:
+        session.close()
+        flash("Empresa possui conta ativa e não pode ser desativada.", "erro")
         return redirect(url_for("financeiro.listar_empresas"))
 
     empresa.deleted = True

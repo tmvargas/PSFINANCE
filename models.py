@@ -40,6 +40,7 @@ class Empresa(Base, TimestampMixin):
     observacao = Column(String(1000), nullable=True)
 
     centros_custo = relationship("CentroCusto", back_populates="empresa")
+    contas = relationship("Conta", back_populates="empresa")
     titulos = relationship("Titulo", back_populates="empresa")
     movimentacoes = relationship("MovimentacaoConta", back_populates="empresa")
 
@@ -141,6 +142,7 @@ class Conta(Base, TimestampMixin):
     uuid = Column(String(36), default=lambda: str(uuid.uuid4()), unique=True, nullable=False)
 
     descricao = Column(String(255), nullable=False)
+    id_empresa = Column(Integer, ForeignKey("empresa.id_empresa"), nullable=False)
     id_banco = Column(String(50), nullable=True)
     # 'corrente', 'aplicacao', 'caixa'
     tipo = Column(String(20), nullable=False)
@@ -148,6 +150,7 @@ class Conta(Base, TimestampMixin):
     saldo_inicial = Column(Numeric(15, 2), default=0, nullable=False)
     data_saldo_inicial = Column(Date, nullable=True)
 
+    empresa = relationship("Empresa", back_populates="contas")
     baixas = relationship("Baixa", back_populates="conta")
 
     movimentos_origem = relationship(

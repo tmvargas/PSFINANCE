@@ -318,6 +318,21 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   do documento em uma unica coluna operacional.
 - Motivo: evitar a separacao entre `ID` e `Documento` na listagem, deixando a
   identificacao do titulo mais direta para consulta e acoes por linha.
+
+## 2026-08-05 - PLA-1376 - Vincular contas a empresa
+
+- Projeto: PSFINANCE.
+- Decisao: contas de caixa/banco passam a exigir vinculo com uma empresa ativa
+  no cadastro e na edicao.
+- Aplicacao: a regra de empresa ativa foi centralizada em
+  `financeiro/regras_empresa_centro.py` e aplicada no fluxo de contas.
+- Banco: `conta.id_empresa` passa a ser obrigatorio pela migration PostgreSQL
+  versionada, com backfill seguro para contas historicas usando a empresa ativa
+  de codigo `1` quando existir exatamente uma.
+- Integridade: empresa com conta ativa vinculada nao pode ser desativada, e
+  conta inativa sem empresa ativa vinculada nao pode ser reativada.
+- Producao: nenhuma migration, escrita em banco produtivo, merge em `main`,
+  copia de dados entre ambientes ou deploy produtivo esta autorizado.
 - Evidencia visual: `docs/mockups/evidencias/PLA-1370-titulos-coluna-titulo.png`.
 - Limite: alteracao restrita ao template `templates/titulos_list.html`. Nao
   altera consulta, regra de negocio, banco de dados, variaveis, VPS, `main` ou

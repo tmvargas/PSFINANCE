@@ -65,3 +65,21 @@ def validar_empresa_centro(session, id_empresa, id_centro_custo):
         erros.append("Centro de custo não pertence à empresa selecionada.")
 
     return erros, empresa, centro
+
+
+def validar_empresa_ativa(session, id_empresa, mensagem_obrigatoria="Empresa é obrigatória."):
+    erros = []
+    empresa = None
+
+    if not id_empresa:
+        erros.append(mensagem_obrigatoria)
+    else:
+        empresa = (
+            session.query(Empresa)
+            .filter(Empresa.id_empresa == id_empresa, Empresa.deleted.is_(False))
+            .first()
+        )
+        if not empresa:
+            erros.append("Empresa ativa não encontrada.")
+
+    return erros, empresa
