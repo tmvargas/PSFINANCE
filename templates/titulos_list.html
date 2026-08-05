@@ -109,8 +109,8 @@
       vertical-align: middle;
     }
 
-    .titles-col-id {
-      width: 58px;
+    .titles-col-title {
+      width: 190px;
     }
 
     .titles-col-date {
@@ -343,8 +343,7 @@
           <table class="table table-sm table-hover align-middle titles-table">
             <thead>
               <tr>
-                <th class="titles-col-id">ID</th>
-                <th>Documento</th>
+                <th class="titles-col-title">Título</th>
                 <th>Credor e plano</th>
                 <th>Empresa e centro</th>
                 <th class="titles-col-date">Vencimento</th>
@@ -359,10 +358,12 @@
                 {% set aberto = (t.aberto or 0) %}
 
                 <tr>
-                  <td class="text-nowrap fw-bold">#{{ t.id }}</td>
                   <td>
-                    <div class="titles-text-main titles-truncate" title="{{ t.doc_label or '-' }}">
-                      {{ t.doc_label or '-' }}
+                    <div
+                      class="titles-text-main titles-truncate"
+                      title="Título #{{ t.id }}{% if t.doc_label %} - {{ t.doc_label }}{% endif %}"
+                    >
+                      #{{ t.id }}{% if t.doc_label %} - {{ t.doc_label }}{% endif %}
                     </div>
                     <div class="titles-text-muted titles-truncate" title="{{ t.nr_documento or '-' }}">
                       Nº {{ t.nr_documento or '-' }}

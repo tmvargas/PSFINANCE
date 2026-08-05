@@ -309,3 +309,15 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
 - Complemento: as acoes por titulo foram ajustadas para botoes compactos com
   icones e atributos `title`/`aria-label`, atendendo ao pedido de reduzir
   botoes textuais grandes na consulta.
+
+## 2026-08-05 - PLA-1370 - Coluna Titulo na consulta de titulos a pagar
+
+- Projeto: PSFINANCE.
+- Decisao: a consulta de titulos a pagar deve exibir uma coluna explicita
+  `Titulo`, reunindo o identificador interno do titulo e a referencia do
+  documento em uma unica coluna operacional.
+- Motivo: evitar a separacao entre `ID` e `Documento` na listagem, deixando a
+  identificacao do titulo mais direta para consulta e acoes por linha.
+- Limite: alteracao restrita ao template `templates/titulos_list.html`. Nao
+  altera consulta, regra de negocio, banco de dados, variaveis, VPS, `main` ou
+  producao.
