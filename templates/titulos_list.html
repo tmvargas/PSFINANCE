@@ -122,7 +122,7 @@
     }
 
     .titles-col-actions {
-      width: 88px;
+      width: 190px;
     }
 
     .titles-text-main {
@@ -178,6 +178,64 @@
       color: var(--ps-muted);
       font-size: 0.76rem;
       font-weight: 700;
+    }
+
+    .titles-actions {
+      display: inline-flex;
+      gap: 6px;
+      justify-content: center;
+      white-space: nowrap;
+    }
+
+    .titles-action-form {
+      display: inline-flex;
+      margin: 0;
+    }
+
+    .titles-action {
+      align-items: center;
+      background: #ffffff;
+      border: 1px solid var(--ps-border);
+      border-radius: 7px;
+      color: var(--ps-green-dark);
+      display: inline-flex;
+      height: 32px;
+      justify-content: center;
+      padding: 0;
+      text-decoration: none;
+      width: 32px;
+    }
+
+    .titles-action:hover,
+    .titles-action:focus-visible {
+      background: var(--ps-green-soft);
+      border-color: #9fd8b8;
+      color: var(--ps-green-dark);
+      outline: 0;
+    }
+
+    .titles-action-danger {
+      color: #b42318;
+    }
+
+    .titles-action-danger:hover,
+    .titles-action-danger:focus-visible {
+      background: #ffe8e5;
+      border-color: #ffc8c1;
+      color: #8f1b12;
+    }
+
+    .titles-action[disabled],
+    .titles-action-disabled {
+      background: #f1f5f2;
+      color: #9aa79f;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .titles-action .icon {
+      height: 15px;
+      width: 15px;
     }
 
     .titles-empty {
@@ -354,62 +412,71 @@
                   </td>
 
                   <td class="text-center">
-                    <div class="dropdown">
-                      <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Ações
-                      </button>
-                      <ul class="dropdown-menu dropdown-menu-end">
-                        <li>
-                          <a
-                            href="{{ url_for('financeiro.baixar_titulo', id_titulo=t.id) }}"
-                            class="dropdown-item {% if aberto <= 0 %}disabled{% endif %}"
-                          >
-                            Baixar
-                          </a>
-                        </li>
-                        {% if (t.baixado or 0) > 0 %}
-                          <li>
-                            <a
-                              href="{{ url_for('financeiro.listar_baixas_titulo', id_titulo=t.id) }}"
-                              class="dropdown-item"
-                            >
-                              Baixas
-                            </a>
-                          </li>
-                        {% endif %}
-                        <li>
-                          <a
-                            href="{{ url_for('financeiro.editar_titulo', id_titulo=t.id) }}"
-                            class="dropdown-item"
-                          >
-                            Editar
-                          </a>
-                        </li>
-                        <li>
-                          <a
-                            href="{{ url_for('financeiro.copiar_titulo', id_titulo=t.id) }}"
-                            class="dropdown-item"
-                          >
-                            Copiar
-                          </a>
-                        </li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                          <form
-                            method="post"
-                            action="{{ url_for('financeiro.excluir_titulo', id_titulo=t.id) }}"
-                            onsubmit="return confirm('Confirma exclusão do título {{ t.doc_label }} {{ t.nr_documento }}?');"
-                          >
-                            <button
-                              type="submit"
-                              class="dropdown-item text-danger"
-                              {% if (t.baixado or 0) > 0 %}disabled title="Título possui baixa e não pode ser excluído"{% endif %}
-                            >
-                              Excluir
-                            </button>
-                          </form>
-                        </li>
-                      </ul>
+                    <div class="titles-actions" aria-label="Ações do título {{ t.id }}">
+                      {% if aberto > 0 %}
+                        <a
+                          href="{{ url_for('financeiro.baixar_titulo', id_titulo=t.id) }}"
+                          class="titles-action"
+                          title="Baixar título"
+                          aria-label="Baixar título {{ t.id }}"
+                        >
+                          <svg class="icon"><use href="#icon-check-circle"></use></svg>
+                        </a>
+                      {% else %}
+                        <span class="titles-action titles-action-disabled" title="Título já baixado" aria-label="Título já baixado">
+                          <svg class="icon"><use href="#icon-check-circle"></use></svg>
+                        </span>
+                      {% endif %}
+
+                      {% if (t.baixado or 0) > 0 %}
+                        <a
+                          href="{{ url_for('financeiro.listar_baixas_titulo', id_titulo=t.id) }}"
+                          class="titles-action"
+                          title="Consultar baixas"
+                          aria-label="Consultar baixas do título {{ t.id }}"
+                        >
+                          <svg class="icon"><use href="#icon-receipt"></use></svg>
+                        </a>
+                      {% else %}
+                        <span class="titles-action titles-action-disabled" title="Sem baixas registradas" aria-label="Sem baixas registradas">
+                          <svg class="icon"><use href="#icon-receipt"></use></svg>
+                        </span>
+                      {% endif %}
+
+                      <a
+                        href="{{ url_for('financeiro.editar_titulo', id_titulo=t.id) }}"
+                        class="titles-action"
+                        title="Editar título"
+                        aria-label="Editar título {{ t.id }}"
+                      >
+                        <svg class="icon"><use href="#icon-pencil"></use></svg>
+                      </a>
+
+                      <a
+                        href="{{ url_for('financeiro.copiar_titulo', id_titulo=t.id) }}"
+                        class="titles-action"
+                        title="Copiar título"
+                        aria-label="Copiar título {{ t.id }}"
+                      >
+                        <svg class="icon"><use href="#icon-copy"></use></svg>
+                      </a>
+
+                      <form
+                        method="post"
+                        action="{{ url_for('financeiro.excluir_titulo', id_titulo=t.id) }}"
+                        class="titles-action-form"
+                        onsubmit="return confirm('Confirma exclusão do título {{ t.doc_label }} {{ t.nr_documento }}?');"
+                      >
+                        <button
+                          type="submit"
+                          class="titles-action titles-action-danger"
+                          title="{% if (t.baixado or 0) > 0 %}Título possui baixa e não pode ser excluído{% else %}Excluir título{% endif %}"
+                          aria-label="Excluir título {{ t.id }}"
+                          {% if (t.baixado or 0) > 0 %}disabled{% endif %}
+                        >
+                          <svg class="icon"><use href="#icon-trash"></use></svg>
+                        </button>
+                      </form>
                     </div>
                   </td>
                 </tr>
