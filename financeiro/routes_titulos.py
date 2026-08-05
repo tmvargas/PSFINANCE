@@ -17,7 +17,11 @@ from sqlalchemy.orm import joinedload
 from sqlalchemy import func
 
 from . import bp_financeiro
-from .regras_empresa_centro import listar_empresas_centros_ativos, validar_empresa_centro
+from .regras_empresa_centro import (
+    listar_empresas_centros_ativos,
+    validar_conta_da_empresa,
+    validar_empresa_centro,
+)
 from database import SessionLocal
 from models import Baixa, Conta, Credor, Documento, PlanoDeContas, Titulo, TituloAnexo
 
@@ -496,7 +500,12 @@ def baixar_titulo(id_titulo: int):
 
     titulo = (
         session.query(Titulo)
-        .options(joinedload(Titulo.credor), joinedload(Titulo.plano), joinedload(Titulo.documento))
+        .options(
+            joinedload(Titulo.credor),
+            joinedload(Titulo.empresa),
+            joinedload(Titulo.plano),
+            joinedload(Titulo.documento),
+        )
         .filter(Titulo.id_titulo == id_titulo, Titulo.deleted.is_(False))
         .first()
     )
@@ -509,11 +518,14 @@ def baixar_titulo(id_titulo: int):
 
     contas = (
         session.query(Conta)
-        .filter(Conta.deleted.is_(False))
+        .filter(
+            Conta.deleted.is_(False),
+            Conta.id_empresa == titulo.id_empresa,
+        )
         .order_by(Conta.descricao)
         .all()
     )
-    contas_view = [{"id": c.id_conta, "descricao": c.descricao} for c in contas]
+    contas_view = [{"id": c.id_conta, "descricao": c.descricao, "id_empresa": c.id_empresa} for c in contas]
 
     if request.method == "POST":
         data_baixa = _parse_date(request.form.get("data"))
@@ -521,20 +533,17 @@ def baixar_titulo(id_titulo: int):
         valor_baixa = _parse_float(request.form.get("valor_baixa"))
 
         erros = []
+        if not titulo.id_empresa:
+            erros.append("Título sem empresa vinculada não pode ser baixado.")
         if not data_baixa:
             erros.append("Data da baixa inválida.")
-        if not id_conta:
-            erros.append("Conta é obrigatória.")
         if valor_baixa is None or valor_baixa <= 0:
             erros.append("Valor da baixa inválido.")
         if valor_baixa is not None and valor_baixa > saldo_aberto + 0.0001:
             erros.append(f"Valor da baixa não pode ser maior que o saldo em aberto (R$ {saldo_aberto:.2f}).")
 
-        conta = None
-        if id_conta:
-            conta = session.query(Conta).filter(Conta.id_conta == id_conta, Conta.deleted.is_(False)).first()
-            if not conta:
-                erros.append("Conta não encontrada.")
+        erros_conta, conta = validar_conta_da_empresa(session, id_conta, titulo.id_empresa)
+        erros.extend(erros_conta)
 
         if erros:
             for e in erros:
@@ -542,7 +551,7 @@ def baixar_titulo(id_titulo: int):
         else:
             bx = Baixa(
                 data=data_baixa,
-                id_conta=id_conta,
+                id_conta=conta.id_conta,
                 id_titulo=id_titulo,
                 valor_baixa=valor_baixa,
             )
@@ -556,6 +565,7 @@ def baixar_titulo(id_titulo: int):
         "id": titulo.id_titulo,
         "nr_documento": titulo.nr_documento,
         "credor": titulo.credor.nome if titulo.credor else "",
+        "empresa": f"{titulo.empresa.codigo} - {titulo.empresa.nome}" if titulo.empresa else "",
         "plano": f"{titulo.plano.cod_estrutural} - {titulo.plano.nome_conta}" if titulo.plano else "",
         "valor": float(titulo.valor or 0),
         "saldo_aberto": float(saldo_aberto or 0),

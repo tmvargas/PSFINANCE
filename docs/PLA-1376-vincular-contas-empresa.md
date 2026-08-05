@@ -17,6 +17,9 @@ estrutura de `PLA-1179`.
   inativas.
 - Empresa com conta ativa vinculada nao pode ser desativada.
 - Conta inativa so pode ser reativada quando possuir empresa ativa vinculada.
+- Movimentacoes de entrada, saida e transferencia exigem que a conta usada
+  pertenca a empresa selecionada na movimentacao.
+- Baixas de titulos so aceitam conta ativa pertencente a empresa do titulo.
 - Contas historicas sem empresa devem ser vinculadas por migration controlada.
 
 ## Arquitetura
@@ -32,9 +35,10 @@ Arquivos por camada:
 - Modelo: `models.py`;
 - Regras compartilhadas: `financeiro/regras_empresa_centro.py`;
 - Controllers Flask: `financeiro/routes_contas.py` e
-  `financeiro/routes_empresa.py`;
-- Templates: `templates/conta_form.html`, `templates/contas_list.html` e
-  `templates/contas_inativas.html`;
+  `financeiro/routes_empresa.py`, `financeiro/routes_titulos.py`;
+- Templates: `templates/conta_form.html`, `templates/contas_list.html`,
+  `templates/contas_inativas.html`, `templates/movimentacao_form.html`,
+  `templates/movimentacao_edit_form.html` e `templates/titulo_baixa_form.html`;
 - Banco: `migrations/versions/20260805_pla1376_conta_empresa.sql`;
 - Documentacao: `docs/decisoes.md` e este arquivo.
 
@@ -69,6 +73,30 @@ Teste focal recomendado com banco temporario:
 - editar conta mantendo empresa ativa;
 - listar contas ativas e inativas confirmando coluna Empresa;
 - tentar desativar empresa com conta ativa e confirmar bloqueio.
+- criar duas empresas ativas e duas contas, uma para cada empresa;
+- tentar registrar entrada, saida e transferencia na empresa A usando conta da
+  empresa B e confirmar mensagem "Conta nao pertence a empresa selecionada.";
+- tentar baixar titulo da empresa A usando conta da empresa B e confirmar
+  bloqueio;
+- confirmar que os selects de movimentacao ocultam contas de outras empresas
+  apos selecionar a empresa.
+
+## Evidencias coletadas
+
+- Backfill no banco PostgreSQL de `staging`, consulta agregada em 2026-08-05:
+  `total_contas=9`, `contas_com_empresa=9`, `contas_sem_empresa=0`,
+  `contas_empresa_1=9`.
+- Evidencia visual local com banco temporario:
+  `docs/mockups/evidencias/PLA-1376-contas-empresa.png`.
+- Evidencia visual local do formulario de movimentacao com empresa selecionada:
+  `docs/mockups/evidencias/PLA-1376-movimentacao-contas-por-empresa.png`.
+- Validacao focal por POST manipulado confirmou bloqueio de conta de outra
+  empresa em `/financeiro/movimentacoes/nova` e
+  `/financeiro/titulos/1/baixar` com mensagem
+  "Conta nao pertence a empresa selecionada.".
+- Validacao DOM (Modelo de Objetos do Documento) confirmou que, ao selecionar
+  a empresa `1`, a conta da empresa `2` fica oculta no select da tela de
+  movimentacao.
 
 ## Limites
 

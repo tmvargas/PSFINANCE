@@ -7,6 +7,7 @@ from datetime import date
 from . import bp_financeiro
 from .regras_empresa_centro import (
     listar_empresas_centros_ativos,
+    validar_conta_da_empresa,
     validar_empresa_ativa,
     validar_empresa_centro,
 )
@@ -414,19 +415,14 @@ def nova_movimentacao():
         # ---------------- TIPOS ----------------
         if tipo == "E":
             # Entrada: uma única conta (destino)
-            if not id_conta_unica:
-                erros.append("Selecione a conta da entrada.")
-            else:
-                conta_destino = (
-                    session.query(Conta)
-                    .filter(
-                        Conta.id_conta == int(id_conta_unica),
-                        Conta.deleted.is_(False),
-                    )
-                    .first()
-                )
-                if not conta_destino:
-                    erros.append("Conta não encontrada.")
+            id_conta = int(id_conta_unica) if id_conta_unica and id_conta_unica.isdigit() else None
+            erros_conta, conta_destino = validar_conta_da_empresa(
+                session,
+                id_conta,
+                id_empresa,
+                "Selecione a conta da entrada.",
+            )
+            erros.extend(erros_conta)
 
             # plano financeiro (grupo 1, analítica)
             if not id_plano:
@@ -447,19 +443,14 @@ def nova_movimentacao():
 
         elif tipo == "S":
             # Saída: uma única conta (origem)
-            if not id_conta_unica:
-                erros.append("Selecione a conta da saída.")
-            else:
-                conta_origem = (
-                    session.query(Conta)
-                    .filter(
-                        Conta.id_conta == int(id_conta_unica),
-                        Conta.deleted.is_(False),
-                    )
-                    .first()
-                )
-                if not conta_origem:
-                    erros.append("Conta não encontrada.")
+            id_conta = int(id_conta_unica) if id_conta_unica and id_conta_unica.isdigit() else None
+            erros_conta, conta_origem = validar_conta_da_empresa(
+                session,
+                id_conta,
+                id_empresa,
+                "Selecione a conta da saída.",
+            )
+            erros.extend(erros_conta)
 
             # plano financeiro (grupo 2, analítica)
             if not id_plano:
@@ -480,33 +471,23 @@ def nova_movimentacao():
 
         elif tipo == "T":
             # Transferência: conta origem + conta destino, sem plano
-            if not id_conta_origem:
-                erros.append("Selecione a conta de origem da transferência.")
-            else:
-                conta_origem = (
-                    session.query(Conta)
-                    .filter(
-                        Conta.id_conta == int(id_conta_origem),
-                        Conta.deleted.is_(False),
-                    )
-                    .first()
-                )
-                if not conta_origem:
-                    erros.append("Conta de origem não encontrada.")
+            id_origem = int(id_conta_origem) if id_conta_origem and id_conta_origem.isdigit() else None
+            erros_origem, conta_origem = validar_conta_da_empresa(
+                session,
+                id_origem,
+                id_empresa,
+                "Selecione a conta de origem da transferência.",
+            )
+            erros.extend(erros_origem)
 
-            if not id_conta_destino:
-                erros.append("Selecione a conta de destino da transferência.")
-            else:
-                conta_destino = (
-                    session.query(Conta)
-                    .filter(
-                        Conta.id_conta == int(id_conta_destino),
-                        Conta.deleted.is_(False),
-                    )
-                    .first()
-                )
-                if not conta_destino:
-                    erros.append("Conta de destino não encontrada.")
+            id_destino = int(id_conta_destino) if id_conta_destino and id_conta_destino.isdigit() else None
+            erros_destino, conta_destino = validar_conta_da_empresa(
+                session,
+                id_destino,
+                id_empresa,
+                "Selecione a conta de destino da transferência.",
+            )
+            erros.extend(erros_destino)
 
             if conta_origem and conta_destino and conta_origem.id_conta == conta_destino.id_conta:
                 erros.append("Conta de origem e destino não podem ser a mesma na transferência.")
@@ -574,7 +555,7 @@ def nova_movimentacao():
     empresas_view, centros_custo_view = listar_empresas_centros_ativos(session)
 
     contas_view = [
-        {"id": c.id_conta, "descricao": c.descricao}
+        {"id": c.id_conta, "descricao": c.descricao, "id_empresa": c.id_empresa}
         for c in contas
     ]
 
@@ -731,19 +712,14 @@ def editar_movimentacao(id_mov):
         plano = None
 
         if tipo == "E":
-            if not id_conta_unica:
-                erros.append("Selecione a conta da entrada.")
-            else:
-                conta_destino = (
-                    session.query(Conta)
-                    .filter(
-                        Conta.id_conta == int(id_conta_unica),
-                        Conta.deleted.is_(False),
-                    )
-                    .first()
-                )
-                if not conta_destino:
-                    erros.append("Conta não encontrada.")
+            id_conta = int(id_conta_unica) if id_conta_unica and id_conta_unica.isdigit() else None
+            erros_conta, conta_destino = validar_conta_da_empresa(
+                session,
+                id_conta,
+                id_empresa,
+                "Selecione a conta da entrada.",
+            )
+            erros.extend(erros_conta)
 
             if not id_plano:
                 erros.append("Selecione o plano financeiro (grupo 1, conta analítica).")
@@ -761,19 +737,14 @@ def editar_movimentacao(id_mov):
                     erros.append("Plano inválido. Para entradas, selecione conta analítica do grupo 1.")
 
         elif tipo == "S":
-            if not id_conta_unica:
-                erros.append("Selecione a conta da saída.")
-            else:
-                conta_origem = (
-                    session.query(Conta)
-                    .filter(
-                        Conta.id_conta == int(id_conta_unica),
-                        Conta.deleted.is_(False),
-                    )
-                    .first()
-                )
-                if not conta_origem:
-                    erros.append("Conta não encontrada.")
+            id_conta = int(id_conta_unica) if id_conta_unica and id_conta_unica.isdigit() else None
+            erros_conta, conta_origem = validar_conta_da_empresa(
+                session,
+                id_conta,
+                id_empresa,
+                "Selecione a conta da saída.",
+            )
+            erros.extend(erros_conta)
 
             if not id_plano:
                 erros.append("Selecione o plano financeiro (grupo 2, conta analítica).")
@@ -791,33 +762,23 @@ def editar_movimentacao(id_mov):
                     erros.append("Plano inválido. Para saídas, selecione conta analítica do grupo 2.")
 
         elif tipo == "T":
-            if not id_conta_origem:
-                erros.append("Selecione a conta de origem da transferência.")
-            else:
-                conta_origem = (
-                    session.query(Conta)
-                    .filter(
-                        Conta.id_conta == int(id_conta_origem),
-                        Conta.deleted.is_(False),
-                    )
-                    .first()
-                )
-                if not conta_origem:
-                    erros.append("Conta de origem não encontrada.")
+            id_origem = int(id_conta_origem) if id_conta_origem and id_conta_origem.isdigit() else None
+            erros_origem, conta_origem = validar_conta_da_empresa(
+                session,
+                id_origem,
+                id_empresa,
+                "Selecione a conta de origem da transferência.",
+            )
+            erros.extend(erros_origem)
 
-            if not id_conta_destino:
-                erros.append("Selecione a conta de destino da transferência.")
-            else:
-                conta_destino = (
-                    session.query(Conta)
-                    .filter(
-                        Conta.id_conta == int(id_conta_destino),
-                        Conta.deleted.is_(False),
-                    )
-                    .first()
-                )
-                if not conta_destino:
-                    erros.append("Conta de destino não encontrada.")
+            id_destino = int(id_conta_destino) if id_conta_destino and id_conta_destino.isdigit() else None
+            erros_destino, conta_destino = validar_conta_da_empresa(
+                session,
+                id_destino,
+                id_empresa,
+                "Selecione a conta de destino da transferência.",
+            )
+            erros.extend(erros_destino)
 
             if conta_origem and conta_destino and conta_origem.id_conta == conta_destino.id_conta:
                 erros.append("Conta de origem e destino não podem ser a mesma na transferência.")
@@ -880,6 +841,7 @@ def editar_movimentacao(id_mov):
         {
             "id": c.id_conta,
             "descricao": c.descricao,
+            "id_empresa": c.id_empresa,
             "tipo": c.tipo,
         }
         for c in contas
