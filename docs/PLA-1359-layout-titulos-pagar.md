@@ -91,12 +91,20 @@ Branch da tarefa:
 
 ```text
 pla-1359-layout-consulta-titulos-pagar
+pla-1359-icones-acoes-titulos
 ```
 
 Commit da tarefa:
 
 ```text
 9f174fb
+98b0f23
+```
+
+Pull Request (solicitacao de revisao) corretivo:
+
+```text
+https://github.com/tmvargas/PSFINANCE/pull/31
 ```
 
 Deploy de staging executado na VPS Sistemas a partir da branch `staging`.
@@ -106,7 +114,7 @@ Evidencia apos deploy:
 ```text
 APP_SERVICE=active
 GATE_SERVICE=active
-HEAD=fdbe81a67f17c30c3aaaa88d8e599b05db67c5dd
+HEAD=3347d18936aabac5c8212be8c754272361650483
 STATUS_LINES=0
 HEALTH_HTTP_STATUS=200
 GATE_HTTP_STATUS=200
@@ -126,7 +134,7 @@ Gate publico:
   "app": "PSFINANCE",
   "base_path": "/staging/psfinance",
   "branch": "staging",
-  "commit": "fdbe81a67f17c30c3aaaa88d8e599b05db67c5dd",
+  "commit": "3347d18936aabac5c8212be8c754272361650483",
   "database_url_source": "PSFINANCE_STAGING_DATABASE_URL",
   "db_dialect": "postgresql",
   "environment": "staging-gate",
@@ -137,6 +145,13 @@ Gate publico:
 Logs recentes dos servicos `psfinance-staging.service` e
 `psfinance-staging-gate.service` registraram restart do Gunicorn sem erro
 critico de inicializacao.
+
+Branches de tarefa encerradas apos integracao e validacao:
+
+```text
+pla-1359-layout-consulta-titulos-pagar
+pla-1359-icones-acoes-titulos
+```
 
 ## Limites
 
