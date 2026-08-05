@@ -314,8 +314,8 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
 
 - Projeto: PSFINANCE.
 - Decisao: a consulta de titulos a pagar deve exibir uma coluna explicita
-  `Titulo`, reunindo o identificador interno do titulo e a referencia do
-  documento em uma unica coluna operacional.
+  `Titulo`, reunindo o identificador interno sem prefixo `#` e a referencia
+  do documento em uma unica coluna operacional.
 - Motivo: evitar a separacao entre `ID` e `Documento` na listagem, deixando a
   identificacao do titulo mais direta para consulta e acoes por linha.
 - Evidencia visual: `docs/mockups/evidencias/PLA-1370-titulos-coluna-titulo.png`.
