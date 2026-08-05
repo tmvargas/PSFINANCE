@@ -326,14 +326,18 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   no cadastro e na edicao.
 - Aplicacao: a regra de empresa ativa foi centralizada em
   `financeiro/regras_empresa_centro.py` e aplicada no fluxo de contas.
+- Complemento de integridade: movimentacoes manuais e baixas de titulos passam
+  a validar que a conta escolhida pertence a empresa da operacao. Em
+  movimentacoes, a referencia e a empresa selecionada no formulario; em baixas,
+  a referencia e a empresa vinculada ao titulo.
 - Banco: `conta.id_empresa` passa a ser obrigatorio pela migration PostgreSQL
   versionada, com backfill seguro para contas historicas usando a empresa ativa
   de codigo `1` quando existir exatamente uma.
 - Integridade: empresa com conta ativa vinculada nao pode ser desativada, e
   conta inativa sem empresa ativa vinculada nao pode ser reativada.
+- Evidencia de staging em 2026-08-05: 9 contas totais, 9 contas com empresa,
+  0 contas sem empresa e 9 contas vinculadas a empresa `1`.
 - Producao: nenhuma migration, escrita em banco produtivo, merge em `main`,
   copia de dados entre ambientes ou deploy produtivo esta autorizado.
-- Evidencia visual: `docs/mockups/evidencias/PLA-1370-titulos-coluna-titulo.png`.
-- Limite: alteracao restrita ao template `templates/titulos_list.html`. Nao
-  altera consulta, regra de negocio, banco de dados, variaveis, VPS, `main` ou
-  producao.
+- Evidencia visual da PLA-1376 deve ser gerada no gate de staging apos deploy
+  da branch `staging`.

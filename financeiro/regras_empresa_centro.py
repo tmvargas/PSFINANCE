@@ -1,4 +1,4 @@
-from models import CentroCusto, Empresa
+from models import CentroCusto, Conta, Empresa
 
 
 def listar_empresas_centros_ativos(session):
@@ -83,3 +83,26 @@ def validar_empresa_ativa(session, id_empresa, mensagem_obrigatoria="Empresa é 
             erros.append("Empresa ativa não encontrada.")
 
     return erros, empresa
+
+
+def validar_conta_da_empresa(session, id_conta, id_empresa, mensagem_obrigatoria="Conta é obrigatória."):
+    erros = []
+    conta = None
+
+    if not id_conta:
+        erros.append(mensagem_obrigatoria)
+        return erros, conta
+
+    conta = (
+        session.query(Conta)
+        .filter(Conta.id_conta == id_conta, Conta.deleted.is_(False))
+        .first()
+    )
+    if not conta:
+        erros.append("Conta ativa não encontrada.")
+        return erros, conta
+
+    if id_empresa and conta.id_empresa != id_empresa:
+        erros.append("Conta não pertence à empresa selecionada.")
+
+    return erros, conta

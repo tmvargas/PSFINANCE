@@ -47,7 +47,7 @@
       <select name="id_conta" id="id_conta" class="form-select">
         <option value="">Selecione...</option>
         {% for c in contas %}
-          <option value="{{ c.id }}"
+          <option value="{{ c.id }}" data-empresa="{{ c.id_empresa }}"
             {% if movimentacao and movimentacao.id_conta == c.id %}selected{% endif %}>
             {{ c.descricao }}
           </option>
@@ -60,7 +60,7 @@
       <select name="id_conta_origem" class="form-select">
         <option value="">Selecione...</option>
         {% for c in contas %}
-          <option value="{{ c.id }}"
+          <option value="{{ c.id }}" data-empresa="{{ c.id_empresa }}"
             {% if movimentacao and movimentacao.id_conta_origem == c.id %}selected{% endif %}>
             {{ c.descricao }}
           </option>
@@ -73,7 +73,7 @@
       <select name="id_conta_destino" class="form-select">
         <option value="">Selecione...</option>
         {% for c in contas %}
-          <option value="{{ c.id }}"
+          <option value="{{ c.id }}" data-empresa="{{ c.id_empresa }}"
             {% if movimentacao and movimentacao.id_conta_destino == c.id %}selected{% endif %}>
             {{ c.descricao }}
           </option>
@@ -295,6 +295,11 @@
 (function () {
   const empresa = document.getElementById("id_empresa");
   const centro = document.getElementById("id_centro_custo");
+  const contas = [
+    document.getElementById("id_conta"),
+    document.querySelector("[name='id_conta_origem']"),
+    document.querySelector("[name='id_conta_destino']"),
+  ].filter(Boolean);
 
   function filtrarCentros() {
     const idEmpresa = empresa.value || "";
@@ -309,8 +314,27 @@
     });
   }
 
-  empresa.addEventListener("change", filtrarCentros);
+  function filtrarContas() {
+    const idEmpresa = empresa.value || "";
+    contas.forEach((select) => {
+      Array.from(select.options).forEach((option) => {
+        if (!option.value) {
+          option.hidden = false;
+          return;
+        }
+        const visivel = !idEmpresa || option.dataset.empresa === idEmpresa;
+        option.hidden = !visivel;
+        if (!visivel && option.selected) select.value = "";
+      });
+    });
+  }
+
+  empresa.addEventListener("change", function () {
+    filtrarCentros();
+    filtrarContas();
+  });
   filtrarCentros();
+  filtrarContas();
 })();
 </script>
 {% endblock %}
