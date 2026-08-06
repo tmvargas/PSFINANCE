@@ -9,9 +9,11 @@ das telas.
 ## Escopo executado
 
 - Convertido o grupo `APOIO` em item expansivel unico, com submenu contendo
-  `Empresa`, `Centro de Custo`, `Credor` e `Plano Financeiro`.
+  `Empresa`, `Centro de Custo`, `Contas`, `Credor` e `Plano Financeiro`.
 - Removida a lista direta de itens de apoio no menu aberto.
 - Removida a abertura automatica inicial dos submenus por endpoint ativo.
+- Definido o menu lateral como compacto no carregamento padrao quando nao ha
+  preferencia salva pelo usuario.
 - Preservado o destaque do item principal quando a rota atual pertence ao seu
   grupo.
 - Preservado o parametro `?open=` para evidencia controlada de flyout no menu
@@ -24,7 +26,7 @@ das telas.
 - Abrir uma rota de apoio, como `/financeiro/empresas`, e confirmar que
   `APOIO` fica destacado, mas seu submenu inicia fechado.
 - Clicar em `APOIO` e confirmar que o submenu exibe `Empresa`,
-  `Centro de Custo`, `Credor` e `Plano Financeiro`.
+  `Centro de Custo`, `Contas`, `Credor` e `Plano Financeiro`.
 - Acionar o estado compacto e confirmar que o icone de `APOIO` abre o mesmo
   submenu em flyout lateral.
 

@@ -751,6 +751,7 @@
                 <div class="submenu" aria-label="Submenu Apoio">
                   <a class="submenu-item {% if endpoint in ['financeiro.listar_empresas', 'financeiro.nova_empresa', 'financeiro.editar_empresa'] %}active{% endif %}" href="{{ url_for('financeiro.listar_empresas') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-landmark"></use></svg></span><span>Empresa</span></a>
                   <a class="submenu-item {% if endpoint in ['financeiro.listar_centros_custo', 'financeiro.novo_centro_custo', 'financeiro.editar_centro_custo'] %}active{% endif %}" href="{{ url_for('financeiro.listar_centros_custo') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-list-tree"></use></svg></span><span>Centro de Custo</span></a>
+                  <a class="submenu-item {% if endpoint in ['financeiro.listar_contas', 'financeiro.nova_conta', 'financeiro.editar_conta', 'financeiro.listar_contas_inativas'] %}active{% endif %}" href="{{ url_for('financeiro.listar_contas') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-landmark"></use></svg></span><span>Contas</span></a>
                   <a class="submenu-item {% if endpoint in ['financeiro.listar_credores', 'financeiro.novo_credor', 'financeiro.editar_credor'] %}active{% endif %}" href="{{ url_for('financeiro.listar_credores') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-user"></use></svg></span><span>Credor</span></a>
                   <a class="submenu-item {% if endpoint in ['financeiro.listar_plano', 'financeiro.novo_plano', 'financeiro.editar_plano'] %}active{% endif %}" href="{{ url_for('financeiro.listar_plano') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-list-tree"></use></svg></span><span>Plano Financeiro</span></a>
                 </div>
@@ -795,6 +796,7 @@
       const toggleSidebar = document.querySelector("#toggleSidebar");
       const toggleGroups = document.querySelector("#toggleGroups");
       const params = new URLSearchParams(window.location.search);
+      const savedSidebarCompact = localStorage.getItem("psfinanceSidebarCompact");
 
       function closeSubmenus() {
         document.querySelectorAll(".menu-node").forEach((node) => {
@@ -825,7 +827,7 @@
         }
       }
 
-      if (params.get("compact") === "1" || localStorage.getItem("psfinanceSidebarCompact") === "1") {
+      if (params.get("compact") === "1" || savedSidebarCompact === "1" || savedSidebarCompact === null) {
         appShell.classList.add("sidebar-compact");
         closeSubmenus();
       }

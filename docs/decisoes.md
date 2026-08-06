@@ -253,13 +253,16 @@ fora da navegacao aprovada, sem alterar regras de negocio, banco de dados,
 ## 2026-08-05 - PLA-1480 menu Apoio e estado inicial fechado
 
 Decisao: transformar `APOIO` em um item expansivel unico no menu lateral da
-aplicacao real, mantendo `Empresa`, `Centro de Custo`, `Credor` e
-`Plano Financeiro` dentro do submenu, e remover a abertura automatica inicial
-dos submenus por endpoint ativo.
+aplicacao real, mantendo `Empresa`, `Centro de Custo`, `Contas`, `Credor` e
+`Plano Financeiro` dentro do submenu, remover a abertura automatica inicial
+dos submenus por endpoint ativo e iniciar o menu lateral compacto por padrao
+quando nao houver preferencia salva pelo usuario.
 
 Motivo: a demanda solicita ajustar o menu `APOIO` e o estado inicial fechado.
-O comportamento anterior deixava `APOIO` como lista direta no menu aberto e
-podia renderizar submenus ja abertos ao acessar rotas internas.
+O comportamento anterior deixava `APOIO` como lista direta no menu aberto,
+podia renderizar submenus ja abertos ao acessar rotas internas e nao aplicava
+o modo compacto no primeiro carregamento sem parametro de URL ou estado salvo
+no navegador.
 
 Impacto: a entrega altera somente `templates/base.html` e documentacao da
 tarefa. Nao altera regras de negocio, banco de dados, migrations, variaveis de
