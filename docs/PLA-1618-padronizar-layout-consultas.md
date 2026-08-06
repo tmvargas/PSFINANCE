@@ -96,6 +96,8 @@ Base temporaria com dados ficticios criada fora do repositorio em
 
 Evidencias:
 
+- `docs/mockups/evidencias/PLA-1618-referencia-titulos-desktop.png`;
+- `docs/mockups/evidencias/PLA-1618-referencia-titulos-mobile.png`;
 - `docs/mockups/evidencias/PLA-1618-contas-desktop.png`;
 - `docs/mockups/evidencias/PLA-1618-movimentacoes-desktop.png`;
 - `docs/mockups/evidencias/PLA-1618-movimentacoes-mobile.png`;
@@ -109,6 +111,41 @@ Resultado observado:
 - desktop com cabecalho, acoes, tabela e rodape de total sem sobreposicao;
 - mobile com cabecalho e acoes empilhados e tabela dentro de area responsiva;
 - acoes por linha renderizadas com icones compactos.
+
+## Comparacao objetiva com consulta de titulos
+
+Referencia usada no sistema real: `/financeiro/titulos`, template
+`templates/titulos_list.html`, conforme entrega visual da PLA-1359/PLA-1370.
+
+| Criterio visual da consulta de titulos | Rotinas ajustadas | Evidencia |
+| --- | --- | --- |
+| Pagina com classe `consultation-page` e cabecalho operacional. | Contas, contas inativas, movimentacoes, empresas, centros de custo, credores e plano financeiro usam a mesma estrutura. | Renderizacao local retornou `consultation-page=True` em todas as rotas. |
+| Titulo em formato `Consulta de ...` com subtitulo de contexto. | Todas as rotinas ajustadas passaram a usar titulo e subtitulo equivalentes ao padrao de titulos. | Screenshots desktop das sete rotinas e mobile de movimentacoes. |
+| Acoes principais no cabecalho com botao compacto, icone e texto. | Botoes de novo cadastro, movimentacao, contas inativas e voltar seguem `btn-icon-label`. | Screenshots desktop das rotinas ajustadas. |
+| Tabela dentro de shell visual padronizado, sem `table-dark` ou `table-striped`. | Todas as consultas ajustadas usam `consultation-table-shell` e cabecalho proprio. | Renderizacao local confirmou ausencia de `table-dark` e `table-striped`. |
+| Acoes por linha com icones compactos, `title` e `aria-label`. | Editar, desativar, reativar e excluir foram convertidos para botoes compactos por icone. | Screenshots desktop e inspecao dos templates alterados. |
+| Estado vazio sem tabela quebrada. | Todas as rotinas ajustadas possuem `consultation-empty` quando nao ha registros. | Inspecao dos templates e renderizacao local. |
+| Responsividade com area rolavel quando a tabela e larga. | As rotinas usam `table-responsive` e a consulta de movimentacoes foi evidenciada tambem em mobile. | `PLA-1618-movimentacoes-mobile.png` e referencia mobile de titulos. |
+
+Conclusao da comparacao: as rotinas ajustadas reproduzem a logica visual da
+consulta de titulos sem copiar regra de negocio e sem alterar backend, banco,
+rotas ou permissoes.
+
+## Validacao de staging na VPS
+
+Validacao inicial executada em 2026-08-06 antes da publicacao desta correcao:
+
+```text
+GET http://vps69143.publiccloud.com.br:5001/health -> HTTP 200
+GET http://vps69143.publiccloud.com.br:5001/gate -> HTTP 200
+branch retornada: staging
+commit retornado: 9502730df2c760e0e596033295fd4b3aa1e73a04
+status retornado: healthy
+```
+
+Conclusao inicial: o gate corporativo esta saudavel, mas ainda apontava para o
+commit anterior da `staging`. A validacao final deve ser registrada apos merge
+da branch de tarefa na `staging` e publicacao na VPS de teste.
 
 ## Limites
 

@@ -374,3 +374,7 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   operacional criado para titulos a pagar.
 - Limite: alteracao restrita a apresentacao. Nao autoriza migration, escrita
   em banco de producao, alteracao em `main` ou deploy produtivo.
+- Complemento de evidencia: a consulta real de referencia e
+  `/financeiro/titulos`, documentada com screenshots desktop e mobile no pacote
+  da PLA-1618. A comparacao objetiva entre a referencia e as rotinas ajustadas
+  fica registrada em `docs/PLA-1618-padronizar-layout-consultas.md`.
