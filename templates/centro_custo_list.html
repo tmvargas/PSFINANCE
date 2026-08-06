@@ -3,60 +3,89 @@
 {% block title %}Centros de Custo{% endblock %}
 
 {% block content %}
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h4 mb-0">Centros de Custo</h1>
+  <div class="consultation-page">
+    <div class="consultation-header">
+      <div>
+        <div class="consultation-kicker">Cadastros de apoio</div>
+        <h1 class="h4 mb-0">Consulta de centros de custo</h1>
+        <p class="consultation-subtitle">Centros vinculados às empresas para classificação financeira.</p>
+      </div>
 
-    <div class="d-flex gap-2">
-      <a href="{{ url_for('financeiro.novo_centro_custo') }}" class="btn btn-sm btn-primary">
-        Novo centro de custo
-      </a>
+      <div class="consultation-actions">
+        <a href="{{ url_for('financeiro.novo_centro_custo') }}" class="btn btn-sm btn-primary btn-icon-label">
+          <svg class="icon"><use href="#icon-plus"></use></svg>
+          <span>Novo centro de custo</span>
+        </a>
+      </div>
     </div>
+
+    {% if centros %}
+      <div class="consultation-table-shell">
+        <div class="table-responsive">
+          <table class="table table-sm table-hover align-middle consultation-table">
+            <thead>
+              <tr>
+                <th style="width: 90px;">ID</th>
+                <th>Empresa</th>
+                <th style="width: 140px;">Código</th>
+                <th>Centro de custo</th>
+                <th style="width: 160px;">Código externo</th>
+                <th style="width: 120px;" class="text-center">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for centro in centros %}
+                <tr>
+                  <td>{{ centro.id }}</td>
+                  <td>
+                    <div class="consultation-text-main consultation-truncate" title="{{ centro.empresa }}">
+                      {{ centro.empresa or '-' }}
+                    </div>
+                    <div class="consultation-text-muted consultation-truncate" title="{{ centro.empresa_codigo }}">
+                      Código {{ centro.empresa_codigo or '-' }}
+                    </div>
+                  </td>
+                  <td>{{ centro.codigo }}</td>
+                  <td>
+                    <div class="consultation-text-main consultation-truncate" title="{{ centro.nome }}">
+                      {{ centro.nome }}
+                    </div>
+                  </td>
+                  <td>{{ centro.codigo_externo or '-' }}</td>
+                  <td class="text-center">
+                    <div class="consultation-row-actions">
+                      <a
+                        href="{{ url_for('financeiro.editar_centro_custo', id_centro_custo=centro.id) }}"
+                        class="consultation-action"
+                        title="Editar centro de custo"
+                        aria-label="Editar centro de custo {{ centro.id }}"
+                      >
+                        <svg class="icon"><use href="#icon-pencil"></use></svg>
+                      </a>
+                      <form
+                        method="post"
+                        action="{{ url_for('financeiro.desativar_centro_custo', id_centro_custo=centro.id) }}"
+                        class="consultation-action-form"
+                      >
+                        <button
+                          type="submit"
+                          class="consultation-action consultation-action-danger"
+                          title="Desativar centro de custo"
+                          aria-label="Desativar centro de custo {{ centro.id }}"
+                        >
+                          <svg class="icon"><use href="#icon-trash"></use></svg>
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% else %}
+      <div class="consultation-empty">Não há centros de custo cadastrados.</div>
+    {% endif %}
   </div>
-
-  {% if centros %}
-    <div class="table-responsive">
-      <table class="table table-sm table-striped table-hover align-middle">
-        <thead class="table-dark">
-          <tr>
-            <th style="width: 90px;">ID</th>
-            <th>Empresa</th>
-            <th>Código</th>
-            <th>Nome</th>
-            <th>Código externo</th>
-            <th style="width: 210px;" class="text-center">Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for centro in centros %}
-            <tr>
-              <td>{{ centro.id }}</td>
-              <td>{{ centro.empresa_codigo }} - {{ centro.empresa }}</td>
-              <td>{{ centro.codigo }}</td>
-              <td>{{ centro.nome }}</td>
-              <td>{{ centro.codigo_externo or '-' }}</td>
-              <td class="text-center">
-                <a
-                  href="{{ url_for('financeiro.editar_centro_custo', id_centro_custo=centro.id) }}"
-                  class="btn btn-sm btn-outline-secondary"
-                >
-                  Editar
-                </a>
-                <form
-                  method="post"
-                  action="{{ url_for('financeiro.desativar_centro_custo', id_centro_custo=centro.id) }}"
-                  class="d-inline"
-                >
-                  <button type="submit" class="btn btn-sm btn-outline-danger">
-                    Desativar
-                  </button>
-                </form>
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  {% else %}
-    <p>Não há centros de custo cadastrados.</p>
-  {% endif %}
 {% endblock %}

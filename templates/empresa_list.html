@@ -3,60 +3,82 @@
 {% block title %}Empresas{% endblock %}
 
 {% block content %}
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h4 mb-0">Empresas</h1>
+  <div class="consultation-page">
+    <div class="consultation-header">
+      <div>
+        <div class="consultation-kicker">Cadastros de apoio</div>
+        <h1 class="h4 mb-0">Consulta de empresas</h1>
+        <p class="consultation-subtitle">Empresas disponíveis para contas, centros de custo e títulos.</p>
+      </div>
 
-    <div class="d-flex gap-2">
-      <a href="{{ url_for('financeiro.nova_empresa') }}" class="btn btn-sm btn-primary">
-        Nova empresa
-      </a>
+      <div class="consultation-actions">
+        <a href="{{ url_for('financeiro.nova_empresa') }}" class="btn btn-sm btn-primary btn-icon-label">
+          <svg class="icon"><use href="#icon-plus"></use></svg>
+          <span>Nova empresa</span>
+        </a>
+      </div>
     </div>
+
+    {% if empresas %}
+      <div class="consultation-table-shell">
+        <div class="table-responsive">
+          <table class="table table-sm table-hover align-middle consultation-table">
+            <thead>
+              <tr>
+                <th style="width: 90px;">ID</th>
+                <th style="width: 140px;">Código</th>
+                <th>Empresa</th>
+                <th style="width: 160px;">Tipo</th>
+                <th style="width: 160px;">Código externo</th>
+                <th style="width: 120px;" class="text-center">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for empresa in empresas %}
+                <tr>
+                  <td>{{ empresa.id }}</td>
+                  <td>{{ empresa.codigo }}</td>
+                  <td>
+                    <div class="consultation-text-main consultation-truncate" title="{{ empresa.nome }}">
+                      {{ empresa.nome }}
+                    </div>
+                  </td>
+                  <td>{{ empresa.tipo_empresa }}</td>
+                  <td>{{ empresa.codigo_externo or '-' }}</td>
+                  <td class="text-center">
+                    <div class="consultation-row-actions">
+                      <a
+                        href="{{ url_for('financeiro.editar_empresa', id_empresa=empresa.id) }}"
+                        class="consultation-action"
+                        title="Editar empresa"
+                        aria-label="Editar empresa {{ empresa.id }}"
+                      >
+                        <svg class="icon"><use href="#icon-pencil"></use></svg>
+                      </a>
+                      <form
+                        method="post"
+                        action="{{ url_for('financeiro.desativar_empresa', id_empresa=empresa.id) }}"
+                        class="consultation-action-form"
+                      >
+                        <button
+                          type="submit"
+                          class="consultation-action consultation-action-danger"
+                          title="Desativar empresa"
+                          aria-label="Desativar empresa {{ empresa.id }}"
+                        >
+                          <svg class="icon"><use href="#icon-trash"></use></svg>
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% else %}
+      <div class="consultation-empty">Não há empresas cadastradas.</div>
+    {% endif %}
   </div>
-
-  {% if empresas %}
-    <div class="table-responsive">
-      <table class="table table-sm table-striped table-hover align-middle">
-        <thead class="table-dark">
-          <tr>
-            <th style="width: 90px;">ID</th>
-            <th>Código</th>
-            <th>Nome</th>
-            <th>Tipo</th>
-            <th>Código externo</th>
-            <th style="width: 210px;" class="text-center">Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for empresa in empresas %}
-            <tr>
-              <td>{{ empresa.id }}</td>
-              <td>{{ empresa.codigo }}</td>
-              <td>{{ empresa.nome }}</td>
-              <td>{{ empresa.tipo_empresa }}</td>
-              <td>{{ empresa.codigo_externo or '-' }}</td>
-              <td class="text-center">
-                <a
-                  href="{{ url_for('financeiro.editar_empresa', id_empresa=empresa.id) }}"
-                  class="btn btn-sm btn-outline-secondary"
-                >
-                  Editar
-                </a>
-                <form
-                  method="post"
-                  action="{{ url_for('financeiro.desativar_empresa', id_empresa=empresa.id) }}"
-                  class="d-inline"
-                >
-                  <button type="submit" class="btn btn-sm btn-outline-danger">
-                    Desativar
-                  </button>
-                </form>
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  {% else %}
-    <p>Não há empresas cadastradas.</p>
-  {% endif %}
 {% endblock %}

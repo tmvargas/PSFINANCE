@@ -3,57 +3,74 @@
 {% block title %}Plano financeiro{% endblock %}
 
 {% block content %}
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h4 mb-0">Plano financeiro</h1>
+  <div class="consultation-page">
+    <div class="consultation-header">
+      <div>
+        <div class="consultation-kicker">Cadastros de apoio</div>
+        <h1 class="h4 mb-0">Consulta de plano financeiro</h1>
+        <p class="consultation-subtitle">Contas estruturais utilizadas nos lançamentos e títulos.</p>
+      </div>
 
-    <div class="d-flex gap-2">
-      <a href="{{ url_for('financeiro.novo_plano') }}" class="btn btn-sm btn-primary">
-        Nova conta do plano
-      </a>
+      <div class="consultation-actions">
+        <a href="{{ url_for('financeiro.novo_plano') }}" class="btn btn-sm btn-primary btn-icon-label">
+          <svg class="icon"><use href="#icon-plus"></use></svg>
+          <span>Nova conta do plano</span>
+        </a>
+      </div>
     </div>
+
+    {% if planos %}
+      <div class="consultation-table-shell">
+        <div class="table-responsive">
+          <table class="table table-sm table-hover align-middle consultation-table">
+            <thead>
+              <tr>
+                <th style="width: 90px;">ID</th>
+                <th style="width: 180px;">Código estrutural</th>
+                <th>Nome da conta</th>
+                <th style="width: 160px;">Tipo</th>
+                <th style="width: 100px;" class="text-center">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in planos %}
+                <tr>
+                  <td>{{ p.id }}</td>
+                  <td>{{ p.cod }}</td>
+                  <td>
+                    <div class="consultation-text-main consultation-truncate" title="{{ p.nome }}">
+                      {{ p.nome }}
+                    </div>
+                  </td>
+                  <td>
+                    {% if p.tipo == 'analitica' %}
+                      Analítica
+                    {% elif p.tipo == 'totalizadora' %}
+                      Totalizadora
+                    {% else %}
+                      {{ p.tipo }}
+                    {% endif %}
+                  </td>
+                  <td class="text-center">
+                    <div class="consultation-row-actions">
+                      <a
+                        href="{{ url_for('financeiro.editar_plano', id_plano=p.id) }}"
+                        class="consultation-action"
+                        title="Editar conta do plano"
+                        aria-label="Editar conta do plano {{ p.id }}"
+                      >
+                        <svg class="icon"><use href="#icon-pencil"></use></svg>
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% else %}
+      <div class="consultation-empty">Não há contas cadastradas no plano financeiro ainda.</div>
+    {% endif %}
   </div>
-
-  {% if planos %}
-    <div class="table-responsive">
-      <table class="table table-sm table-striped table-hover align-middle">
-        <thead class="table-dark">
-          <tr>
-            <th>ID</th>
-            <th>Código estrutural</th>
-            <th>Nome da conta</th>
-            <th>Tipo</th>
-            <th class="text-center">Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for p in planos %}
-            <tr>
-              <td>{{ p.id }}</td>
-              <td>{{ p.cod }}</td>
-              <td>{{ p.nome }}</td>
-              <td>
-                {% if p.tipo == 'analitica' %}
-                  Analítica
-                {% elif p.tipo == 'totalizadora' %}
-                  Totalizadora
-                {% else %}
-                  {{ p.tipo }}
-                {% endif %}
-              </td>
-              <td class="text-center">
-                <a
-                  href="{{ url_for('financeiro.editar_plano', id_plano=p.id) }}"
-                  class="btn btn-sm btn-outline-secondary"
-                >
-                  Editar
-                </a>
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  {% else %}
-    <p>Não há contas cadastradas no plano financeiro ainda.</p>
-  {% endif %}
 {% endblock %}

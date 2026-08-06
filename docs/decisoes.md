@@ -359,3 +359,18 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   copia de dados entre ambientes ou deploy produtivo esta autorizado.
 - Evidencia visual da PLA-1376 deve ser gerada no gate de staging apos deploy
   da branch `staging`.
+
+## 2026-08-06 - PLA-1618 - Padronizacao do layout das consultas
+
+- Projeto: PSFINANCE.
+- Decisao: padronizar as consultas de contas, contas inativas, movimentacoes,
+  empresas, centros de custo, credores e plano financeiro conforme o layout da
+  consulta de titulos.
+- Aplicacao: estilos comuns foram centralizados em `templates/base.html` com
+  cabecalho, kicker, subtitulo, shell de tabela, estado vazio e botoes de acao
+  por icone. As listagens passam a usar esses estilos sem alterar rotas,
+  controllers, models, banco de dados ou regras de negocio.
+- Motivo: reduzir divergencia visual entre consultas e manter o padrao
+  operacional criado para titulos a pagar.
+- Limite: alteracao restrita a apresentacao. Nao autoriza migration, escrita
+  em banco de producao, alteracao em `main` ou deploy produtivo.

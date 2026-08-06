@@ -3,64 +3,86 @@
 {% block title %}Contas inativas{% endblock %}
 
 {% block content %}
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h4 mb-0">Contas inativas</h1>
+  <div class="consultation-page">
+    <div class="consultation-header">
+      <div>
+        <div class="consultation-kicker">Caixas e bancos</div>
+        <h1 class="h4 mb-0">Consulta de contas inativas</h1>
+        <p class="consultation-subtitle">Contas desativadas disponíveis para reativação operacional.</p>
+      </div>
 
-    <a href="{{ url_for('financeiro.listar_contas') }}" class="btn btn-sm btn-outline-primary">
-      Ver contas ativas
-    </a>
-  </div>
-
-  {% if contas %}
-    <div class="table-responsive">
-      <table class="table table-sm table-striped table-hover align-middle">
-        <thead class="table-dark">
-          <tr>
-            <th>ID</th>
-            <th>Empresa</th>
-            <th>Descrição</th>
-            <th>Tipo</th>
-            <th class="text-end">Saldo inicial</th>
-            <th>Data saldo inicial</th>
-            <th class="text-end">Saldo atual</th>
-            <th class="text-center">Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for c in contas %}
-            <tr>
-              <td>{{ c.id }}</td>
-              <td>{{ c.empresa or '-' }}</td>
-              <td>{{ c.descricao }}</td>
-              <td>{{ c.tipo }}</td>
-              <td class="text-end">R$ {{ '%.2f'|format(c.saldo_inicial) }}</td>
-              <td>{{ c.data_saldo_inicial }}</td>
-              <td class="text-end">R$ {{ '%.2f'|format(c.saldo_atual) }}</td>
-              <td class="text-center">
-                <form
-                  method="post"
-                  action="{{ url_for('financeiro.reativar_conta', id_conta=c.id) }}"
-                  style="display:inline"
-                  onsubmit="return confirm('Confirma reativação da conta {{ c.descricao }}?');"
-                >
-                  <button type="submit" class="btn btn-sm btn-outline-success">
-                    Reativar
-                  </button>
-                </form>
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-        <tfoot>
-          <tr class="fw-bold">
-            <td colspan="6" class="text-end">Total geral (inativas):</td>
-            <td class="text-end">R$ {{ '%.2f'|format(total_saldo) }}</td>
-            <td></td>
-          </tr>
-        </tfoot>
-      </table>
+      <div class="consultation-actions">
+        <a href="{{ url_for('financeiro.listar_contas') }}" class="btn btn-sm btn-outline-primary btn-icon-label">
+          <svg class="icon"><use href="#icon-arrow-left"></use></svg>
+          <span>Ver contas ativas</span>
+        </a>
+      </div>
     </div>
-  {% else %}
-    <p>Não há contas inativas.</p>
-  {% endif %}
+
+    {% if contas %}
+      <div class="consultation-table-shell">
+        <div class="table-responsive">
+          <table class="table table-sm table-hover align-middle consultation-table">
+            <thead>
+              <tr>
+                <th style="width: 90px;">ID</th>
+                <th>Conta</th>
+                <th>Empresa</th>
+                <th style="width: 130px;">Tipo</th>
+                <th style="width: 150px;" class="text-end">Saldo inicial</th>
+                <th style="width: 140px;">Data saldo inicial</th>
+                <th style="width: 150px;" class="text-end">Saldo atual</th>
+                <th style="width: 100px;" class="text-center">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for c in contas %}
+                <tr>
+                  <td>{{ c.id }}</td>
+                  <td>
+                    <div class="consultation-text-main consultation-truncate" title="{{ c.descricao }}">
+                      {{ c.descricao }}
+                    </div>
+                  </td>
+                  <td>{{ c.empresa or '-' }}</td>
+                  <td>{{ c.tipo }}</td>
+                  <td class="text-end text-nowrap">R$ {{ '%.2f'|format(c.saldo_inicial) }}</td>
+                  <td class="text-nowrap">{{ c.data_saldo_inicial }}</td>
+                  <td class="text-end text-nowrap">R$ {{ '%.2f'|format(c.saldo_atual) }}</td>
+                  <td class="text-center">
+                    <div class="consultation-row-actions">
+                      <form
+                        method="post"
+                        action="{{ url_for('financeiro.reativar_conta', id_conta=c.id) }}"
+                        class="consultation-action-form"
+                        onsubmit="return confirm('Confirma reativação da conta {{ c.descricao }}?');"
+                      >
+                        <button
+                          type="submit"
+                          class="consultation-action consultation-action-success"
+                          title="Reativar conta"
+                          aria-label="Reativar conta {{ c.id }}"
+                        >
+                          <svg class="icon"><use href="#icon-check-circle"></use></svg>
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+            <tfoot>
+              <tr class="fw-bold">
+                <td colspan="6" class="text-end">Total geral (inativas):</td>
+                <td class="text-end text-nowrap">R$ {{ '%.2f'|format(total_saldo) }}</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    {% else %}
+      <div class="consultation-empty">Não há contas inativas.</div>
+    {% endif %}
+  </div>
 {% endblock %}
