@@ -250,6 +250,21 @@ fora da navegacao aprovada, sem alterar regras de negocio, banco de dados,
 
 ## 2026-08-04 - PLA-1235 cadastros Empresa e Centro de Custo PSFINANCE
 
+## 2026-08-05 - PLA-1480 menu Apoio e estado inicial fechado
+
+Decisao: transformar `APOIO` em um item expansivel unico no menu lateral da
+aplicacao real, mantendo `Empresa`, `Centro de Custo`, `Credor` e
+`Plano Financeiro` dentro do submenu, e remover a abertura automatica inicial
+dos submenus por endpoint ativo.
+
+Motivo: a demanda solicita ajustar o menu `APOIO` e o estado inicial fechado.
+O comportamento anterior deixava `APOIO` como lista direta no menu aberto e
+podia renderizar submenus ja abertos ao acessar rotas internas.
+
+Impacto: a entrega altera somente `templates/base.html` e documentacao da
+tarefa. Nao altera regras de negocio, banco de dados, migrations, variaveis de
+ambiente, VPS, `main` ou producao.
+
 Decisao: implementar os cadastros funcionais `APOIO > Empresa` e
 `APOIO > Centro de Custo` no PSFINANCE, conforme arquitetura aprovada na
 `PLA-1221`.
