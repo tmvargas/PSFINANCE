@@ -3,114 +3,135 @@
 {% block title %}Movimentações{% endblock %}
 
 {% block content %}
+  <div class="consultation-page">
+    <div class="consultation-header">
+      <div>
+        <div class="consultation-kicker">Caixas e bancos</div>
+        <h1 class="h4 mb-0">Consulta de movimentações</h1>
+        <p class="consultation-subtitle">Lançamentos financeiros com conta, empresa, centro de custo e plano.</p>
+      </div>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h1 class="h4 mb-0">Movimentações</h1>
+      <div class="consultation-actions">
+        <a href="{{ url_for('financeiro.nova_movimentacao') }}" class="btn btn-sm btn-primary btn-icon-label">
+          <svg class="icon"><use href="#icon-plus"></use></svg>
+          <span>Nova movimentação</span>
+        </a>
+        <a href="{{ url_for('financeiro.listar_contas') }}" class="btn btn-sm btn-outline-secondary btn-icon-label">
+          <svg class="icon"><use href="#icon-arrow-left"></use></svg>
+          <span>Voltar para contas</span>
+        </a>
+      </div>
+    </div>
 
-  <div class="d-flex gap-2">
-    <a href="{{ url_for('financeiro.nova_movimentacao') }}" class="btn btn-sm btn-primary">
-      Nova movimentação
-    </a>
-    <a href="{{ url_for('financeiro.listar_contas') }}" class="btn btn-sm btn-outline-secondary">
-      Voltar para contas
-    </a>
+    {% if movimentacoes %}
+      <div class="consultation-table-shell">
+        <div class="table-responsive">
+          <table class="table table-sm table-hover align-middle consultation-table" style="min-width: 980px;">
+            <thead>
+              <tr>
+                <th style="width: 90px;">ID</th>
+                <th style="width: 110px;">Data</th>
+                <th style="width: 230px;">Documento</th>
+                <th>Descrição e classificação</th>
+                <th style="width: 220px;">Contas</th>
+                <th style="width: 140px;" class="text-end">Valor</th>
+                <th style="width: 120px;" class="text-center">Ações</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {% for m in movimentacoes %}
+                <tr>
+                  <td class="text-nowrap">{{ m.id }}</td>
+                  <td class="text-nowrap">{{ m.data or '-' }}</td>
+
+                  {% set doc_sigla = '' %}
+                  {% if m.documento is not none and m.documento is not string and m.documento.tipo_doc is defined %}
+                    {% set doc_sigla = m.documento.tipo_doc %}
+                  {% elif m.documento is mapping and m.documento.get('tipo_doc') %}
+                    {% set doc_sigla = m.documento.get('tipo_doc') %}
+                  {% else %}
+                    {% set doc_str = (m.documento|string)|trim %}
+                    {% if ' - ' in doc_str %}
+                      {% set doc_sigla = doc_str.split(' - ')[0] %}
+                    {% elif doc_str.startswith('<Documento ') %}
+                      {% set doc_sigla = doc_str.replace('<Documento', '')|replace('>', '')|trim %}
+                      {% if ' ' in doc_sigla %}
+                        {% set doc_sigla = doc_sigla.split(' ')[0] %}
+                      {% endif %}
+                    {% else %}
+                      {% set doc_sigla = doc_str %}
+                    {% endif %}
+                  {% endif %}
+
+                  <td>
+                    <div class="consultation-text-main consultation-truncate" title="{{ (doc_sigla or '-') }} - {{ (m.nr_documento or 'NA') }}">
+                      {{ (doc_sigla or '-') }} - {{ (m.nr_documento or 'NA') }}
+                    </div>
+                    <div class="consultation-text-muted consultation-truncate" title="{{ m.tipo_label }}">
+                      {{ m.tipo_label }}
+                    </div>
+                  </td>
+
+                  <td>
+                    <div class="consultation-text-main consultation-truncate" title="{{ m.descricao or '' }}">
+                      {{ m.descricao or '-' }}
+                    </div>
+                    <div class="consultation-text-muted consultation-truncate" title="{{ m.empresa or '-' }}">
+                      {{ m.empresa or '-' }}
+                    </div>
+                    <div class="consultation-text-muted consultation-truncate" title="{{ m.centro_custo or '-' }} / {{ m.plano or '-' }}">
+                      {{ m.centro_custo or '-' }} / {{ m.plano or '-' }}
+                    </div>
+                  </td>
+
+                  <td>
+                    <div class="consultation-text-main consultation-truncate" title="{{ m.conta_origem or '-' }}">
+                      Origem: {{ m.conta_origem or '-' }}
+                    </div>
+                    <div class="consultation-text-muted consultation-truncate" title="{{ m.conta_destino or '-' }}">
+                      Destino: {{ m.conta_destino or '-' }}
+                    </div>
+                  </td>
+
+                  <td class="text-end text-nowrap">R$ {{ "%.2f"|format(m.valor or 0) }}</td>
+
+                  <td class="text-center">
+                    <div class="consultation-row-actions">
+                      <a
+                        href="{{ url_for('financeiro.editar_movimentacao', id_mov=m.id) }}"
+                        class="consultation-action"
+                        title="Editar movimentação"
+                        aria-label="Editar movimentação {{ m.id }}"
+                      >
+                        <svg class="icon"><use href="#icon-pencil"></use></svg>
+                      </a>
+
+                      <form
+                        method="post"
+                        action="{{ url_for('financeiro.excluir_movimentacao', id_mov=m.id) }}"
+                        class="consultation-action-form"
+                        onsubmit="return confirm('Confirma exclusão desta movimentação de R$ {{ '%.2f'|format(m.valor or 0) }}?');"
+                      >
+                        <button
+                          type="submit"
+                          class="consultation-action consultation-action-danger"
+                          title="Excluir movimentação"
+                          aria-label="Excluir movimentação {{ m.id }}"
+                        >
+                          <svg class="icon"><use href="#icon-trash"></use></svg>
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% else %}
+      <div class="consultation-empty">Não há movimentações lançadas ainda.</div>
+    {% endif %}
   </div>
-</div>
-
-{% if movimentacoes %}
-<div class="table-responsive">
-  <table class="table table-sm table-striped table-hover align-middle">
-    <thead class="table-dark">
-      <tr>
-        <th style="width: 60px;">ID</th>
-        <th style="width: 95px;">Data</th>
-        <th style="width: 90px;">Tipo</th>
-        <th style="width: 160px;">Documento</th>
-        <th>Descrição</th>
-        <th style="width: 110px;" class="text-end">Valor</th>
-        <th style="width: 180px;">Conta origem</th>
-        <th style="width: 180px;">Conta destino</th>
-        <th style="width: 180px;">Empresa</th>
-        <th style="width: 200px;">Centro de Custo</th>
-        <th style="width: 220px;">Plano financeiro</th>
-        <th style="width: 130px;" class="text-center">Ações</th>
-      </tr>
-    </thead>
-
-    <tbody>
-      {% for m in movimentacoes %}
-      <tr>
-        <td class="text-nowrap">{{ m.id }}</td>
-
-        {# no routes você já monta m.data como string dd/mm/aaaa #}
-        <td class="text-nowrap">{{ m.data or '-' }}</td>
-
-        <td class="text-nowrap">{{ m.tipo_label }}</td>
-
-        {# -------- Documento: queremos "AV - NA" -------- #}
-        {% set doc_sigla = '' %}
-
-        {% if m.documento is not none and m.documento is not string and m.documento.tipo_doc is defined %}
-          {% set doc_sigla = m.documento.tipo_doc %}
-        {% elif m.documento is mapping and m.documento.get('tipo_doc') %}
-          {% set doc_sigla = m.documento.get('tipo_doc') %}
-        {% else %}
-          {% set doc_str = (m.documento|string)|trim %}
-          {% if ' - ' in doc_str %}
-            {% set doc_sigla = doc_str.split(' - ')[0] %}
-          {% elif doc_str.startswith('<Documento ') %}
-            {% set doc_sigla = doc_str.replace('<Documento', '')|replace('>', '')|trim %}
-            {% if ' ' in doc_sigla %}
-              {% set doc_sigla = doc_sigla.split(' ')[0] %}
-            {% endif %}
-          {% else %}
-            {% set doc_sigla = doc_str %}
-          {% endif %}
-        {% endif %}
-
-        <td class="text-nowrap">
-          {{ (doc_sigla or '-') }} - {{ (m.nr_documento or 'NA') }}
-        </td>
-
-        <td>{{ m.descricao or '' }}</td>
-
-        <td class="text-end text-nowrap">
-          R$ {{ "%.2f"|format(m.valor or 0) }}
-        </td>
-
-        <td>{{ m.conta_origem or '-' }}</td>
-        <td>{{ m.conta_destino or '-' }}</td>
-        <td>{{ m.empresa or '-' }}</td>
-        <td>{{ m.centro_custo or '-' }}</td>
-        <td>{{ m.plano or '-' }}</td>
-
-        <td class="text-center text-nowrap">
-          <a
-            href="{{ url_for('financeiro.editar_movimentacao', id_mov=m.id) }}"
-            class="btn btn-sm btn-outline-secondary me-1"
-          >
-            Editar
-          </a>
-
-          <form
-            method="post"
-            action="{{ url_for('financeiro.excluir_movimentacao', id_mov=m.id) }}"
-            style="display:inline;"
-            onsubmit="return confirm('Confirma exclusão desta movimentação de R$ {{ '%.2f'|format(m.valor or 0) }}?');"
-          >
-            <button type="submit" class="btn btn-sm btn-outline-danger">
-              Excluir
-            </button>
-          </form>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-
-  </table>
-</div>
-{% else %}
-<p>Não há movimentações lançadas ainda.</p>
-{% endif %}
-
 {% endblock %}

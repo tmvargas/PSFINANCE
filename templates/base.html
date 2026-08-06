@@ -420,7 +420,163 @@
         --bs-table-border-color: var(--ps-border);
       }
 
+      .consultation-page {
+        display: grid;
+        gap: 18px;
+      }
+
+      .consultation-header {
+        align-items: start;
+        display: flex;
+        gap: 14px;
+        justify-content: space-between;
+      }
+
+      .consultation-kicker {
+        color: var(--ps-green-dark);
+        font-size: 0.75rem;
+        font-weight: 800;
+        margin-bottom: 4px;
+        text-transform: uppercase;
+      }
+
+      .consultation-subtitle {
+        color: var(--ps-muted);
+        margin: 4px 0 0;
+      }
+
+      .consultation-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+
+      .consultation-table-shell {
+        background: var(--ps-surface);
+        border: 1px solid var(--ps-border);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .consultation-table {
+        margin-bottom: 0;
+      }
+
+      .consultation-table thead th {
+        background: #173c28;
+        border-bottom: 0;
+        color: #ffffff;
+        font-size: 0.74rem;
+        letter-spacing: 0;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+
+      .consultation-table td {
+        vertical-align: middle;
+      }
+
+      .consultation-empty {
+        background: var(--ps-surface);
+        border: 1px solid var(--ps-border);
+        border-radius: 8px;
+        color: var(--ps-muted);
+        padding: 28px;
+        text-align: center;
+      }
+
+      .consultation-text-main {
+        font-weight: 700;
+        max-width: 260px;
+      }
+
+      .consultation-text-muted {
+        color: var(--ps-muted);
+        font-size: 0.82rem;
+        max-width: 260px;
+      }
+
+      .consultation-truncate {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .consultation-row-actions {
+        display: inline-flex;
+        gap: 6px;
+        justify-content: center;
+        white-space: nowrap;
+      }
+
+      .consultation-action-form {
+        display: inline-flex;
+        margin: 0;
+      }
+
+      .consultation-action {
+        align-items: center;
+        background: #ffffff;
+        border: 1px solid var(--ps-border);
+        border-radius: 7px;
+        color: var(--ps-green-dark);
+        display: inline-flex;
+        height: 32px;
+        justify-content: center;
+        padding: 0;
+        text-decoration: none;
+        width: 32px;
+      }
+
+      .consultation-action:hover,
+      .consultation-action:focus-visible {
+        background: var(--ps-green-soft);
+        border-color: #9fd8b8;
+        color: var(--ps-green-dark);
+        outline: 0;
+      }
+
+      .consultation-action-danger {
+        color: #b42318;
+      }
+
+      .consultation-action-danger:hover,
+      .consultation-action-danger:focus-visible {
+        background: #ffe8e5;
+        border-color: #ffc8c1;
+        color: #8f1b12;
+      }
+
+      .consultation-action-success {
+        color: var(--ps-green-dark);
+      }
+
+      .consultation-action .icon,
+      .btn .icon {
+        height: 15px;
+        width: 15px;
+      }
+
+      .btn-icon-label {
+        align-items: center;
+        display: inline-flex;
+        gap: 6px;
+      }
+
       @media (max-width: 980px) {
+        .consultation-header {
+          display: grid;
+        }
+
+        .consultation-actions {
+          justify-content: stretch;
+        }
+
+        .consultation-actions .btn {
+          justify-content: center;
+        }
+
         .app-shell {
           grid-template-columns: 1fr;
         }
@@ -593,6 +749,14 @@
       <symbol id="icon-check-circle" viewBox="0 0 24 24">
         <path d="M22 11.1V12a10 10 0 1 1-5.9-9.1"></path>
         <path d="m9 11 3 3L22 4"></path>
+      </symbol>
+      <symbol id="icon-plus" viewBox="0 0 24 24">
+        <path d="M12 5v14"></path>
+        <path d="M5 12h14"></path>
+      </symbol>
+      <symbol id="icon-arrow-left" viewBox="0 0 24 24">
+        <path d="m12 19-7-7 7-7"></path>
+        <path d="M19 12H5"></path>
       </symbol>
       <symbol id="icon-landmark" viewBox="0 0 24 24">
         <path d="m3 10 9-6 9 6"></path>
