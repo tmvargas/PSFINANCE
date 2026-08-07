@@ -379,13 +379,15 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   da PLA-1618. A comparacao objetiva entre a referencia e as rotinas ajustadas
   fica registrada em `docs/PLA-1618-padronizar-layout-consultas.md`.
 
-## 2026-08-07 - PLA-1655 - Renomear segundo Apoio para Cadastro Geral
+## 2026-08-07 - PLA-1655 - Cadastro Geral dentro de Apoio
 
 - Projeto: PSFINANCE.
-- Decisao: preservar o primeiro grupo lateral `APOIO` visivel, com Credor e
-  Plano Financeiro, e renomear somente o segundo grupo lateral de cadastros
-  para `CADASTRO GERAL`, mantendo nele Empresa, Centro de Custo e Contas.
-- Motivo: eliminar a duplicidade visual/estrutural de nomenclatura no menu sem
-  alterar endpoints, rotas, submenu, banco de dados ou regras de negocio.
+- Decisao: manter `APOIO` como unico menu principal dessa area e posicionar
+  `CADASTRO GERAL` como submenu expansivo dentro de `APOIO`, contendo
+  exatamente `Credor`, `Plano Financeiro`, `Empresa`, `Centro de Custo` e
+  `Conta`.
+- Motivo: atender ao esclarecimento de Thiago na revisao da PLA-1655 e eliminar
+  a divisao incorreta em dois grupos principais, preservando endpoints, rotas,
+  banco de dados e regras de negocio.
 - Limite: alteracao restrita a apresentacao. Nao autoriza migration, escrita
   em banco de producao, alteracao em `main` ou deploy produtivo.
