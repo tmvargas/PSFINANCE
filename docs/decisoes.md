@@ -378,3 +378,14 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   `/financeiro/titulos`, documentada com screenshots desktop e mobile no pacote
   da PLA-1618. A comparacao objetiva entre a referencia e as rotinas ajustadas
   fica registrada em `docs/PLA-1618-padronizar-layout-consultas.md`.
+
+## 2026-08-07 - PLA-1655 - Renomear segundo Apoio para Cadastro Geral
+
+- Projeto: PSFINANCE.
+- Decisao: manter o grupo lateral `APOIO`, renomear o botao expansivel interno
+  de `APOIO` para `Cadastro Geral` e exibir o mesmo titulo no flyout compacto
+  do submenu.
+- Motivo: eliminar duplicidade visual de nomenclatura no menu sem alterar
+  endpoints, rotas, submenu, banco de dados ou regras de negocio.
+- Limite: alteracao restrita a apresentacao. Nao autoriza migration, escrita
+  em banco de producao, alteracao em `main` ou deploy produtivo.
