@@ -230,6 +230,10 @@
         position: static;
       }
 
+      .submenu-title {
+        display: none;
+      }
+
       .menu-node.submenu-open .submenu {
         display: grid;
       }
@@ -326,6 +330,16 @@
         position: absolute;
         top: 0;
         z-index: 10;
+      }
+
+      .app-shell.sidebar-compact .submenu-title {
+        color: #ffffff;
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0;
+        padding: 3px 8px 6px;
+        text-transform: uppercase;
       }
 
       .sidebar.groups-compact .menu-item:not(.active) {
@@ -909,10 +923,11 @@
               <div class="menu-node" data-menu-node="apoio">
                 <button class="menu-item submenu-toggle {% if endpoint in apoio_endpoints %}active{% endif %}" type="button" aria-label="Expandir Apoio" aria-expanded="false">
                   <span class="nav-icon"><svg class="icon"><use href="#icon-user"></use></svg></span>
-                  <span class="nav-label">APOIO</span>
+                  <span class="nav-label">Cadastro Geral</span>
                   <span class="nav-chevron">›</span>
                 </button>
                 <div class="submenu" aria-label="Submenu Apoio">
+                  <span class="submenu-title">Cadastro Geral</span>
                   <a class="submenu-item {% if endpoint in ['financeiro.listar_empresas', 'financeiro.nova_empresa', 'financeiro.editar_empresa'] %}active{% endif %}" href="{{ url_for('financeiro.listar_empresas') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-landmark"></use></svg></span><span>Empresa</span></a>
                   <a class="submenu-item {% if endpoint in ['financeiro.listar_centros_custo', 'financeiro.novo_centro_custo', 'financeiro.editar_centro_custo'] %}active{% endif %}" href="{{ url_for('financeiro.listar_centros_custo') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-list-tree"></use></svg></span><span>Centro de Custo</span></a>
                   <a class="submenu-item {% if endpoint in ['financeiro.listar_contas', 'financeiro.nova_conta', 'financeiro.editar_conta', 'financeiro.listar_contas_inativas'] %}active{% endif %}" href="{{ url_for('financeiro.listar_contas') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-landmark"></use></svg></span><span>Contas</span></a>
