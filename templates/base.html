@@ -917,16 +917,16 @@
           <div class="menu-group">
             <div class="group-header">
               <span class="group-icon"><svg class="icon"><use href="#icon-user"></use></svg></span>
-              <p class="group-title">APOIO</p>
+              <p class="group-title">CADASTRO GERAL</p>
             </div>
             <div class="menu-list">
               <div class="menu-node" data-menu-node="apoio">
-                <button class="menu-item submenu-toggle {% if endpoint in apoio_endpoints %}active{% endif %}" type="button" aria-label="Expandir Apoio" aria-expanded="false">
+                <button class="menu-item submenu-toggle {% if endpoint in apoio_endpoints %}active{% endif %}" type="button" aria-label="Expandir Cadastro Geral" aria-expanded="false">
                   <span class="nav-icon"><svg class="icon"><use href="#icon-user"></use></svg></span>
                   <span class="nav-label">Cadastro Geral</span>
                   <span class="nav-chevron">›</span>
                 </button>
-                <div class="submenu" aria-label="Submenu Apoio">
+                <div class="submenu" aria-label="Submenu Cadastro Geral">
                   <span class="submenu-title">Cadastro Geral</span>
                   <a class="submenu-item {% if endpoint in ['financeiro.listar_empresas', 'financeiro.nova_empresa', 'financeiro.editar_empresa'] %}active{% endif %}" href="{{ url_for('financeiro.listar_empresas') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-landmark"></use></svg></span><span>Empresa</span></a>
                   <a class="submenu-item {% if endpoint in ['financeiro.listar_centros_custo', 'financeiro.novo_centro_custo', 'financeiro.editar_centro_custo'] %}active{% endif %}" href="{{ url_for('financeiro.listar_centros_custo') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-list-tree"></use></svg></span><span>Centro de Custo</span></a>
