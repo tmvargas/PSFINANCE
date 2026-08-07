@@ -382,10 +382,11 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
 ## 2026-08-07 - PLA-1655 - Renomear segundo Apoio para Cadastro Geral
 
 - Projeto: PSFINANCE.
-- Decisao: manter o grupo lateral `APOIO`, renomear o botao expansivel interno
-  de `APOIO` para `Cadastro Geral` e exibir o mesmo titulo no flyout compacto
-  do submenu.
-- Motivo: eliminar duplicidade visual de nomenclatura no menu sem alterar
-  endpoints, rotas, submenu, banco de dados ou regras de negocio.
+- Decisao: renomear o segundo grupo lateral `APOIO` para `CADASTRO GERAL`,
+  mantendo dentro dele os cadastros gerais ja existentes, incluindo Empresa e
+  Centro de Custo, e exibir o mesmo titulo no botao expansivel e no flyout
+  compacto do submenu.
+- Motivo: eliminar a duplicidade visual/estrutural de nomenclatura no menu sem
+  alterar endpoints, rotas, submenu, banco de dados ou regras de negocio.
 - Limite: alteracao restrita a apresentacao. Nao autoriza migration, escrita
   em banco de producao, alteracao em `main` ou deploy produtivo.
