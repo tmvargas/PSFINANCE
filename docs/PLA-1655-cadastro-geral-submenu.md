@@ -26,6 +26,8 @@ dele.
   - viewport estreito com validacao de DOM da estrutura.
 - `docs/evidencias/PLA-1655/correcao-compacto-flyout-apoio-cadastro-geral.png`
   - menu compacto/flyout com `APOIO` e `CADASTRO GERAL` aninhado.
+- `docs/evidencias/PLA-1655/correcao-vps-5001-apoio-cadastro-geral.png` -
+  validacao visual publicada na VPS de teste pela porta `5001`.
 
 ## Validacao local
 
@@ -37,6 +39,23 @@ dele.
 - `curl http://127.0.0.1:5001/health`: HTTP 200, `status=healthy`.
 - `curl http://127.0.0.1:5001/financeiro/credores?open=cadastro-geral`: HTTP
   200.
+
+## Validacao na VPS de teste
+
+- VPS: `vps69143.publiccloud.com.br` (`191.252.93.136`).
+- Diretorio: `/opt/plansmart/sistemas/psfinance/staging/repo`.
+- Branch remota publicada: `staging`.
+- Commit local da VPS: `9481df3e3f21dd7f434a271086249bc78fc33797`.
+- Commit `origin/staging`: `9481df3e3f21dd7f434a271086249bc78fc33797`.
+- `git status --short`: limpo.
+- Servicos: `psfinance-staging` e `psfinance-staging-gate` ativos.
+- Porta `5001`: `http://191.252.93.136:5001/health` retornou HTTP 200,
+  `status=healthy`, `branch=staging` e commit
+  `9481df3e3f21dd7f434a271086249bc78fc33797`.
+- Rota visual validada:
+  `http://191.252.93.136:5001/staging/psfinance/financeiro/credores?open=cadastro-geral`.
+- Logs recentes do Gunicorn registraram reinicio normal e workers iniciados,
+  sem erro critico de inicializacao.
 
 ## Observacao de banco local
 
