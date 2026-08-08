@@ -418,3 +418,17 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
 - Limite: alteracao restrita a apresentacao do menu compacto. Nao altera nomes,
   hierarquia aberta, rotas, banco de dados, migrations, permissoes, `main` ou
   producao.
+
+## 2026-08-08 - PLA-1655 - Icone compacto de Cadastro Geral
+
+- Projeto: PSFINANCE.
+- Decisao: manter `APOIO` apenas como grupo do menu aberto e, no menu compacto,
+  usar o acionador visual de `Cadastro Geral`, com o mesmo icone do submenu
+  aberto e flyout contendo `Credor`, `Plano Financeiro`, `Empresa`,
+  `Centro de Custo` e `Conta`.
+- Motivo: Thiago rejeitou a revisao porque o estado compacto ainda mostrava o
+  icone de `APOIO` como menu, enquanto os demais grupos compactos acionam o
+  submenu navegavel. A correcao alinha `Cadastro Geral` ao mesmo padrao.
+- Limite: alteracao restrita a apresentacao do menu compacto. Nao altera a
+  hierarquia aberta aprovada, nomes exibidos no menu aberto, rotas, banco de
+  dados, migrations, permissoes, `main` ou producao.
