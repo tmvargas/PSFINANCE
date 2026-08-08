@@ -403,3 +403,18 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   Geral > Credor, Plano Financeiro, Empresa, Centro de Custo, Conta`.
 - Limite: alteracao restrita a apresentacao. Nao altera rotas, banco de dados,
   migrations, permissoes, `main` ou producao.
+
+## 2026-08-08 - PLA-1655 - Comportamento compacto de Apoio
+
+- Projeto: PSFINANCE.
+- Decisao: separar a renderizacao do menu `APOIO` entre estado aberto e estado
+  compacto, mantendo a hierarquia aberta aprovada e criando no compacto um
+  acionador proprio de `APOIO` que abre o flyout com `Cadastro Geral` e seus
+  itens.
+- Motivo: Thiago aprovou o menu aberto, mas rejeitou o comportamento encolhido
+  por estar diferente dos demais menus; o clique no icone de `APOIO` deve abrir
+  o flyout compacto, sem expor diretamente `Cadastro Geral` como item principal
+  do estado encolhido.
+- Limite: alteracao restrita a apresentacao do menu compacto. Nao altera nomes,
+  hierarquia aberta, rotas, banco de dados, migrations, permissoes, `main` ou
+  producao.

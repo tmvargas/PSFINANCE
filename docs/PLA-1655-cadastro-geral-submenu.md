@@ -16,6 +16,9 @@ dele.
 - Correcao recorrente em 2026-08-08: removido o segundo `APOIO` visivel que
   permanecia como item/titulo de submenu; `APOIO` agora aparece uma unica vez
   por estado visual.
+- Ajuste pos-revisao em 2026-08-08: menu aberto preservado e menu compacto
+  corrigido para exibir o icone de `APOIO` como acionador do flyout, com
+  `Cadastro Geral` e seus itens dentro dele.
 - Rotas existentes preservadas.
 - Banco de dados, migrations, permissoes, `main` e producao nao alterados.
 
@@ -37,6 +40,12 @@ dele.
   - menu compacto/flyout com `APOIO` unico, `Cadastro Geral` e os cinco itens.
 - `docs/evidencias/PLA-1655/recorrencia-mobile-apoio-unico-cadastro-geral.png`
   - mobile com flyout aberto mostrando a mesma hierarquia.
+- `docs/evidencias/PLA-1655/ajuste-compacto-menu-aberto-preservado.png` -
+  menu aberto com `APOIO > Cadastro Geral` preservado.
+- `docs/evidencias/PLA-1655/ajuste-compacto-flyout-apoio.png` - menu compacto
+  com o icone de `APOIO` acionando o flyout.
+- `docs/evidencias/PLA-1655/ajuste-compacto-flyout-comparativo-gerencial.png`
+  - comparacao com outro flyout compacto equivalente.
 
 ## Validacao local
 
@@ -50,6 +59,11 @@ dele.
   paralelo chamado `APOIO`, `Cadastro Geral` aninhado no grupo `APOIO`,
   `aria-expanded=true`, e os itens exatamente na ordem `Credor`, `Plano
   Financeiro`, `Empresa`, `Centro de Custo`, `Conta`.
+- Playwright Python do ajuste compacto: validou que o estado aberto preserva
+  `APOIO > Cadastro Geral`; no estado compacto, a lista aberta fica oculta, o
+  acionador visivel e `APOIO`, o clique abre o flyout com `Cadastro Geral` e os
+  cinco itens, com comportamento equivalente ao flyout de `Gerencial
+  Financeiro`.
 - `curl http://127.0.0.1:5001/health`: HTTP 200, `status=healthy`.
 - `curl http://127.0.0.1:5001/financeiro/credores?open=cadastro-geral`: HTTP
   200.
@@ -63,6 +77,16 @@ dele.
 | `Cadastro Geral` dentro de `APOIO` | `[data-menu-node="cadastro-geral"]` localizado dentro do `.menu-group` de `APOIO`. |
 | Itens dentro de `Cadastro Geral` | DOM retornou exatamente `Credor`, `Plano Financeiro`, `Empresa`, `Centro de Custo`, `Conta`. |
 | Rotas preservadas | Links mantidos para as rotas existentes de credores, plano, empresas, centros de custo e contas. |
+
+## Matriz objetiva do ajuste compacto
+
+| Estrutura exigida | Evidencia |
+| --- | --- |
+| Menu aberto preservado | `.menu-list.open-only` contem `[data-menu-node="cadastro-geral"]` com os cinco itens na ordem validada. |
+| Compacto acionado por `APOIO` | Em `.sidebar-compact`, o unico no do grupo visivel e `[data-menu-node="apoio"]` com rotulo `APOIO`. |
+| Flyout compacto abre como os demais menus | Clique no botao de `APOIO` define `aria-expanded=true` e exibe `.submenu`, igual ao teste aplicado em `Gerencial Financeiro`. |
+| `Cadastro Geral` acessivel no flyout compacto | Flyout de `APOIO` exibe o titulo `Cadastro Geral` e os itens `Credor`, `Plano Financeiro`, `Empresa`, `Centro de Custo`, `Conta`. |
+| Escopo restrito | Sem alteracao de rotas, banco de dados, migrations, permissoes, `main` ou producao. |
 
 ## Validacao na VPS de teste
 
