@@ -17,8 +17,8 @@ dele.
   permanecia como item/titulo de submenu; `APOIO` agora aparece uma unica vez
   por estado visual.
 - Ajuste pos-revisao em 2026-08-08: menu aberto preservado e menu compacto
-  corrigido para exibir o icone de `APOIO` como acionador do flyout, com
-  `Cadastro Geral` e seus itens dentro dele.
+  corrigido para exibir o acionador de `Cadastro Geral`, usando o mesmo icone
+  do submenu aberto, sem expor `APOIO` como item acionavel no estado compacto.
 - Rotas existentes preservadas.
 - Banco de dados, migrations, permissoes, `main` e producao nao alterados.
 
@@ -46,6 +46,13 @@ dele.
   com o icone de `APOIO` acionando o flyout.
 - `docs/evidencias/PLA-1655/ajuste-compacto-flyout-comparativo-gerencial.png`
   - comparacao com outro flyout compacto equivalente.
+- `docs/evidencias/PLA-1655/corrige-icone-compacto-comparativo.png` -
+  comparacao do menu compacto entre `Gerencial Financeiro` e `Cadastro Geral`,
+  demonstrando o mesmo padrao de acionador por submenu.
+- `docs/evidencias/PLA-1655/corrige-icone-compacto-flyout-cadastro-geral.png`
+  - flyout aberto pelo acionador compacto de `Cadastro Geral`.
+- `docs/evidencias/PLA-1655/corrige-icone-menu-aberto-preservado.png` - menu
+  aberto preservando `APOIO > Cadastro Geral`.
 
 ## Validacao local
 
@@ -64,6 +71,11 @@ dele.
   acionador visivel e `APOIO`, o clique abre o flyout com `Cadastro Geral` e os
   cinco itens, com comportamento equivalente ao flyout de `Gerencial
   Financeiro`.
+- Playwright Python da correcao do icone compacto: validou que, em
+  `.sidebar-compact`, o acionador visivel possui
+  `data-menu-node="cadastro-geral-compacto"`, `aria-label="Expandir Cadastro
+  Geral"`, icone `#icon-landmark` e rotulo acessivel `Cadastro Geral`, sem
+  `APOIO` como acionador compacto.
 - `curl http://127.0.0.1:5001/health`: HTTP 200, `status=healthy`.
 - `curl http://127.0.0.1:5001/financeiro/credores?open=cadastro-geral`: HTTP
   200.
@@ -83,9 +95,10 @@ dele.
 | Estrutura exigida | Evidencia |
 | --- | --- |
 | Menu aberto preservado | `.menu-list.open-only` contem `[data-menu-node="cadastro-geral"]` com os cinco itens na ordem validada. |
-| Compacto acionado por `APOIO` | Em `.sidebar-compact`, o unico no do grupo visivel e `[data-menu-node="apoio"]` com rotulo `APOIO`. |
-| Flyout compacto abre como os demais menus | Clique no botao de `APOIO` define `aria-expanded=true` e exibe `.submenu`, igual ao teste aplicado em `Gerencial Financeiro`. |
-| `Cadastro Geral` acessivel no flyout compacto | Flyout de `APOIO` exibe o titulo `Cadastro Geral` e os itens `Credor`, `Plano Financeiro`, `Empresa`, `Centro de Custo`, `Conta`. |
+| Compacto acionado por `Cadastro Geral` | Em `.sidebar-compact`, o no visivel e `[data-menu-node="cadastro-geral-compacto"]`, com `aria-label="Expandir Cadastro Geral"` e icone `#icon-landmark`. |
+| Flyout compacto abre como os demais menus | Clique no botao de `Cadastro Geral` define `aria-expanded=true` e exibe `.submenu`, igual ao teste aplicado em `Gerencial Financeiro`. |
+| `APOIO` nao aparece como acionador compacto | O DOM visivel do estado compacto nao possui botao, rotulo ou `data-menu-node` de acionador `APOIO`. |
+| `Cadastro Geral` acessivel no flyout compacto | Flyout de `Cadastro Geral` exibe o titulo `Cadastro Geral` e os itens `Credor`, `Plano Financeiro`, `Empresa`, `Centro de Custo`, `Conta`. |
 | Escopo restrito | Sem alteracao de rotas, banco de dados, migrations, permissoes, `main` ou producao. |
 
 ## Validacao na VPS de teste
