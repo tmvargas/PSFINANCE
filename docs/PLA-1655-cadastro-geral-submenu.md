@@ -69,17 +69,33 @@ dele.
 - VPS: `vps69143.publiccloud.com.br` (`191.252.93.136`).
 - Diretorio: `/opt/plansmart/sistemas/psfinance/staging/repo`.
 - Branch remota publicada: `staging`.
-- Commit local da VPS: `9481df3e3f21dd7f434a271086249bc78fc33797`.
-- Commit `origin/staging`: `9481df3e3f21dd7f434a271086249bc78fc33797`.
+- Commit local da VPS validado na revisao executiva em 2026-08-08:
+  `99c7a7fb210969b94bf91c19d00cefd5d71c2816`.
+- Commit `origin/staging` validado na revisao executiva em 2026-08-08:
+  `99c7a7fb210969b94bf91c19d00cefd5d71c2816`.
 - `git status --short`: limpo.
 - Servicos: `psfinance-staging` e `psfinance-staging-gate` ativos.
 - Porta `5001`: `http://191.252.93.136:5001/health` retornou HTTP 200,
   `status=healthy`, `branch=staging` e commit
-  `9481df3e3f21dd7f434a271086249bc78fc33797`.
+  `99c7a7fb210969b94bf91c19d00cefd5d71c2816`.
 - Rota visual validada:
   `http://191.252.93.136:5001/staging/psfinance/financeiro/credores?open=cadastro-geral`.
 - Logs recentes do Gunicorn registraram reinicio normal e workers iniciados,
   sem erro critico de inicializacao.
+
+## Registro de revisao GitHub
+
+- Branch da correcao recorrente:
+  `fix/PLA-1655-cadastro-geral-apoio-unico`.
+- Commit head da branch da correcao recorrente:
+  `450545f928442e51112f31934fbbc7173b399992`.
+- A branch da correcao recorrente ja estava integrada em `origin/staging` pelo
+  merge `df0110c` quando a revisao executiva solicitou a correcao documental.
+- Como a branch original passou a ser ancestral de `origin/staging`, nao ha
+  diff restante para abertura de PR retrospectivo daquela branch.
+- A lacuna de revisao foi corrigida em branch propria
+  `docs/PLA-1655-alinha-evidencias-revisao`, aberta contra `staging`, para
+  registrar a evidencia GitHub e alinhar o commit validado da VPS.
 
 ## Observacao de banco local
 
