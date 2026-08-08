@@ -106,17 +106,22 @@ dele.
 - VPS: `vps69143.publiccloud.com.br` (`191.252.93.136`).
 - Diretorio: `/opt/plansmart/sistemas/psfinance/staging/repo`.
 - Branch remota publicada: `staging`.
-- Commit local da VPS validado na revisao executiva em 2026-08-08:
-  `99c7a7fb210969b94bf91c19d00cefd5d71c2816`.
-- Commit `origin/staging` validado na revisao executiva em 2026-08-08:
-  `99c7a7fb210969b94bf91c19d00cefd5d71c2816`.
+- Commit da correcao do icone compacto integrado por PR #46:
+  `8078f3630154d0e1ef1f1f24d85a68f7b4361c35`.
+- Commit local da VPS validado em 2026-08-08:
+  `8078f3630154d0e1ef1f1f24d85a68f7b4361c35`.
 - `git status --short`: limpo.
 - Servicos: `psfinance-staging` e `psfinance-staging-gate` ativos.
 - Porta `5001`: `http://191.252.93.136:5001/health` retornou HTTP 200,
   `status=healthy`, `branch=staging` e commit
-  `99c7a7fb210969b94bf91c19d00cefd5d71c2816`.
+  `8078f3630154d0e1ef1f1f24d85a68f7b4361c35`.
 - Rota visual validada:
-  `http://191.252.93.136:5001/staging/psfinance/financeiro/credores?open=cadastro-geral`.
+  `http://191.252.93.136:5001/staging/psfinance/financeiro/credores?compact=1`.
+- Playwright publico na porta `5001`: validou que o estado compacto publicado
+  possui `[data-menu-node="cadastro-geral-compacto"]`,
+  `aria-label="Expandir Cadastro Geral"`, icone `#icon-landmark`,
+  `aria-expanded=true` apos clique e itens `Credor`, `Plano Financeiro`,
+  `Empresa`, `Centro de Custo`, `Conta`, sem acionador compacto `APOIO`.
 - Logs recentes do Gunicorn registraram reinicio normal e workers iniciados,
   sem erro critico de inicializacao.
 
