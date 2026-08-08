@@ -391,3 +391,15 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   banco de dados e regras de negocio.
 - Limite: alteracao restrita a apresentacao. Nao autoriza migration, escrita
   em banco de producao, alteracao em `main` ou deploy produtivo.
+
+## 2026-08-08 - PLA-1655 - Remocao de duplicidade visual de Apoio
+
+- Projeto: PSFINANCE.
+- Decisao: remover o segundo `APOIO` visivel que ainda aparecia como item e
+  titulo de submenu, mantendo `APOIO` apenas como grupo principal e
+  `Cadastro Geral` como submenu expansivo direto desse grupo.
+- Motivo: Thiago rejeitou novamente a entrega por duplicidade de `APOIO`; a
+  correcao precisa comprovar objetivamente a hierarquia `APOIO > Cadastro
+  Geral > Credor, Plano Financeiro, Empresa, Centro de Custo, Conta`.
+- Limite: alteracao restrita a apresentacao. Nao altera rotas, banco de dados,
+  migrations, permissoes, `main` ou producao.
