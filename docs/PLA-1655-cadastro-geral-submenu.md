@@ -3,16 +3,19 @@
 ## Escopo
 
 Corrigir a interpretacao da PLA-1655 para manter `APOIO` como unico menu
-principal da area e posicionar `CADASTRO GERAL` como submenu expansivo dentro
+principal da area e posicionar `Cadastro Geral` como submenu expansivo dentro
 dele.
 
 ## Checklist do esclarecimento de Thiago
 
 - `APOIO` mantido como menu principal unico da area.
-- `CADASTRO GERAL` removido como grupo principal separado.
-- `CADASTRO GERAL` criado como submenu expansivo dentro de `APOIO`.
-- Itens dentro de `CADASTRO GERAL`: `Credor`, `Plano Financeiro`, `Empresa`,
+- `Cadastro Geral` removido como grupo principal separado.
+- `Cadastro Geral` criado como submenu expansivo dentro de `APOIO`.
+- Itens dentro de `Cadastro Geral`: `Credor`, `Plano Financeiro`, `Empresa`,
   `Centro de Custo` e `Conta`.
+- Correcao recorrente em 2026-08-08: removido o segundo `APOIO` visivel que
+  permanecia como item/titulo de submenu; `APOIO` agora aparece uma unica vez
+  por estado visual.
 - Rotas existentes preservadas.
 - Banco de dados, migrations, permissoes, `main` e producao nao alterados.
 
@@ -28,6 +31,12 @@ dele.
   - menu compacto/flyout com `APOIO` e `CADASTRO GERAL` aninhado.
 - `docs/evidencias/PLA-1655/correcao-vps-5001-apoio-cadastro-geral.png` -
   validacao visual publicada na VPS de teste pela porta `5001`.
+- `docs/evidencias/PLA-1655/recorrencia-desktop-apoio-unico-cadastro-geral.png`
+  - desktop com `APOIO` unico e `Cadastro Geral` expandido.
+- `docs/evidencias/PLA-1655/recorrencia-compacto-flyout-apoio-unico-cadastro-geral.png`
+  - menu compacto/flyout com `APOIO` unico, `Cadastro Geral` e os cinco itens.
+- `docs/evidencias/PLA-1655/recorrencia-mobile-apoio-unico-cadastro-geral.png`
+  - mobile com flyout aberto mostrando a mesma hierarquia.
 
 ## Validacao local
 
@@ -36,9 +45,24 @@ dele.
 - Playwright Python: validou que existe apenas um `group-title` `APOIO`, que
   nao existe `group-title` `CADASTRO GERAL`, e que os cinco itens esperados
   estao dentro de `CADASTRO GERAL`.
+- Playwright Python da correcao recorrente: validou em desktop, compacto/flyout
+  e mobile que ha exatamente um `APOIO` visivel, nenhum item de menu/submenu
+  paralelo chamado `APOIO`, `Cadastro Geral` aninhado no grupo `APOIO`,
+  `aria-expanded=true`, e os itens exatamente na ordem `Credor`, `Plano
+  Financeiro`, `Empresa`, `Centro de Custo`, `Conta`.
 - `curl http://127.0.0.1:5001/health`: HTTP 200, `status=healthy`.
 - `curl http://127.0.0.1:5001/financeiro/credores?open=cadastro-geral`: HTTP
   200.
+
+## Matriz objetiva da correcao recorrente
+
+| Estrutura exigida | Evidencia |
+| --- | --- |
+| `APOIO` como unico grupo/menu principal da area | Um unico `.group-title` `APOIO`; nenhum `.nav-label` de menu chamado `APOIO`. |
+| Sem segundo `APOIO` como header, grupo, item, flyout ou submenu paralelo | Um unico `APOIO` visivel por estado: grupo no desktop; titulo do flyout no compacto/mobile. |
+| `Cadastro Geral` dentro de `APOIO` | `[data-menu-node="cadastro-geral"]` localizado dentro do `.menu-group` de `APOIO`. |
+| Itens dentro de `Cadastro Geral` | DOM retornou exatamente `Credor`, `Plano Financeiro`, `Empresa`, `Centro de Custo`, `Conta`. |
+| Rotas preservadas | Links mantidos para as rotas existentes de credores, plano, empresas, centros de custo e contas. |
 
 ## Validacao na VPS de teste
 
