@@ -432,3 +432,19 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
 - Limite: alteracao restrita a apresentacao do menu compacto. Nao altera a
   hierarquia aberta aprovada, nomes exibidos no menu aberto, rotas, banco de
   dados, migrations, permissoes, `main` ou producao.
+
+## 2026-08-09 - PLA-1655 - Comparacao visual obrigatoria entre menus equivalentes
+
+- Projeto: PSFINANCE.
+- Decisao: quando Thiago solicitar comportamento "igual ao outro menu", a
+  validacao visual deve comparar o estado equivalente lado a lado antes de
+  devolver ao CEO. Nao basta validar apenas DOM ou intencao tecnica.
+- Motivo: a rejeicao da PLA-1655 mostrou que o compacto/flyout de `Cadastro
+  Geral` ainda exibia um titulo textual adicional que nao aparece no padrao
+  real de `FINANCEIRO > Contas a Pagar`.
+- Aplicacao: no compacto/flyout, `Cadastro Geral` deve seguir o mesmo padrao de
+  `Contas a Pagar`: acionador visual por icone no menu compacto e flyout com os
+  itens do submenu, sem titulo/label textual adicional quando o menu comparado
+  tambem nao possui esse titulo.
+- Limite: regra de qualidade visual e ajuste de template. Nao altera rotas,
+  banco de dados, migrations, permissoes, `main` ou producao.

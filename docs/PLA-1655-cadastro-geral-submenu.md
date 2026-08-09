@@ -19,6 +19,10 @@ dele.
 - Ajuste pos-revisao em 2026-08-08: menu aberto preservado e menu compacto
   corrigido para exibir o acionador de `Cadastro Geral`, usando o mesmo icone
   do submenu aberto, sem expor `APOIO` como item acionavel no estado compacto.
+- Ajuste pos-rejeicao em 2026-08-09: removido o titulo textual adicional
+  `Cadastro Geral` do flyout compacto, alinhando o comportamento visual ao
+  padrao real de `FINANCEIRO > Contas a Pagar`, que mostra somente o acionador
+  compacto e os itens do submenu.
 - Rotas existentes preservadas.
 - Banco de dados, migrations, permissoes, `main` e producao nao alterados.
 
@@ -53,6 +57,12 @@ dele.
   - flyout aberto pelo acionador compacto de `Cadastro Geral`.
 - `docs/evidencias/PLA-1655/corrige-icone-menu-aberto-preservado.png` - menu
   aberto preservando `APOIO > Cadastro Geral`.
+- `docs/evidencias/PLA-1655/compacto-contas-pagar-referencia.png` - referencia
+  real do compacto/flyout de `FINANCEIRO > Contas a Pagar`.
+- `docs/evidencias/PLA-1655/compacto-cadastro-geral-corrigido.png` -
+  compacto/flyout corrigido de `Cadastro Geral`, sem titulo textual adicional.
+- `docs/evidencias/PLA-1655/menu-aberto-hierarquia-preservada.png` - menu
+  aberto com `APOIO > Cadastro Geral` preservado.
 
 ## Validacao local
 
@@ -76,6 +86,10 @@ dele.
   `data-menu-node="cadastro-geral-compacto"`, `aria-label="Expandir Cadastro
   Geral"`, icone `#icon-landmark` e rotulo acessivel `Cadastro Geral`, sem
   `APOIO` como acionador compacto.
+- Playwright Python da correcao pos-rejeicao: comparou `Contas a Pagar` e
+  `Cadastro Geral` no estado compacto/flyout e validou que ambos exibem somente
+  itens do submenu, sem `.submenu-title` visivel ou texto adicional de titulo no
+  flyout compacto.
 - `curl http://127.0.0.1:5001/health`: HTTP 200, `status=healthy`.
 - `curl http://127.0.0.1:5001/financeiro/credores?open=cadastro-geral`: HTTP
   200.
@@ -98,7 +112,16 @@ dele.
 | Compacto acionado por `Cadastro Geral` | Em `.sidebar-compact`, o no visivel e `[data-menu-node="cadastro-geral-compacto"]`, com `aria-label="Expandir Cadastro Geral"` e icone `#icon-landmark`. |
 | Flyout compacto abre como os demais menus | Clique no botao de `Cadastro Geral` define `aria-expanded=true` e exibe `.submenu`, igual ao teste aplicado em `Gerencial Financeiro`. |
 | `APOIO` nao aparece como acionador compacto | O DOM visivel do estado compacto nao possui botao, rotulo ou `data-menu-node` de acionador `APOIO`. |
-| `Cadastro Geral` acessivel no flyout compacto | Flyout de `Cadastro Geral` exibe o titulo `Cadastro Geral` e os itens `Credor`, `Plano Financeiro`, `Empresa`, `Centro de Custo`, `Conta`. |
+| `Cadastro Geral` acessivel no flyout compacto | Flyout de `Cadastro Geral` exibe os itens `Credor`, `Plano Financeiro`, `Empresa`, `Centro de Custo`, `Conta`, sem titulo textual adicional. |
+| Escopo restrito | Sem alteracao de rotas, banco de dados, migrations, permissoes, `main` ou producao. |
+
+## Matriz objetiva da correcao pos-rejeicao
+
+| Estrutura exigida | Evidencia |
+| --- | --- |
+| Padrao comparavel de `Contas a Pagar` | Flyout compacto de `Contas a Pagar` nao possui `.submenu-title` e exibe apenas `Titulo` e `Baixa`. |
+| `Cadastro Geral` sem titulo textual adicional no compacto | Flyout compacto de `Cadastro Geral` nao possui `.submenu-title` visivel e exibe apenas `Credor`, `Plano Financeiro`, `Empresa`, `Centro de Custo`, `Conta`. |
+| Hierarquia aberta preservada | Menu aberto continua com `APOIO > Cadastro Geral > Credor / Plano Financeiro / Empresa / Centro de Custo / Conta`. |
 | Escopo restrito | Sem alteracao de rotas, banco de dados, migrations, permissoes, `main` ou producao. |
 
 ## Validacao na VPS de teste
