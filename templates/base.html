@@ -961,8 +961,6 @@
                   <span class="nav-chevron">›</span>
                 </button>
                 <div class="submenu" aria-label="Submenu Cadastro Geral">
-                  <span class="submenu-title">APOIO</span>
-                  <span class="submenu-title">Cadastro Geral</span>
                   <a class="submenu-item {% if endpoint in ['financeiro.listar_credores', 'financeiro.novo_credor', 'financeiro.editar_credor'] %}active{% endif %}" href="{{ url_for('financeiro.listar_credores') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-user"></use></svg></span><span>Credor</span></a>
                   <a class="submenu-item {% if endpoint in ['financeiro.listar_plano', 'financeiro.novo_plano', 'financeiro.editar_plano'] %}active{% endif %}" href="{{ url_for('financeiro.listar_plano') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-list-tree"></use></svg></span><span>Plano Financeiro</span></a>
                   <a class="submenu-item {% if endpoint in ['financeiro.listar_empresas', 'financeiro.nova_empresa', 'financeiro.editar_empresa'] %}active{% endif %}" href="{{ url_for('financeiro.listar_empresas') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-landmark"></use></svg></span><span>Empresa</span></a>

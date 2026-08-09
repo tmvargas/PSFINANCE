@@ -448,3 +448,18 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   tambem nao possui esse titulo.
 - Limite: regra de qualidade visual e ajuste de template. Nao altera rotas,
   banco de dados, migrations, permissoes, `main` ou producao.
+
+## 2026-08-09 - PLA-1655 - Evidencia executiva do menu Cadastro Geral
+
+- Projeto: PSFINANCE.
+- Decisao: remover tambem os titulos internos redundantes do submenu aberto de
+  `Cadastro Geral`, inclusive o segundo `APOIO` que permanecia como
+  `.submenu-title`, e registrar screenshots especificos para revisao executiva.
+- Motivo: a devolucao do CEO apontou que as evidencias anteriores nao
+  comprovavam de forma objetiva o flyout comparativo nem a hierarquia aberta
+  `APOIO > Cadastro Geral > itens`.
+- Evidencia: novos screenshots em `docs/evidencias/PLA-1655/` com menu aberto,
+  flyout compacto de `Cadastro Geral`, referencia compacta de `Contas a Pagar`
+  e viewport mobile.
+- Limite: alteracao restrita a apresentacao e documentacao. Nao altera rotas,
+  banco de dados, migrations, permissoes, `main` ou producao.
