@@ -23,6 +23,11 @@ dele.
   `Cadastro Geral` do flyout compacto, alinhando o comportamento visual ao
   padrao real de `FINANCEIRO > Contas a Pagar`, que mostra somente o acionador
   compacto e os itens do submenu.
+- Ajuste pos-revisao CEO em 2026-08-09: removidos os titulos internos
+  redundantes do submenu aberto de `Cadastro Geral`, incluindo o segundo
+  `APOIO` que ainda existia no HTML como `.submenu-title`, e substituidas as
+  evidencias principais por screenshots que mostram a hierarquia aberta e o
+  flyout compacto com os itens.
 - Rotas existentes preservadas.
 - Banco de dados, migrations, permissoes, `main` e producao nao alterados.
 
@@ -63,6 +68,17 @@ dele.
   compacto/flyout corrigido de `Cadastro Geral`, sem titulo textual adicional.
 - `docs/evidencias/PLA-1655/menu-aberto-hierarquia-preservada.png` - menu
   aberto com `APOIO > Cadastro Geral` preservado.
+- `docs/evidencias/PLA-1655/revisao-ceo-menu-aberto-apoio-cadastro-geral.png`
+  - menu aberto com `APOIO` uma unica vez, `Cadastro Geral` expandido e itens
+  `Credor`, `Plano Financeiro`, `Empresa`, `Centro de Custo` e `Conta`.
+- `docs/evidencias/PLA-1655/revisao-ceo-compacto-flyout-cadastro-geral-itens.png`
+  - menu compacto com o acionador de `Cadastro Geral` abrindo flyout lateral
+  com os cinco itens, sem titulo textual adicional e sem segundo `APOIO`.
+- `docs/evidencias/PLA-1655/revisao-ceo-compacto-flyout-contas-pagar-referencia.png`
+  - referencia visual equivalente de `FINANCEIRO > Contas a Pagar` no estado
+  compacto, usada para comparar o padrao de flyout.
+- `docs/evidencias/PLA-1655/revisao-ceo-mobile-flyout-cadastro-geral-itens.png`
+  - viewport mobile com o mesmo flyout de `Cadastro Geral` e os cinco itens.
 
 ## Validacao local
 
@@ -90,6 +106,15 @@ dele.
   `Cadastro Geral` no estado compacto/flyout e validou que ambos exibem somente
   itens do submenu, sem `.submenu-title` visivel ou texto adicional de titulo no
   flyout compacto.
+- Playwright Python da revisao CEO: validou que o menu aberto nao inicia
+  compacto, possui exatamente um `.group-title` `APOIO`, nao possui
+  `.submenu-title` `APOIO`, abre `[data-menu-node="cadastro-geral"]` com
+  `aria-expanded=true` e exibe exatamente os itens `Credor`,
+  `Plano Financeiro`, `Empresa`, `Centro de Custo`, `Conta`.
+- Playwright Python da revisao CEO no compacto/mobile: validou
+  `[data-menu-node="cadastro-geral-compacto"]`, `aria-expanded=true`,
+  ausencia de `.submenu-title`, ausencia de acionador compacto
+  `data-menu-node="apoio"` e os cinco itens esperados no flyout.
 - `curl http://127.0.0.1:5001/health`: HTTP 200, `status=healthy`.
 - `curl http://127.0.0.1:5001/financeiro/credores?open=cadastro-geral`: HTTP
   200.
@@ -123,6 +148,16 @@ dele.
 | `Cadastro Geral` sem titulo textual adicional no compacto | Flyout compacto de `Cadastro Geral` nao possui `.submenu-title` visivel e exibe apenas `Credor`, `Plano Financeiro`, `Empresa`, `Centro de Custo`, `Conta`. |
 | Hierarquia aberta preservada | Menu aberto continua com `APOIO > Cadastro Geral > Credor / Plano Financeiro / Empresa / Centro de Custo / Conta`. |
 | Escopo restrito | Sem alteracao de rotas, banco de dados, migrations, permissoes, `main` ou producao. |
+
+## Matriz objetiva da revisao CEO
+
+| Ponto devolvido pelo CEO | Evidencia atualizada |
+| --- | --- |
+| Screenshots anteriores nao comprovavam a hierarquia aberta | `revisao-ceo-menu-aberto-apoio-cadastro-geral.png` mostra `APOIO` como grupo unico, `Cadastro Geral` expandido e os cinco itens diretamente abaixo. |
+| Screenshots anteriores nao comprovavam o flyout compacto | `revisao-ceo-compacto-flyout-cadastro-geral-itens.png` mostra o flyout lateral aberto pelo acionador compacto de `Cadastro Geral` com os cinco itens. |
+| Faltava comparacao com menu equivalente | `revisao-ceo-compacto-flyout-contas-pagar-referencia.png` registra a referencia compacta de `Contas a Pagar`, sem titulo textual adicional, para comparar o mesmo padrao visual. |
+| Risco de segundo `APOIO` ainda visivel | Playwright validou ausencia de `.submenu-title` `APOIO` e ausencia de acionador compacto `data-menu-node="apoio"`; o template removeu o segundo `APOIO` interno. |
+| Responsividade do flyout | `revisao-ceo-mobile-flyout-cadastro-geral-itens.png` mostra o flyout em viewport mobile com os mesmos itens. |
 
 ## Validacao na VPS de teste
 
