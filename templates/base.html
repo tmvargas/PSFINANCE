@@ -733,6 +733,7 @@
       'financeiro.novo_titulo',
       'financeiro.editar_titulo',
       'financeiro.copiar_titulo',
+      'financeiro.editar_parcelas_titulo',
       'financeiro.baixar_titulo',
       'financeiro.listar_baixas_titulo'
     ] %}
@@ -886,7 +887,7 @@
                   <span class="nav-chevron">›</span>
                 </button>
                 <div class="submenu" aria-label="Submenu Contas a Pagar">
-                  <a class="submenu-item {% if endpoint in ['financeiro.listar_titulos', 'financeiro.novo_titulo', 'financeiro.editar_titulo', 'financeiro.copiar_titulo'] %}active{% endif %}" href="{{ url_for('financeiro.listar_titulos') }}">
+                  <a class="submenu-item {% if endpoint in ['financeiro.listar_titulos', 'financeiro.novo_titulo', 'financeiro.editar_titulo', 'financeiro.copiar_titulo', 'financeiro.editar_parcelas_titulo'] %}active{% endif %}" href="{{ url_for('financeiro.listar_titulos') }}">
                     <span class="nav-icon"><svg class="icon"><use href="#icon-file-text"></use></svg></span><span>Título</span>
                   </a>
                   <a class="submenu-item {% if endpoint in ['financeiro.baixar_titulo', 'financeiro.listar_baixas_titulo'] %}active{% endif %}" href="{{ url_for('financeiro.listar_titulos') }}">

@@ -129,7 +129,9 @@
     </div>
 
     <div class="col-md-3">
-      <label class="form-label">Valor</label>
+      <label class="form-label">
+        {% if titulo and not modo_copia %}Valor{% else %}Valor total{% endif %}
+      </label>
       <input
         type="text"
         name="valor"
@@ -166,7 +168,9 @@
 
   <div class="row mb-3">
     <div class="col-md-3">
-      <label class="form-label">Data de Vencimento</label>
+      <label class="form-label">
+        {% if titulo and not modo_copia %}Data de Vencimento{% else %}Data do 1º Vencimento{% endif %}
+      </label>
       {% set venc_val = hoje %}
       {% if titulo and titulo.vencimento %}
         {% if titulo.vencimento is string %}
@@ -182,6 +186,28 @@
         value="{{ venc_val }}"
         required
       >
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">Parcelas</label>
+      <input
+        type="number"
+        name="quantidade_parcelas"
+        class="form-control"
+        min="1"
+        max="120"
+        step="1"
+        value="1"
+        {% if titulo and not modo_copia %}disabled{% endif %}
+        required
+      >
+      <div class="form-text">
+        {% if titulo and not modo_copia %}
+          Edição mantém o título atual.
+        {% else %}
+          Cada parcela gera uma parcela mensal do título.
+        {% endif %}
+      </div>
     </div>
   </div>
 

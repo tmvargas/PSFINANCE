@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Parcelas do Título - PlanSmart Financeiro{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="h4 mb-1">Parcelas do Título #{{ titulo.id }}</h2>
+    <div class="text-muted">
+      {{ titulo.documento }} {{ titulo.nr_documento }}{% if titulo.credor %} - {{ titulo.credor }}{% endif %}
+    </div>
+  </div>
+  <div>
+    <a href="{{ url_for('financeiro.editar_titulo', id_titulo=titulo.id) }}" class="btn btn-sm btn-outline-primary me-2">
+      Editar título
+    </a>
+    <a href="{{ url_for('financeiro.listar_titulos') }}" class="btn btn-sm btn-outline-secondary">
+      Voltar para lista
+    </a>
+  </div>
+</div>
+
+<form method="post" class="card p-3 shadow-sm">
+  <div class="d-flex flex-wrap justify-content-between gap-2 mb-3">
+    <div>
+      <strong>Valor total do título:</strong>
+      R$ {{ '%.2f'|format(titulo.valor or 0)|replace('.', ',') }}
+    </div>
+    <div>
+      <strong>Soma das parcelas:</strong>
+      R$ {{ '%.2f'|format(total_parcelas or 0)|replace('.', ',') }}
+    </div>
+  </div>
+
+  <div class="table-responsive mb-3">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th style="width: 140px;">Parcela</th>
+          <th style="width: 220px;">Vencimento</th>
+          <th style="width: 220px;">Valor</th>
+          <th style="width: 110px;">Excluir</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for parcela in parcelas %}
+          <tr>
+            <td>
+              <input type="hidden" name="parcela_id" value="{{ parcela.id_parcela }}">
+              <input
+                type="number"
+                name="numero_parcela"
+                class="form-control"
+                min="1"
+                step="1"
+                value="{{ parcela.numero_parcela }}"
+                required
+              >
+            </td>
+            <td>
+              <input
+                type="date"
+                name="vencimento_parcela"
+                class="form-control"
+                value="{{ parcela.vencimento }}"
+                required
+              >
+            </td>
+            <td>
+              <input
+                type="text"
+                name="valor_parcela"
+                class="form-control js-money"
+                inputmode="numeric"
+                autocomplete="off"
+                value="{{ '%.2f'|format(parcela.valor or 0)|replace('.', ',') }}"
+                required
+              >
+            </td>
+            <td>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  name="excluir_parcela"
+                  value="{{ parcela.id_parcela }}"
+                  id="excluir_parcela_{{ parcela.id_parcela }}"
+                >
+                <label class="form-check-label" for="excluir_parcela_{{ parcela.id_parcela }}">Excluir</label>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <hr>
+
+  <h3 class="h6 mb-3">Nova parcela</h3>
+  <div class="row g-3 mb-3">
+    <div class="col-md-2">
+      <label class="form-label">Parcela</label>
+      <input type="number" name="novo_numero_parcela" class="form-control" min="1" step="1" value="{{ proximo_numero }}">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Vencimento</label>
+      <input type="date" name="novo_vencimento_parcela" class="form-control" value="">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Valor</label>
+      <input type="text" name="novo_valor_parcela" class="form-control js-money" inputmode="numeric" autocomplete="off" placeholder="0,00">
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-end">
+    <button type="submit" class="btn btn-success">
+      Salvar parcelas
+    </button>
+  </div>
+</form>
+
+<script>
+(function () {
+  const nf = new Intl.NumberFormat('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+
+  function formatAsCents(raw) {
+    const digits = String(raw || '').replace(/\D/g, '');
+    if (!digits) return '';
+    const cents = parseInt(digits, 10);
+    return nf.format(cents / 100);
+  }
+
+  function attachMoneyMask(input) {
+    input.addEventListener('input', function () {
+      input.value = formatAsCents(input.value);
+      try { input.setSelectionRange(input.value.length, input.value.length); } catch (e) {}
+    });
+
+    input.addEventListener('blur', function () {
+      input.value = formatAsCents(input.value);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.js-money').forEach((el) => {
+      attachMoneyMask(el);
+      if (el.value) el.value = formatAsCents(el.value);
+    });
+  });
+})();
+</script>
+{% endblock %}

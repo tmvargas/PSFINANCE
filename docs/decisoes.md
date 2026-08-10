@@ -463,3 +463,20 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   e viewport mobile.
 - Limite: alteracao restrita a apresentacao e documentacao. Nao altera rotas,
   banco de dados, migrations, permissoes, `main` ou producao.
+
+## 2026-08-10 - PLA-1816 - Multi parcela em titulo
+
+- Projeto: PSFINANCE.
+- Decisao: manter o titulo como registro principal com valor total e criar a
+  tabela relacional `titulo_parcela` para controlar numero, vencimento e valor
+  de cada parcela.
+- Regra: a quantidade de parcelas deve ficar entre 1 e 120; a criacao inicial
+  gera parcelas mensais a partir da Data do 1º Vencimento, preservando o dia
+  original quando existir e usando o ultimo dia valido quando o mes nao possuir
+  aquele dia.
+- Ajuste manual: a guia de parcelas permite editar vencimentos e valores,
+  excluir parcela e incluir nova parcela. Ao salvar, o valor total do titulo e
+  atualizado pela soma das parcelas ativas e o vencimento do titulo acompanha a
+  primeira parcela.
+- Limite: migration preparada no repositorio para staging. Nao autoriza escrita
+  no banco de producao, merge em `main` ou deploy produtivo.
