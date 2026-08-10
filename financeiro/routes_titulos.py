@@ -1,6 +1,7 @@
 # financeiro/routes_titulos.py
 import os
 import uuid as uuid_lib
+import calendar
 from datetime import date, datetime
 from pathlib import Path
 
@@ -68,6 +69,45 @@ def _parse_float(value: str | None):
         return float(s)
     except Exception:
         return None
+
+
+def _parse_int(value: str | None):
+    try:
+        return int(value)
+    except Exception:
+        return None
+
+
+def _add_months(data_base: date, meses: int) -> date:
+    mes_indice = data_base.month - 1 + meses
+    ano = data_base.year + mes_indice // 12
+    mes = mes_indice % 12 + 1
+    ultimo_dia = calendar.monthrange(ano, mes)[1]
+    return date(ano, mes, min(data_base.day, ultimo_dia))
+
+
+def _gerar_parcelas(valor_total: float, vencimento_inicial: date, quantidade: int):
+    total_centavos = round(float(valor_total or 0) * 100)
+    base_centavos = total_centavos // quantidade
+    resto = total_centavos % quantidade
+
+    parcelas = []
+    for indice in range(quantidade):
+        valor_centavos = base_centavos + (1 if indice < resto else 0)
+        parcelas.append(
+            {
+                "numero": indice + 1,
+                "valor": valor_centavos / 100,
+                "vencimento": _add_months(vencimento_inicial, indice),
+            }
+        )
+    return parcelas
+
+
+def _numero_documento_parcela(numero_documento: str, numero: int, total: int) -> str:
+    if total <= 1:
+        return numero_documento
+    return f"{numero_documento}-{numero:02d}/{total:02d}"
 
 
 
@@ -296,6 +336,11 @@ def _upsert_titulo(id_titulo: int | None, id_titulo_copia: int | None = None):
         emissao = _parse_date(request.form.get("emissao"))
         vencimento = _parse_date(request.form.get("vencimento"))
         observacao = (request.form.get("observacao") or "").strip()
+        quantidade_parcelas_raw = request.form.get("quantidade_parcelas") or "1"
+        quantidade_parcelas = _parse_int(quantidade_parcelas_raw)
+        permitir_multi_parcela = titulo_obj is None
+        files = request.files.getlist("arquivos")
+        files = [f for f in files if f and f.filename]
 
 
         erros = []
@@ -315,6 +360,18 @@ def _upsert_titulo(id_titulo: int | None, id_titulo_copia: int | None = None):
             erros.append("Data de emissão inválida.")
         if not vencimento:
             erros.append("Data de vencimento inválida.")
+        if quantidade_parcelas is None or quantidade_parcelas < 1 or quantidade_parcelas > 120:
+            erros.append("Quantidade de parcelas deve estar entre 1 e 120.")
+        if quantidade_parcelas is None:
+            quantidade_parcelas = 1
+        if not permitir_multi_parcela and quantidade_parcelas != 1:
+            erros.append("Parcelamento só pode ser informado ao criar ou copiar um título.")
+        if quantidade_parcelas > 1 and _numero_documento_parcela(nr_documento, quantidade_parcelas, quantidade_parcelas):
+            nr_documento_final = _numero_documento_parcela(nr_documento, quantidade_parcelas, quantidade_parcelas)
+            if len(nr_documento_final) > 50:
+                erros.append("Número do documento muito longo para gerar as parcelas.")
+        if quantidade_parcelas > 1 and files:
+            erros.append("Anexos devem ser incluídos depois, em cada título gerado.")
 
         if id_doc:
             doc = (
@@ -330,21 +387,30 @@ def _upsert_titulo(id_titulo: int | None, id_titulo_copia: int | None = None):
                 flash(e, "erro")
         else:
             if titulo_obj is None:
-                titulo_obj = Titulo(
-                    id_doc=id_doc,
-                    nr_documento=nr_documento,
-                    id_credor=id_credor,
-                    id_empresa=id_empresa,
-                    id_centro_custo=id_centro_custo,
-                    id_plano=id_plano,
-                    valor=valor,
-                    emissao=emissao,
-                    vencimento=vencimento,
-                    observacao=observacao or None,
+                titulos_criados = []
+                parcelas = _gerar_parcelas(valor, vencimento, quantidade_parcelas)
+                for parcela in parcelas:
+                    titulo_parcela = Titulo(
+                        id_doc=id_doc,
+                        nr_documento=_numero_documento_parcela(
+                            nr_documento,
+                            parcela["numero"],
+                            quantidade_parcelas,
+                        ),
+                        id_credor=id_credor,
+                        id_empresa=id_empresa,
+                        id_centro_custo=id_centro_custo,
+                        id_plano=id_plano,
+                        valor=parcela["valor"],
+                        emissao=emissao,
+                        vencimento=parcela["vencimento"],
+                        observacao=observacao or None,
 
-                )
-                session.add(titulo_obj)
+                    )
+                    session.add(titulo_parcela)
+                    titulos_criados.append(titulo_parcela)
                 session.flush()
+                titulo_obj = titulos_criados[0]
             else:
                 baixado = (
                     session.query(func.coalesce(func.sum(Baixa.valor_baixa), 0))
@@ -368,10 +434,6 @@ def _upsert_titulo(id_titulo: int | None, id_titulo_copia: int | None = None):
                 titulo_obj.vencimento = vencimento
                 titulo_obj.observacao = observacao
       
-
-
-            files = request.files.getlist("arquivos")
-            files = [f for f in files if f and f.filename]
             if files:
                 existentes = (
                     session.query(TituloAnexo)
@@ -400,7 +462,9 @@ def _upsert_titulo(id_titulo: int | None, id_titulo_copia: int | None = None):
 
             session.commit()
             session.close()
-            if modo_copia:
+            if quantidade_parcelas > 1:
+                flash(f"{quantidade_parcelas} parcelas salvas com sucesso!", "sucesso")
+            elif modo_copia:
                 flash("Cópia do título salva com sucesso!", "sucesso")
             else:
                 flash("Título salvo com sucesso!", "sucesso")

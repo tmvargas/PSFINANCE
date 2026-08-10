@@ -463,3 +463,16 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   e viewport mobile.
 - Limite: alteracao restrita a apresentacao e documentacao. Nao altera rotas,
   banco de dados, migrations, permissoes, `main` ou producao.
+
+## 2026-08-10 - PLA-1816 - Multi parcela em titulo
+
+- Projeto: PSFINANCE.
+- Decisao: implementar multi parcela no cadastro e na copia de titulo gerando
+  titulos separados, um por parcela, sem criar tabela ou coluna nova.
+- Regra: a quantidade de parcelas deve ficar entre 1 e 120; cada parcela recebe
+  vencimento mensal a partir da data informada, valor dividido por centavos e
+  numero de documento com sufixo `NN/TT`, como `NF123-01/03`.
+- Preservacao: edicao de titulo existente permanece como titulo unico para nao
+  conflitar com baixas e anexos ja cadastrados.
+- Limite: anexos em parcelamento devem ser incluidos posteriormente em cada
+  titulo gerado. Nao altera banco, migrations, producao ou `main`.

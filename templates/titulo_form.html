@@ -183,6 +183,28 @@
         required
       >
     </div>
+
+    <div class="col-md-3">
+      <label class="form-label">Parcelas</label>
+      <input
+        type="number"
+        name="quantidade_parcelas"
+        class="form-control"
+        min="1"
+        max="120"
+        step="1"
+        value="1"
+        {% if titulo and not modo_copia %}disabled{% endif %}
+        required
+      >
+      <div class="form-text">
+        {% if titulo and not modo_copia %}
+          Edição mantém o título atual.
+        {% else %}
+          Cada parcela gera um título mensal.
+        {% endif %}
+      </div>
+    </div>
   </div>
 
   <div class="mb-3">
