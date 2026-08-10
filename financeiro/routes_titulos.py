@@ -24,7 +24,16 @@ from .regras_empresa_centro import (
     validar_empresa_centro,
 )
 from database import SessionLocal
-from models import Baixa, Conta, Credor, Documento, PlanoDeContas, Titulo, TituloAnexo
+from models import (
+    Baixa,
+    Conta,
+    Credor,
+    Documento,
+    PlanoDeContas,
+    Titulo,
+    TituloAnexo,
+    TituloParcela,
+)
 
 
 def get_session():
@@ -104,10 +113,49 @@ def _gerar_parcelas(valor_total: float, vencimento_inicial: date, quantidade: in
     return parcelas
 
 
-def _numero_documento_parcela(numero_documento: str, numero: int, total: int) -> str:
-    if total <= 1:
-        return numero_documento
-    return f"{numero_documento}-{numero:02d}/{total:02d}"
+def _sincronizar_parcelas_iniciais(
+    session,
+    titulo: Titulo,
+    valor_total: float,
+    vencimento_inicial: date,
+    quantidade: int,
+):
+    parcelas_existentes = [
+        p for p in getattr(titulo, "parcelas", []) if not getattr(p, "deleted", False)
+    ]
+    for parcela in parcelas_existentes:
+        parcela.deleted = True
+
+    for parcela in _gerar_parcelas(valor_total, vencimento_inicial, quantidade):
+        session.add(
+            TituloParcela(
+                id_titulo=titulo.id_titulo,
+                numero_parcela=parcela["numero"],
+                vencimento=parcela["vencimento"],
+                valor=parcela["valor"],
+            )
+        )
+
+
+def _garantir_parcela_unica(session, titulo: Titulo):
+    tem_parcela = (
+        session.query(TituloParcela.id_parcela)
+        .filter(
+            TituloParcela.deleted.is_(False),
+            TituloParcela.id_titulo == titulo.id_titulo,
+        )
+        .first()
+        is not None
+    )
+    if not tem_parcela:
+        session.add(
+            TituloParcela(
+                id_titulo=titulo.id_titulo,
+                numero_parcela=1,
+                vencimento=titulo.vencimento,
+                valor=float(titulo.valor or 0),
+            )
+        )
 
 
 
@@ -366,12 +414,6 @@ def _upsert_titulo(id_titulo: int | None, id_titulo_copia: int | None = None):
             quantidade_parcelas = 1
         if not permitir_multi_parcela and quantidade_parcelas != 1:
             erros.append("Parcelamento só pode ser informado ao criar ou copiar um título.")
-        if quantidade_parcelas > 1 and _numero_documento_parcela(nr_documento, quantidade_parcelas, quantidade_parcelas):
-            nr_documento_final = _numero_documento_parcela(nr_documento, quantidade_parcelas, quantidade_parcelas)
-            if len(nr_documento_final) > 50:
-                erros.append("Número do documento muito longo para gerar as parcelas.")
-        if quantidade_parcelas > 1 and files:
-            erros.append("Anexos devem ser incluídos depois, em cada título gerado.")
 
         if id_doc:
             doc = (
@@ -386,31 +428,30 @@ def _upsert_titulo(id_titulo: int | None, id_titulo_copia: int | None = None):
             for e in erros:
                 flash(e, "erro")
         else:
+            titulo_criado = titulo_obj is None
             if titulo_obj is None:
-                titulos_criados = []
-                parcelas = _gerar_parcelas(valor, vencimento, quantidade_parcelas)
-                for parcela in parcelas:
-                    titulo_parcela = Titulo(
-                        id_doc=id_doc,
-                        nr_documento=_numero_documento_parcela(
-                            nr_documento,
-                            parcela["numero"],
-                            quantidade_parcelas,
-                        ),
-                        id_credor=id_credor,
-                        id_empresa=id_empresa,
-                        id_centro_custo=id_centro_custo,
-                        id_plano=id_plano,
-                        valor=parcela["valor"],
-                        emissao=emissao,
-                        vencimento=parcela["vencimento"],
-                        observacao=observacao or None,
+                titulo_obj = Titulo(
+                    id_doc=id_doc,
+                    nr_documento=nr_documento,
+                    id_credor=id_credor,
+                    id_empresa=id_empresa,
+                    id_centro_custo=id_centro_custo,
+                    id_plano=id_plano,
+                    valor=valor,
+                    emissao=emissao,
+                    vencimento=vencimento,
+                    observacao=observacao or None,
 
-                    )
-                    session.add(titulo_parcela)
-                    titulos_criados.append(titulo_parcela)
+                )
+                session.add(titulo_obj)
                 session.flush()
-                titulo_obj = titulos_criados[0]
+                _sincronizar_parcelas_iniciais(
+                    session,
+                    titulo_obj,
+                    valor,
+                    vencimento,
+                    quantidade_parcelas,
+                )
             else:
                 baixado = (
                     session.query(func.coalesce(func.sum(Baixa.valor_baixa), 0))
@@ -433,6 +474,7 @@ def _upsert_titulo(id_titulo: int | None, id_titulo_copia: int | None = None):
                 titulo_obj.emissao = emissao
                 titulo_obj.vencimento = vencimento
                 titulo_obj.observacao = observacao
+                _garantir_parcela_unica(session, titulo_obj)
       
             if files:
                 existentes = (
@@ -461,13 +503,18 @@ def _upsert_titulo(id_titulo: int | None, id_titulo_copia: int | None = None):
                         session.add(an)
 
             session.commit()
+            id_titulo_salvo = titulo_obj.id_titulo
             session.close()
             if quantidade_parcelas > 1:
                 flash(f"{quantidade_parcelas} parcelas salvas com sucesso!", "sucesso")
-            elif modo_copia:
+                return redirect(url_for("financeiro.editar_parcelas_titulo", id_titulo=id_titulo_salvo))
+            if modo_copia:
                 flash("Cópia do título salva com sucesso!", "sucesso")
-            else:
-                flash("Título salvo com sucesso!", "sucesso")
+                return redirect(url_for("financeiro.editar_parcelas_titulo", id_titulo=id_titulo_salvo))
+            if titulo_criado:
+                flash("Título salvo com sucesso. Revise as parcelas.", "sucesso")
+                return redirect(url_for("financeiro.editar_parcelas_titulo", id_titulo=id_titulo_salvo))
+            flash("Título salvo com sucesso!", "sucesso")
             return redirect(url_for("financeiro.listar_titulos"))
 
     hoje_str = date.today().isoformat()
@@ -516,6 +563,171 @@ def _upsert_titulo(id_titulo: int | None, id_titulo_copia: int | None = None):
         hoje=hoje_str,
         modo_copia=modo_copia,
         titulo_original=titulo_base.id_titulo if titulo_base else None,
+    )
+
+
+# ----------------------------------------------------------------------
+# PARCELAS DO TÍTULO
+# ----------------------------------------------------------------------
+@bp_financeiro.route("/titulos/<int:id_titulo>/parcelas", methods=["GET", "POST"])
+def editar_parcelas_titulo(id_titulo: int):
+    session = get_session()
+
+    titulo = (
+        session.query(Titulo)
+        .options(
+            joinedload(Titulo.credor),
+            joinedload(Titulo.documento),
+            joinedload(Titulo.parcelas),
+        )
+        .filter(Titulo.id_titulo == id_titulo, Titulo.deleted.is_(False))
+        .first()
+    )
+    if not titulo:
+        session.close()
+        flash("Título não encontrado.", "erro")
+        return redirect(url_for("financeiro.listar_titulos"))
+
+    _garantir_parcela_unica(session, titulo)
+    session.flush()
+
+    if request.method == "POST":
+        parcela_ids = request.form.getlist("parcela_id")
+        numeros = request.form.getlist("numero_parcela")
+        vencimentos = request.form.getlist("vencimento_parcela")
+        valores = request.form.getlist("valor_parcela")
+        excluir_ids = set(request.form.getlist("excluir_parcela"))
+
+        parcelas_por_id = {
+            str(p.id_parcela): p
+            for p in titulo.parcelas
+            if not getattr(p, "deleted", False)
+        }
+        erros = []
+        numeros_usados = set()
+
+        for indice, id_parcela in enumerate(parcela_ids):
+            parcela = parcelas_por_id.get(id_parcela)
+            if not parcela:
+                continue
+
+            if id_parcela in excluir_ids:
+                parcela.deleted = True
+                continue
+
+            numero = _parse_int(numeros[indice] if indice < len(numeros) else None)
+            vencimento = _parse_date(vencimentos[indice] if indice < len(vencimentos) else None)
+            valor = _parse_float(valores[indice] if indice < len(valores) else None)
+
+            if numero is None or numero < 1:
+                erros.append("Número de parcela inválido.")
+                continue
+            if numero in numeros_usados:
+                erros.append("Número de parcela duplicado.")
+                continue
+            if not vencimento:
+                erros.append(f"Vencimento inválido na parcela {numero}.")
+                continue
+            if valor is None or valor <= 0:
+                erros.append(f"Valor inválido na parcela {numero}.")
+                continue
+
+            numeros_usados.add(numero)
+            parcela.numero_parcela = numero
+            parcela.vencimento = vencimento
+            parcela.valor = valor
+
+        novo_numero = _parse_int(request.form.get("novo_numero_parcela"))
+        novo_vencimento = _parse_date(request.form.get("novo_vencimento_parcela"))
+        novo_valor = _parse_float(request.form.get("novo_valor_parcela"))
+
+        if novo_numero or novo_vencimento or novo_valor is not None:
+            if novo_numero is None or novo_numero < 1:
+                erros.append("Número da nova parcela inválido.")
+            elif novo_numero in numeros_usados:
+                erros.append("Número da nova parcela duplicado.")
+            elif not novo_vencimento:
+                erros.append("Vencimento da nova parcela inválido.")
+            elif novo_valor is None or novo_valor <= 0:
+                erros.append("Valor da nova parcela inválido.")
+            else:
+                numeros_usados.add(novo_numero)
+                session.add(
+                    TituloParcela(
+                        id_titulo=titulo.id_titulo,
+                        numero_parcela=novo_numero,
+                        vencimento=novo_vencimento,
+                        valor=novo_valor,
+                    )
+                )
+
+        if erros:
+            session.rollback()
+            for erro in erros:
+                flash(erro, "erro")
+        else:
+            session.flush()
+            parcelas_ativas = (
+                session.query(TituloParcela)
+                .filter(
+                    TituloParcela.deleted.is_(False),
+                    TituloParcela.id_titulo == titulo.id_titulo,
+                )
+                .order_by(TituloParcela.numero_parcela.asc())
+                .all()
+            )
+            if not parcelas_ativas:
+                flash("Título deve possuir ao menos uma parcela ativa.", "erro")
+                session.rollback()
+            else:
+                titulo.valor = sum(float(p.valor or 0) for p in parcelas_ativas)
+                primeira_parcela = parcelas_ativas[0]
+                titulo.vencimento = primeira_parcela.vencimento
+                session.commit()
+                session.close()
+                flash("Parcelas salvas e valor total do título atualizado.", "sucesso")
+                return redirect(url_for("financeiro.editar_parcelas_titulo", id_titulo=id_titulo))
+
+    parcelas_view = []
+    parcelas = (
+        session.query(TituloParcela)
+        .filter(
+            TituloParcela.deleted.is_(False),
+            TituloParcela.id_titulo == titulo.id_titulo,
+        )
+        .order_by(TituloParcela.numero_parcela.asc(), TituloParcela.id_parcela.asc())
+        .all()
+    )
+    total_parcelas = 0.0
+    for parcela in parcelas:
+        valor = float(parcela.valor or 0)
+        total_parcelas += valor
+        parcelas_view.append(
+            {
+                "id_parcela": parcela.id_parcela,
+                "numero_parcela": parcela.numero_parcela,
+                "vencimento": parcela.vencimento.isoformat() if parcela.vencimento else "",
+                "valor": valor,
+            }
+        )
+
+    titulo_view = {
+        "id": titulo.id_titulo,
+        "documento": titulo.documento.tipo_doc if titulo.documento else "",
+        "nr_documento": titulo.nr_documento,
+        "credor": titulo.credor.nome if titulo.credor else "",
+        "valor": float(titulo.valor or 0),
+    }
+    proximo_numero = (max([p["numero_parcela"] for p in parcelas_view] or [0]) + 1)
+
+    session.close()
+    return render_template(
+        "titulo_parcelas_form.html",
+        titulo=titulo_view,
+        parcelas=parcelas_view,
+        total_parcelas=total_parcelas,
+        proximo_numero=proximo_numero,
+        hoje=date.today().isoformat(),
     )
 
 

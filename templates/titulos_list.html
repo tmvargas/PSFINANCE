@@ -454,6 +454,15 @@
                       </a>
 
                       <a
+                        href="{{ url_for('financeiro.editar_parcelas_titulo', id_titulo=t.id) }}"
+                        class="titles-action"
+                        title="Editar parcelas"
+                        aria-label="Editar parcelas do título {{ t.id }}"
+                      >
+                        <svg class="icon"><use href="#icon-list-tree"></use></svg>
+                      </a>
+
+                      <a
                         href="{{ url_for('financeiro.copiar_titulo', id_titulo=t.id) }}"
                         class="titles-action"
                         title="Copiar título"

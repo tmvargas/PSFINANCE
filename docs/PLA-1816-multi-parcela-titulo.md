@@ -7,27 +7,32 @@ PSFINANCE.
 ## Objetivo
 
 Permitir que o cadastro de titulo gere varias parcelas em uma unica entrada,
-preservando a estrutura atual de titulos, baixas e anexos.
+preservando o titulo como registro principal e controlando as parcelas em tabela
+relacional propria.
 
 ## Regra aplicada
 
 - O campo `Parcelas` fica disponivel em novo titulo e copia de titulo.
 - Quantidade valida: 1 a 120 parcelas.
-- Uma parcela mantem o comportamento anterior.
-- Duas ou mais parcelas geram titulos separados, com vencimento mensal a partir
-  da data de vencimento informada.
+- Uma parcela cria o titulo e uma parcela relacional.
+- Duas ou mais parcelas criam um unico titulo com parcelas relacionais.
+- O vencimento mensal parte da Data do 1º Vencimento.
+- O dia original e preservado quando existir no mes seguinte; se nao existir,
+  usa o ultimo dia valido e volta ao dia original quando ele existir novamente.
 - O valor total e dividido por centavos; eventual resto fica nas primeiras
   parcelas.
-- O numero do documento recebe sufixo `NN/TT`, por exemplo `NF123-01/03`.
-- Edicao de titulo existente permanece como titulo unico.
-- Anexos em parcelamento devem ser incluidos posteriormente em cada titulo
-  gerado.
+- A guia de parcelas permite editar vencimento e valor, excluir parcela e
+  incluir nova parcela.
+- Ao salvar a guia de parcelas, o valor total do titulo passa a refletir a soma
+  das parcelas ativas.
 
 ## Arquitetura
 
 - Controller Flask: `financeiro/routes_titulos.py`.
-- Template: `templates/titulo_form.html`.
-- Banco: sem alteracao de schema e sem migration.
+- Models: `models.py`.
+- Templates: `templates/titulo_form.html`, `templates/titulo_parcelas_form.html`
+  e `templates/titulos_list.html`.
+- Banco: migration `migrations/versions/20260810_pla1816_titulo_parcela.sql`.
 - Documento de decisao: `docs/decisoes.md`.
 
 ## Validacao local
@@ -48,14 +53,30 @@ Teste focal executado com banco SQLite temporario:
 - vencimento inicial `2026-01-31`;
 - quantidade `3`.
 
-Resultado confirmado:
+Resultado esperado:
 
 ```text
-[('NF123-01/03', 33.34, '2026-01-31'), ('NF123-02/03', 33.33, '2026-02-28'), ('NF123-03/03', 33.33, '2026-03-31')]
+titulo NF123 com valor total 100.00
+parcelas: 1 = 33.34 / 2026-01-31; 2 = 33.33 / 2026-02-28; 3 = 33.33 / 2026-03-31
 ```
+
+Casos obrigatorios adicionais:
+
+- 5 parcelas com vencimento inicial `2027-01-29` devem gerar `2027-01-29`,
+  `2027-02-28`, `2027-03-29`, `2027-04-29` e `2027-05-29`.
+- Alterar parcelas pela guia deve recalcular o valor total do titulo.
+- Incluir nova parcela pela guia deve persistir a parcela e recalcular o total.
+
+## Evidencia visual local
+
+- `docs/evidencias/PLA-1816/cadastro-titulo-multi-parcela.png` - Formulario de
+  novo titulo com `Valor total`, `Data do 1º Vencimento` e `Parcelas`.
+- `docs/evidencias/PLA-1816/guia-parcelas-editavel.png` - Guia de parcelas com
+  edicao de numero, vencimento, valor, exclusao e inclusao de nova parcela.
 
 ## Pendencias
 
 - Nao foi executado deploy em staging nem validacao na porta corporativa `5001`
   neste heartbeat.
-- Nao houve alteracao de banco, variavel de ambiente, VPS ou producao.
+- Ha migration preparada para staging. Nao houve escrita em banco de producao,
+  variavel de ambiente, VPS ou producao.

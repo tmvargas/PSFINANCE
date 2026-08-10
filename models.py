@@ -251,6 +251,12 @@ class Titulo(Base, TimestampMixin):
     centro_custo = relationship("CentroCusto", back_populates="titulos")
     plano = relationship("PlanoDeContas", back_populates="titulos")
     baixas = relationship("Baixa", back_populates="titulo")
+    parcelas = relationship(
+        "TituloParcela",
+        back_populates="titulo",
+        cascade="all, delete-orphan",
+        order_by="TituloParcela.numero_parcela",
+    )
 
     anexos = relationship(
         "TituloAnexo",
@@ -271,6 +277,23 @@ class Titulo(Base, TimestampMixin):
     def __repr__(self):
         status = "QUITADO" if self.saldo_aberto <= 0 else "EM ABERTO"
         return f"<Titulo id={self.id_titulo} - {status}>"
+
+
+class TituloParcela(Base, TimestampMixin):
+    __tablename__ = "titulo_parcela"
+
+    id_parcela = Column(Integer, primary_key=True, autoincrement=True)
+    uuid = Column(String(36), default=lambda: str(uuid.uuid4()), unique=True, nullable=False)
+
+    id_titulo = Column(Integer, ForeignKey("titulo.id_titulo"), nullable=False)
+    numero_parcela = Column(Integer, nullable=False)
+    vencimento = Column(Date, nullable=False)
+    valor = Column(Numeric(15, 2), nullable=False)
+
+    titulo = relationship("Titulo", back_populates="parcelas")
+
+    def __repr__(self):
+        return f"<TituloParcela titulo={self.id_titulo} parcela={self.numero_parcela}>"
 
 
 class TituloAnexo(Base, TimestampMixin):
