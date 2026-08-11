@@ -480,3 +480,14 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   primeira parcela.
 - Limite: migration preparada no repositorio para staging. Nao autoriza escrita
   no banco de producao, merge em `main` ou deploy produtivo.
+
+## 2026-08-11 - PLA-2073 - Visibilidade da guia de parcelas no titulo
+
+- Decisao: a edicao de titulo existente deve exibir acao explicita
+  `Parcelas do titulo` no cabecalho, apontando para a guia de parcelas do
+  proprio titulo.
+- Regra: o campo `Parcelas` permanece desabilitado na edicao do titulo para
+  preservar a quantidade atual; ajustes de vencimento, valor, inclusao e
+  exclusao continuam centralizados na guia especifica de parcelas.
+- Impacto: alteracao apenas visual/de navegacao em template, sem banco,
+  migration, variavel de ambiente, VPS ou producao.
