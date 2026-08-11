@@ -485,7 +485,8 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
 
 - Decisao: a edicao de titulo existente deve exibir acao explicita
   `Parcelas do titulo` no cabecalho, apontando para a guia de parcelas do
-  proprio titulo.
+  proprio titulo, e manter os rotulos `Valor total` e
+  `Data do 1º Vencimento` tambem na edicao.
 - Regra: o campo `Parcelas` permanece desabilitado na edicao do titulo para
   preservar a quantidade atual; ajustes de vencimento, valor, inclusao e
   exclusao continuam centralizados na guia especifica de parcelas.
