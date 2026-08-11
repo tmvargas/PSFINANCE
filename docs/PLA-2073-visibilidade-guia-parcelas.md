@@ -12,6 +12,9 @@ Corrigir a visibilidade da guia de parcelas no titulo.
 
 - A guia de parcelas deve ficar acessivel durante a edicao de um titulo ja
   existente.
+- A edicao do titulo deve exibir os rotulos `Valor total` e
+  `Data do 1º Vencimento`, evitando que a nomenclatura fique visivel apenas na
+  criacao.
 - O campo `Parcelas` permanece bloqueado na edicao do titulo para preservar a
   regra da PLA-1816: ajustes de vencimento, valor, inclusao e exclusao devem
   ocorrer pela guia especifica de parcelas.
@@ -26,6 +29,7 @@ Corrigir a visibilidade da guia de parcelas no titulo.
 
 - Abrir a edicao de um titulo existente.
 - Confirmar que o botao `Parcelas do titulo` aparece no cabecalho da tela.
+- Confirmar que a edicao exibe `Valor total` e `Data do 1º Vencimento`.
 - Acionar o botao e confirmar acesso a
   `/financeiro/titulos/<id_titulo>/parcelas`.
 - Confirmar que novo titulo e copia de titulo continuam exibindo o campo
@@ -50,13 +54,14 @@ Validacao local na porta corporativa `5001`:
 - `GET http://127.0.0.1:5001/health` retornou HTTP 200.
 - `GET http://127.0.0.1:5001/financeiro/titulos/1/editar` retornou HTTP 200.
 - HTML renderizado contem `Parcelas do titulo`, link
-  `/financeiro/titulos/1/parcelas` e texto de apoio da guia.
+  `/financeiro/titulos/1/parcelas`, `Valor total`, `Data do 1º Vencimento` e
+  texto de apoio da guia.
 
 ## Evidencia visual
 
 - `docs/evidencias/PLA-2073/edicao-titulo-botao-parcelas-desktop.png` -
-  Edicao de titulo existente com botao `Parcelas do titulo` visivel no
-  cabecalho em desktop.
+  Edicao de titulo existente com botao `Parcelas do titulo`, `Valor total` e
+  `Data do 1º Vencimento` visiveis em desktop.
 - `docs/evidencias/PLA-2073/edicao-titulo-botao-parcelas-mobile.png` -
   Edicao de titulo existente com cabecalho quebrando linha sem sobreposicao em
   mobile.

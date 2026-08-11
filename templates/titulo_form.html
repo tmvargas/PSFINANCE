@@ -134,9 +134,7 @@
     </div>
 
     <div class="col-md-3">
-      <label class="form-label">
-        {% if titulo and not modo_copia %}Valor{% else %}Valor total{% endif %}
-      </label>
+      <label class="form-label">Valor total</label>
       <input
         type="text"
         name="valor"
@@ -173,9 +171,7 @@
 
   <div class="row mb-3">
     <div class="col-md-3">
-      <label class="form-label">
-        {% if titulo and not modo_copia %}Data de Vencimento{% else %}Data do 1º Vencimento{% endif %}
-      </label>
+      <label class="form-label">Data do 1º Vencimento</label>
       {% set venc_val = hoje %}
       {% if titulo and titulo.vencimento %}
         {% if titulo.vencimento is string %}
