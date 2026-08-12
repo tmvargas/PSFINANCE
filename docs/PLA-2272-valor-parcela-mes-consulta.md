@@ -105,29 +105,40 @@ Executada em 2026-08-12 na porta publica corporativa `5001`.
 | Caso | Resultado |
 | --- | --- |
 | Branch da VPS | `staging` |
-| Commit da VPS | `c30d9856fed132a63528b4d3afd5e63c55d2d6e1` |
-| `origin/staging` na VPS | `c30d9856fed132a63528b4d3afd5e63c55d2d6e1` |
+| Commit da VPS | `8901c988f9e867cf1f1a09f762797050ee4f6381` |
+| `origin/staging` na VPS | `8901c988f9e867cf1f1a09f762797050ee4f6381` |
 | `git status` na VPS | limpo |
 | `psfinance-staging` | `active` |
 | `psfinance-staging-gate` | `active` |
 | `GET http://127.0.0.1:5104/health` | HTTP 200 |
 | `GET http://127.0.0.1:5001/health` | HTTP 200 |
 | `GET http://127.0.0.1:5001/financeiro/titulos?mes=6&ano=2026` | HTTP 200 |
+| Health commit | `8901c988f9e867cf1f1a09f762797050ee4f6381` |
+| Gate commit | `8901c988f9e867cf1f1a09f762797050ee4f6381` |
 
 Validacao funcional publicada:
 
 - consulta em Jun/2026 na porta `5001`;
 - titulo `59` exibido com vencimento `11/06/2026`;
-- coluna `Valor` exibindo `R$ 30.01`, correspondente ao valor da parcela do
-  periodo;
-- total `Valor` exibindo `R$ 30.01`;
-- valor total anterior do titulo, `R$ 40.01`, nao aparece na consulta mensal.
+- resumo superior exibindo `Valor total dos titulos R$ 40.01`,
+  `Valor da parcela no mes R$ 30.01`, `Pago no mes R$ 0.00` e
+  `Nao pago no mes R$ 30.01`;
+- linha do titulo exibindo `Valor total do titulo R$ 40.01`,
+  `Valor da parcela no mes R$ 30.01`, `Pago no mes R$ 0.00` e
+  `Nao pago no mes R$ 30.01`;
+- rodape da tabela exibindo os mesmos quatro conceitos;
+- validado no HTML publicado que os rotulos antigos `Valor`, `Baixado` e
+  `Saldo` nao permanecem como labels do bloco financeiro.
 
 Evidencia visual:
 
-- `docs/evidencias/PLA-2272/consulta-titulos-valor-parcela-junho-5001.png` -
+- `docs/evidencias/PLA-2272/consulta-titulos-caixa-mensal-5001.png` -
   Screenshot da consulta publicada na porta `5001`, filtrada por Jun/2026,
-  comprovando a exibicao do valor da parcela no mes.
+  comprovando `Valor total do titulo`, `Valor da parcela no mes`, `Pago no mes`
+  e `Nao pago no mes`.
+- `docs/evidencias/PLA-2272/consulta-titulos-valor-parcela-junho-5001.png` -
+  Screenshot historico da entrega anterior, mantido como referencia da versao
+  que ainda usava rotulos ambiguos e foi corrigida nesta revisao.
 
 ## Riscos e limites
 
