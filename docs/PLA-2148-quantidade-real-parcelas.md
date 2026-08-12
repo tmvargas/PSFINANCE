@@ -21,7 +21,8 @@ existente com multiplas parcelas.
 
 Validacao executada em 2026-08-12 com a aplicacao local na porta `5001`,
 usando a base `instance/pla2073_gate`, que possui o titulo `1` com `6`
-parcelas ativas:
+parcelas ativas. Revalidacao final feita na branch `staging`, commit
+`86ef904`:
 
 - `GET /financeiro/titulos/1/editar`: HTTP 200.
 - `GET /financeiro/titulos/1/parcelas`: HTTP 200.
