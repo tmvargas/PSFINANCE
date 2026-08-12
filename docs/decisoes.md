@@ -593,5 +593,11 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   devem considerar somente titulos vinculados ao respectivo `id_empresa`;
   quando nenhuma empresa e selecionada, a consulta permanece abrangendo todas
   as empresas do periodo.
+- Memorizacao: a ultima empresa selecionada fica salva na sessao assinada do
+  Flask pela chave `titulos_filtro_id_empresa`; a preferencia e reaplicada ao
+  entrar novamente na consulta somente se a empresa ainda estiver ativa.
+- Seguranca: escolher `Todas` remove a preferencia da sessao e qualquer
+  `id_empresa` invalido ou inativo tambem limpa a memorizacao, evitando filtro
+  persistente para empresa inexistente.
 - Limite: alteracao restrita a rota, template e documentacao. Nao altera
   banco, migration, `main`, producao ou dados produtivos.

@@ -12,6 +12,7 @@ from flask import (
     render_template,
     request,
     send_file,
+    session as flask_session,
     url_for,
 )
 from sqlalchemy.orm import joinedload
@@ -34,6 +35,8 @@ from models import (
     TituloAnexo,
     TituloParcela,
 )
+
+FILTRO_TITULOS_EMPRESA_SESSION_KEY = "titulos_filtro_id_empresa"
 
 
 def get_session():
@@ -224,6 +227,37 @@ def _titulo_saldo_aberto(session, id_titulo: int) -> float:
     return max(0.0, total - baixado)
 
 
+def _resolver_filtro_empresa_memorizado(empresas_view):
+    empresas_ativas = {empresa["id"] for empresa in empresas_view}
+
+    if "id_empresa" in request.args:
+        id_empresa_raw = (request.args.get("id_empresa") or "").strip()
+        if not id_empresa_raw:
+            flask_session.pop(FILTRO_TITULOS_EMPRESA_SESSION_KEY, None)
+            return None
+
+        id_empresa = request.args.get("id_empresa", type=int)
+        if id_empresa in empresas_ativas:
+            flask_session[FILTRO_TITULOS_EMPRESA_SESSION_KEY] = id_empresa
+            return id_empresa
+
+        flask_session.pop(FILTRO_TITULOS_EMPRESA_SESSION_KEY, None)
+        return None
+
+    id_empresa_memorizada = flask_session.get(FILTRO_TITULOS_EMPRESA_SESSION_KEY)
+    try:
+        id_empresa_memorizada = int(id_empresa_memorizada)
+    except (TypeError, ValueError):
+        flask_session.pop(FILTRO_TITULOS_EMPRESA_SESSION_KEY, None)
+        return None
+
+    if id_empresa_memorizada in empresas_ativas:
+        return id_empresa_memorizada
+
+    flask_session.pop(FILTRO_TITULOS_EMPRESA_SESSION_KEY, None)
+    return None
+
+
 # ----------------------------------------------------------------------
 # LISTAR TÍTULOS (filtro por mês/ano do VENCIMENTO)
 # ----------------------------------------------------------------------
@@ -234,7 +268,6 @@ def listar_titulos():
     hoje = date.today()
     mes = request.args.get("mes", type=int) or hoje.month
     ano = request.args.get("ano", type=int) or hoje.year
-    id_empresa = request.args.get("id_empresa", type=int)
 
     if mes < 1 or mes > 12:
         mes = hoje.month
@@ -242,6 +275,7 @@ def listar_titulos():
     data_ini = date(ano, mes, 1)
     data_fim = date(ano + 1, 1, 1) if mes == 12 else date(ano, mes + 1, 1)
     empresas_view, _centros_custo_view = listar_empresas_centros_ativos(session)
+    id_empresa = _resolver_filtro_empresa_memorizado(empresas_view)
 
     query = (
         session.query(Titulo)
