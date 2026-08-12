@@ -72,6 +72,37 @@ Saida validada:
 OK PLA-2272: consulta mensal exibe valor da parcela, totais do periodo e saldo mensal corretos
 ```
 
+## Validacao na VPS de staging
+
+Executada em 2026-08-12 na porta publica corporativa `5001`.
+
+| Caso | Resultado |
+| --- | --- |
+| Branch da VPS | `staging` |
+| Commit da VPS | `c30d9856fed132a63528b4d3afd5e63c55d2d6e1` |
+| `origin/staging` na VPS | `c30d9856fed132a63528b4d3afd5e63c55d2d6e1` |
+| `git status` na VPS | limpo |
+| `psfinance-staging` | `active` |
+| `psfinance-staging-gate` | `active` |
+| `GET http://127.0.0.1:5104/health` | HTTP 200 |
+| `GET http://127.0.0.1:5001/health` | HTTP 200 |
+| `GET http://127.0.0.1:5001/financeiro/titulos?mes=6&ano=2026` | HTTP 200 |
+
+Validacao funcional publicada:
+
+- consulta em Jun/2026 na porta `5001`;
+- titulo `59` exibido com vencimento `11/06/2026`;
+- coluna `Valor` exibindo `R$ 30.01`, correspondente ao valor da parcela do
+  periodo;
+- total `Valor` exibindo `R$ 30.01`;
+- valor total anterior do titulo, `R$ 40.01`, nao aparece na consulta mensal.
+
+Evidencia visual:
+
+- `docs/evidencias/PLA-2272/consulta-titulos-valor-parcela-junho-5001.png` -
+  Screenshot da consulta publicada na porta `5001`, filtrada por Jun/2026,
+  comprovando a exibicao do valor da parcela no mes.
+
 ## Riscos e limites
 
 - Nao houve migration.
