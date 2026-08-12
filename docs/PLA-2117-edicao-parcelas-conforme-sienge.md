@@ -84,6 +84,13 @@ Evidencias geradas em navegador automatizado local na porta `5001`:
   clicar em `Adicionar parcela`, exibindo campos da nova parcela.
 - `docs/evidencias/PLA-2117/parcelas-lixeira-linha-vermelha.png` - Tela apos
   clicar na lixeira, com a linha marcada em vermelho antes de salvar.
+- `docs/evidencias/PLA-2117/staging-parcelas-inicial-nova-parcela-fechada.png`
+  - Tela real de staging na porta `5001`, com `Nova parcela` fechada por
+  padrao.
+- `docs/evidencias/PLA-2117/staging-parcelas-adicionar-parcela-aberta.png` -
+  Tela real de staging apos clicar em `Adicionar parcela`.
+- `docs/evidencias/PLA-2117/staging-parcelas-lixeira-linha-vermelha.png` -
+  Tela real de staging com lixeira acionada e linha vermelha antes de salvar.
 
 Comparacao objetiva com o print do Sienge:
 
@@ -102,9 +109,9 @@ Publicada em 2026-08-12 na VPS (Servidor Virtual Privado) Sistemas.
 
 ```text
 Branch da VPS: staging
-Commit funcional validado: 10d7fc6163032401a610db88446834f02878d79f
-HEAD da VPS: 10d7fc6163032401a610db88446834f02878d79f
-origin/staging na VPS: 10d7fc6163032401a610db88446834f02878d79f
+Commit funcional validado: 0ae81cd1606c47fef77f9049d5c7256d227a06fb
+HEAD da VPS: 0ae81cd1606c47fef77f9049d5c7256d227a06fb
+origin/staging na VPS: 0ae81cd1606c47fef77f9049d5c7256d227a06fb
 git status da VPS: limpo
 psfinance-staging: active
 psfinance-staging-gate: active
@@ -113,6 +120,17 @@ PORT 5105 /health: HTTP 200, branch=staging, db=postgresql
 PORT 5001 /health: HTTP 200, branch=staging, db=postgresql
 GET /financeiro/titulos/1/editar na porta 5001: HTTP 200
 GET /financeiro/titulos/1/parcelas na porta 5001: HTTP 200
+```
+
+Jornada operacional real validada na porta publica `5001`, em banco PostgreSQL
+de staging, com titulo temporario `PLA-2117-TESTE`:
+
+```text
+Editar parcela existente e salvar: sem erro `Vencimento da nova parcela invalido`
+Adicionar nova parcela pelo botao `Adicionar parcela`: aprovado
+Excluir parcela por lixeira: linha ficou vermelha antes de salvar
+Salvar exclusao: parcela removida logicamente e titulo recalculado
+Limpeza posterior: titulo temporario sem registro ativo e parcelas temporarias sem registro ativo
 ```
 
 Marcadores validados na tela de edicao:
@@ -149,16 +167,17 @@ operacional do arquivo de ambiente e sem registrar valores de secrets.
   sincronizava valor e vencimento quando ela ja existia.
 - Correcao: criada sincronizacao focal para atualizar somente a parcela unica.
 - Evidencia de nao recorrencia: teste focal confirmou a sincronizacao da
-  parcela unica e a preservacao das multiplas parcelas.
-- Risco residual: a validacao funcional detalhada de persistencia foi feita em
-  SQLite temporario isolado; a VPS validou rotas reais e banco PostgreSQL de
-  staging, mas nao foi executada escrita de teste no banco de staging durante a
-  validacao final.
+  parcela unica e a preservacao das multiplas parcelas; staging confirmou
+  edicao, inclusao e exclusao sem recorrencia do erro de nova parcela.
+- Risco residual: validacao de escrita foi executada somente no banco
+  PostgreSQL de staging com dado temporario removido logicamente ao final; nao
+  houve validacao nem escrita em producao.
 
 ## Limites
 
 - Nao houve escrita em banco de producao.
 - Nao houve migration.
-- Nao houve alteracao de variavel de ambiente.
+- Houve atualizacao apenas dos metadados nao sensiveis `GIT_BRANCH` e
+  `GIT_COMMIT` no ambiente de staging.
 - Houve deploy somente em staging, pela branch `staging`.
 - Nao houve deploy em producao.
