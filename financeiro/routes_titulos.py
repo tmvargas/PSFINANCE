@@ -201,6 +201,7 @@ def _titulos_periodo_por_parcela(session, data_ini: date, data_fim: date, id_emp
         session.query(
             TituloParcela.id_titulo,
             func.min(TituloParcela.vencimento).label("vencimento_periodo"),
+            func.coalesce(func.sum(TituloParcela.valor), 0).label("valor_periodo"),
         )
         .join(Titulo, Titulo.id_titulo == TituloParcela.id_titulo)
         .filter(
@@ -215,8 +216,11 @@ def _titulos_periodo_por_parcela(session, data_ini: date, data_fim: date, id_emp
         query = query.filter(Titulo.id_empresa == id_empresa)
 
     return {
-        id_titulo: vencimento_periodo
-        for id_titulo, vencimento_periodo in query.group_by(TituloParcela.id_titulo).all()
+        id_titulo: {
+            "vencimento": vencimento_periodo,
+            "valor": float(valor_periodo or 0),
+        }
+        for id_titulo, vencimento_periodo, valor_periodo in query.group_by(TituloParcela.id_titulo).all()
     }
 
 
@@ -226,7 +230,7 @@ def _titulos_legados_periodo_sem_parcela(session, data_ini: date, data_fim: date
         .filter(TituloParcela.deleted.is_(False))
         .distinct()
     )
-    query = session.query(Titulo.id_titulo, Titulo.vencimento).filter(
+    query = session.query(Titulo.id_titulo, Titulo.vencimento, Titulo.valor).filter(
         Titulo.deleted.is_(False),
         Titulo.vencimento >= data_ini,
         Titulo.vencimento < data_fim,
@@ -236,7 +240,13 @@ def _titulos_legados_periodo_sem_parcela(session, data_ini: date, data_fim: date
     if id_empresa:
         query = query.filter(Titulo.id_empresa == id_empresa)
 
-    return dict(query.all())
+    return {
+        id_titulo: {
+            "vencimento": vencimento,
+            "valor": float(valor or 0),
+        }
+        for id_titulo, vencimento, valor in query.all()
+    }
 
 
 
@@ -320,11 +330,11 @@ def listar_titulos():
     empresas_view, _centros_custo_view = listar_empresas_centros_ativos(session)
     id_empresa = _resolver_filtro_empresa_memorizado(empresas_view)
 
-    vencimentos_periodo = _titulos_periodo_por_parcela(session, data_ini, data_fim, id_empresa)
-    vencimentos_periodo.update(
+    titulos_periodo = _titulos_periodo_por_parcela(session, data_ini, data_fim, id_empresa)
+    titulos_periodo.update(
         _titulos_legados_periodo_sem_parcela(session, data_ini, data_fim, id_empresa)
     )
-    ids_titulos = list(vencimentos_periodo)
+    ids_titulos = list(titulos_periodo)
 
     titulos_por_id = {}
     if ids_titulos:
@@ -346,7 +356,7 @@ def listar_titulos():
         titulos_por_id[id_titulo]
         for id_titulo in sorted(
             ids_titulos,
-            key=lambda item: (vencimentos_periodo[item], -item),
+            key=lambda item: (titulos_periodo[item]["vencimento"], -item),
         )
         if id_titulo in titulos_por_id
     ]
@@ -359,6 +369,8 @@ def listar_titulos():
         .filter(
             Baixa.deleted.is_(False),
             Baixa.id_titulo.in_([t.id_titulo for t in titulos] or [-1]),
+            Baixa.data >= data_ini,
+            Baixa.data < data_fim,
         )
         .group_by(Baixa.id_titulo)
         .all()
@@ -371,8 +383,9 @@ def listar_titulos():
 
     for t in titulos:
         valor = float(t.valor or 0)
+        valor_periodo = float(titulos_periodo[t.id_titulo]["valor"] or 0)
         baixado = float(baixas_soma.get(t.id_titulo, 0) or 0)
-        aberto = max(0.0, valor - baixado)
+        aberto = max(0.0, valor_periodo - baixado)
 
         total_valor += valor
         total_baixado += baixado
@@ -385,7 +398,7 @@ def listar_titulos():
             # fallback se ainda existir campo string antigo
             doc_label = getattr(t, "documento", "") or ""
 
-        vencimento_periodo = vencimentos_periodo.get(t.id_titulo) or t.vencimento
+        vencimento_periodo = titulos_periodo[t.id_titulo]["vencimento"] or t.vencimento
 
         rows.append(
             {

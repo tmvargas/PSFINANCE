@@ -615,7 +615,11 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   `titulo.vencimento` como fallback.
 - Exibicao: a coluna `Vencimento` passa a mostrar o vencimento da parcela do
   periodo filtrado quando existir, preservando a linha como representacao do
-  titulo e mantendo valores, baixas e saldo no nivel do titulo.
+  titulo e mantendo a coluna `Valor` como valor total do titulo.
+- Totais do periodo: `Baixado` considera somente baixas com data dentro do mes
+  filtrado; `Saldo` considera o valor das parcelas vencendo no periodo,
+  descontado das baixas do mesmo mes. Titulos legados sem parcelas usam o valor
+  do proprio titulo como valor do periodo.
 - Filtro por empresa: permanece aplicado pelo `id_empresa` do titulo e tambem
   restringe titulos parcelados.
 - Limite: alteracao restrita a controller e documentacao. Nao altera template,
