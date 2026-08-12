@@ -1,5 +1,22 @@
 # Decisoes - PSCONTROL
 
+## 2026-08-12 - Sincronizacao da parcela unica do titulo conforme Sienge
+
+Decisao: na edicao de um titulo existente com exatamente uma parcela ativa, o
+PSFINANCE passa a sincronizar a parcela unica com o valor total e a data do
+primeiro vencimento salvos na tela principal do titulo. Para titulos com duas
+ou mais parcelas ativas, a distribuicao permanece sob controle exclusivo da aba
+`Parcelas`.
+
+Motivo: o fluxo validado para o PSFINANCE segue o comportamento do Sienge em
+que a aba `Parcelas` controla inclusao e distribuicao, uma parcela por vez, e o
+valor do titulo reflete as parcelas; para parcela unica, manter titulo e parcela
+divergentes gera erro operacional.
+
+Impacto: a correcao preserva a regra ja validada de multiplas parcelas e evita
+divergencia em titulos simples, sem migration, sem banco de producao e sem
+alteracao de infraestrutura.
+
 ## 2026-07-20 - Criacao do repositorio
 
 Decisao: iniciar o repositorio com documentacao e estrutura minima, sem fixar stack ou deploy.
