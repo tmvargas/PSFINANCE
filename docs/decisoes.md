@@ -1,22 +1,23 @@
 # Decisoes - PSCONTROL
 
-## 2026-08-12 - Valor da consulta mensal usa parcela vencida no mes
+## 2026-08-12 - Consulta mensal separa valor total e caixa do mes
 
-Decisao: na consulta de titulos do PSFINANCE, a coluna `Valor` e o total do
-periodo passam a exibir o valor vencido no mes filtrado. Para titulos com
-parcelas ativas, o valor exibido e a soma das parcelas ativas com vencimento no
-mes consultado; para titulos sem parcelas ativas, permanece o valor do titulo
-legado encontrado pelo vencimento principal.
+Decisao: na consulta de titulos do PSFINANCE, a tela deve separar
+explicitamente o valor total do titulo da leitura de caixa do mes filtrado. Cada
+linha passa a exibir `Valor total do titulo`, `Valor da parcela no mes`,
+`Pago no mes` e `Nao pago no mes`; o resumo e o rodape seguem os mesmos
+conceitos.
 
-Motivo: apos a correcao da consulta por vencimento da parcela, manter a coluna
-`Valor` com o valor total do titulo gerava divergencia operacional na leitura
-mensal, pois a consulta do mes deve apresentar o valor da parcela que vence
-naquele periodo.
+Motivo: apos a correcao da consulta por vencimento da parcela, manter rotulos
+genericos como `Valor`, `Baixado` e `Saldo` ainda misturava o valor total do
+titulo com a leitura financeira do periodo. Para gestao por caixa, o valor da
+parcela vencida no mes, o pago no mes e o nao pago no mes precisam estar
+explicitos.
 
 Impacto: a alteracao preserva a linha da consulta como representacao do titulo,
-mantem baixas filtradas pelo mes e saldo calculado sobre o valor do periodo,
-sem migration, sem banco de producao e sem alteracao de infraestrutura de
-producao.
+mantem titulos parcelados entrando pelo vencimento das parcelas ativas, mantem
+titulos legados pelo vencimento principal, filtra baixas pelo mes e nao altera
+banco, producao ou infraestrutura.
 
 ## 2026-08-12 - Sincronizacao da parcela unica do titulo conforme Sienge
 

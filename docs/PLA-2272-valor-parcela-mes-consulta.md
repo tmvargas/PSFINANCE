@@ -6,9 +6,8 @@ PSFINANCE.
 
 ## Objetivo
 
-Ajustar a consulta de titulos para que, ao filtrar por mes e ano, a coluna
-`Valor` exiba o valor da parcela vencida no periodo consultado, e nao o valor
-total do titulo parcelado.
+Ajustar a consulta de titulos para que, ao filtrar por mes e ano, a tela mostre
+explicitamente a leitura de caixa mensal sem ocultar o valor total do titulo.
 
 ## Regra aplicada
 
@@ -16,15 +15,17 @@ total do titulo parcelado.
   vencimento de `titulo_parcela`.
 - Titulos sem parcelas ativas continuam entrando pelo vencimento principal de
   `titulo`.
-- Quando houver parcela ativa no periodo selecionado, a coluna `Valor` exibe a
-  soma das parcelas ativas que vencem no mes consultado.
-- Quando o titulo nao possuir parcelas ativas, a coluna `Valor` preserva o
-  valor do titulo legado.
-- O total `Valor` da consulta passa a somar os valores do periodo exibidos nas
-  linhas.
-- A coluna `Baixado` permanece considerando somente baixas com data dentro do
-  mes filtrado.
-- A coluna `Saldo` permanece calculada por `valor do periodo - baixado no mes`.
+- Cada linha passa a exibir `Valor total do titulo`.
+- Cada linha passa a exibir `Valor da parcela no mes`, calculado pela soma das
+  parcelas ativas que vencem no periodo selecionado.
+- Quando o titulo nao possuir parcelas ativas, `Valor da parcela no mes`
+  preserva o valor do titulo legado filtrado pelo vencimento principal.
+- Cada linha passa a exibir `Pago no mes`, considerando somente baixas com data
+  dentro do mes filtrado.
+- Cada linha passa a exibir `Nao pago no mes`, calculado por
+  `valor da parcela no mes - pago no mes`.
+- Os totais da consulta passam a separar `Valor total dos titulos`,
+  `Valor da parcela no mes`, `Pago no mes` e `Nao pago no mes`.
 - A linha da consulta continua representando o titulo.
 
 ## Arquitetura
@@ -37,10 +38,25 @@ total do titulo parcelado.
 
 | Caso | Resultado esperado |
 | --- | --- |
-| Titulo parcelado com valor total de `300,00` e parcela de setembro de `100,00` | Consulta de setembro exibe `Valor 100,00`, e nao `300,00` |
-| Baixa de setembro de `30,00` no titulo parcelado | Consulta de setembro exibe `Baixado 30,00` e `Saldo 70,00` |
-| Titulo legado sem parcelas em setembro no valor de `50,00` | Consulta de setembro exibe `Valor 50,00` |
-| Total do periodo com os dois registros acima | Total `Valor 150,00`, `Baixado 30,00` e `Saldo 120,00` |
+| Titulo parcelado com valor total de `300,00` e parcela de setembro de `100,00` | Consulta de setembro exibe `Valor total do titulo 300,00` e `Valor da parcela no mes 100,00` |
+| Baixa de setembro de `30,00` no titulo parcelado | Consulta de setembro exibe `Pago no mes 30,00` e `Nao pago no mes 70,00` |
+| Titulo legado sem parcelas em setembro no valor de `50,00` | Consulta de setembro exibe `Valor total do titulo 50,00` e `Valor da parcela no mes 50,00` |
+| Total do periodo com os dois registros acima | Totais exibem `Valor total dos titulos 350,00`, `Valor da parcela no mes 150,00`, `Pago no mes 30,00` e `Nao pago no mes 120,00` |
+
+## Ajuste apos revisao executiva
+
+Em 2026-08-12, a revisao executiva reprovou a entrega anterior porque a tela
+ainda usava os rotulos ambiguos `Valor`, `Baixado` e `Saldo`, nao deixando
+claro o valor total do titulo e a composicao financeira do mes.
+
+Correcao aplicada:
+
+- o backend passou a enviar campos explicitos para a tela:
+  `valor_total_titulo`, `valor_parcela_mes`, `pago_mes` e `nao_pago_mes`;
+- o resumo superior e o rodape da tabela passaram a exibir totais separados
+  para os mesmos conceitos;
+- o template deixou de apresentar `Valor`, `Baixado` e `Saldo` como leitura
+  principal da consulta mensal.
 
 ## Validacao local
 
@@ -60,16 +76,24 @@ Teste funcional focal com banco SQLite temporario e `Flask test_client`:
 - titulo legado sem parcelas ativas em setembro no valor de `50,00`;
 - consulta em `/financeiro/titulos?mes=9&ano=2026`;
 - validado que o titulo parcelado aparece com vencimento `15/09/2026`;
-- validado que o valor total do titulo parcelado `300,00` nao aparece na
-  consulta mensal;
-- validado que a consulta exibe `Valor 100,00` para o titulo parcelado,
-  `Valor 50,00` para o titulo legado, total `Valor 150,00`, total `Baixado
-  30,00` e total `Saldo 120,00`.
+- validado que a consulta exibe `Valor total do titulo`, `Valor da parcela no
+  mes`, `Pago no mes` e `Nao pago no mes`;
+- validado que o titulo parcelado exibe `300,00` como valor total do titulo e
+  `100,00` como valor da parcela no mes;
+- validado que a consulta exibe `Pago no mes 30,00` e `Nao pago no mes 70,00`
+  para o titulo parcelado;
+- validado que o titulo legado exibe `50,00` como valor total do titulo e
+  `50,00` como valor da parcela no mes;
+- validado que os totais exibem `Valor total dos titulos 350,00`,
+  `Valor da parcela no mes 150,00`, `Pago no mes 30,00` e
+  `Nao pago no mes 120,00`;
+- validado que os rotulos antigos `Valor`, `Baixado` e `Saldo` nao permanecem
+  como leitura principal do bloco financeiro.
 
 Saida validada:
 
 ```text
-OK PLA-2272: consulta mensal exibe valor da parcela, totais do periodo e saldo mensal corretos
+OK PLA-2272: consulta exibe total do titulo, parcela no mes, pago no mes e nao pago no mes
 ```
 
 ## Validacao na VPS de staging
