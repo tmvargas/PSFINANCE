@@ -492,3 +492,23 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   exclusao continuam centralizados na guia especifica de parcelas.
 - Impacto: alteracao apenas visual/de navegacao em template, sem banco,
   migration, variavel de ambiente, VPS ou producao.
+
+## 2026-08-12 - PLA-2106 - Staging real da aba de parcelas
+
+- Projeto: PSFINANCE.
+- Decisao: corrigir o staging real publicado na VPS de teste atualizando o
+  repositorio operacional de `staging` do commit
+  `e17896e7838cdea30f6deea9f8aecd003cc3b0f0` para o commit
+  `b7d10c1a18574aff8186573829aba2786c1df80c`, ja existente em
+  `origin/staging`.
+- Motivo: a porta publica `5001` respondia com tela funcional, mas a tela real
+  de edicao de titulo ainda nao continha `Parcelas do titulo`, `Valor total` e
+  `Data do 1º Vencimento`, porque a VPS estava defasada em relacao ao GitHub.
+- Banco: aplicada no PostgreSQL de staging a migration versionada
+  `migrations/versions/20260810_pla1816_titulo_parcela.sql`, pois a tabela
+  `titulo_parcela` ainda nao existia no banco de staging real.
+- Infraestrutura: atualizados somente metadados nao sensiveis de `GIT_BRANCH`
+  e `GIT_COMMIT` do ambiente de staging, com backup do arquivo operacional de
+  ambiente antes da alteracao.
+- Limite: acao restrita a VPS e banco de staging. Nao altera `main`, producao,
+  banco de producao, secrets, credenciais ou dados operacionais produtivos.
