@@ -661,7 +661,7 @@ def editar_parcelas_titulo(id_titulo: int):
         novo_vencimento = _parse_date(request.form.get("novo_vencimento_parcela"))
         novo_valor = _parse_float(request.form.get("novo_valor_parcela"))
 
-        if novo_numero or novo_vencimento or novo_valor is not None:
+        if novo_vencimento or novo_valor is not None:
             if novo_numero is None or novo_numero < 1:
                 erros.append("Número da nova parcela inválido.")
             elif novo_numero in numeros_usados:

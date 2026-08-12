@@ -6,16 +6,18 @@ Decisao: na edicao de um titulo existente com exatamente uma parcela ativa, o
 PSFINANCE passa a sincronizar a parcela unica com o valor total e a data do
 primeiro vencimento salvos na tela principal do titulo. Para titulos com duas
 ou mais parcelas ativas, a distribuicao permanece sob controle exclusivo da aba
-`Parcelas`.
+`Parcelas`, com inclusao aberta somente por botao, numero de parcela como
+rotulo e exclusao por lixeira com marcacao visual antes de salvar.
 
 Motivo: o fluxo validado para o PSFINANCE segue o comportamento do Sienge em
 que a aba `Parcelas` controla inclusao e distribuicao, uma parcela por vez, e o
 valor do titulo reflete as parcelas; para parcela unica, manter titulo e parcela
 divergentes gera erro operacional.
 
-Impacto: a correcao preserva a regra ja validada de multiplas parcelas e evita
-divergencia em titulos simples, sem migration, sem banco de producao e sem
-alteracao de infraestrutura.
+Impacto: a correcao preserva a regra ja validada de multiplas parcelas, evita
+divergencia em titulos simples e aproxima a experiencia visual da referencia do
+Sienge, sem migration, sem banco de producao e sem alteracao de infraestrutura
+de producao.
 
 ## 2026-07-20 - Criacao do repositorio
 
