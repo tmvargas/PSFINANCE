@@ -196,6 +196,49 @@ def _quantidade_parcelas_ativas(session, id_titulo: int | None) -> int:
     return max(1, int(quantidade or 0))
 
 
+def _titulos_periodo_por_parcela(session, data_ini: date, data_fim: date, id_empresa: int | None):
+    query = (
+        session.query(
+            TituloParcela.id_titulo,
+            func.min(TituloParcela.vencimento).label("vencimento_periodo"),
+        )
+        .join(Titulo, Titulo.id_titulo == TituloParcela.id_titulo)
+        .filter(
+            Titulo.deleted.is_(False),
+            TituloParcela.deleted.is_(False),
+            TituloParcela.vencimento >= data_ini,
+            TituloParcela.vencimento < data_fim,
+        )
+    )
+
+    if id_empresa:
+        query = query.filter(Titulo.id_empresa == id_empresa)
+
+    return {
+        id_titulo: vencimento_periodo
+        for id_titulo, vencimento_periodo in query.group_by(TituloParcela.id_titulo).all()
+    }
+
+
+def _titulos_legados_periodo_sem_parcela(session, data_ini: date, data_fim: date, id_empresa: int | None):
+    titulos_com_parcela_ativa = (
+        session.query(TituloParcela.id_titulo)
+        .filter(TituloParcela.deleted.is_(False))
+        .distinct()
+    )
+    query = session.query(Titulo.id_titulo, Titulo.vencimento).filter(
+        Titulo.deleted.is_(False),
+        Titulo.vencimento >= data_ini,
+        Titulo.vencimento < data_fim,
+        ~Titulo.id_titulo.in_(titulos_com_parcela_ativa),
+    )
+
+    if id_empresa:
+        query = query.filter(Titulo.id_empresa == id_empresa)
+
+    return dict(query.all())
+
+
 
 def _uploads_dir() -> Path:
     # guarda dentro da pasta do app (não versionada)
@@ -277,30 +320,36 @@ def listar_titulos():
     empresas_view, _centros_custo_view = listar_empresas_centros_ativos(session)
     id_empresa = _resolver_filtro_empresa_memorizado(empresas_view)
 
-    query = (
-        session.query(Titulo)
-        .options(
-            joinedload(Titulo.credor),
-            joinedload(Titulo.empresa),
-            joinedload(Titulo.centro_custo),
-            joinedload(Titulo.plano),
-            joinedload(Titulo.documento),  # requer relationship via id_doc
-        )
-        .filter(
-            Titulo.deleted.is_(False),
-            Titulo.vencimento >= data_ini,
-            Titulo.vencimento < data_fim,
-        )
+    vencimentos_periodo = _titulos_periodo_por_parcela(session, data_ini, data_fim, id_empresa)
+    vencimentos_periodo.update(
+        _titulos_legados_periodo_sem_parcela(session, data_ini, data_fim, id_empresa)
     )
+    ids_titulos = list(vencimentos_periodo)
 
-    if id_empresa:
-        query = query.filter(Titulo.id_empresa == id_empresa)
+    titulos_por_id = {}
+    if ids_titulos:
+        titulos = (
+            session.query(Titulo)
+            .options(
+                joinedload(Titulo.credor),
+                joinedload(Titulo.empresa),
+                joinedload(Titulo.centro_custo),
+                joinedload(Titulo.plano),
+                joinedload(Titulo.documento),  # requer relationship via id_doc
+            )
+            .filter(Titulo.id_titulo.in_(ids_titulos))
+            .all()
+        )
+        titulos_por_id = {t.id_titulo: t for t in titulos}
 
-    titulos = (
-        query
-        .order_by(Titulo.vencimento.asc(), Titulo.id_titulo.desc())
-        .all()
-    )
+    titulos = [
+        titulos_por_id[id_titulo]
+        for id_titulo in sorted(
+            ids_titulos,
+            key=lambda item: (vencimentos_periodo[item], -item),
+        )
+        if id_titulo in titulos_por_id
+    ]
 
     baixas_soma = dict(
         session.query(
@@ -336,6 +385,8 @@ def listar_titulos():
             # fallback se ainda existir campo string antigo
             doc_label = getattr(t, "documento", "") or ""
 
+        vencimento_periodo = vencimentos_periodo.get(t.id_titulo) or t.vencimento
+
         rows.append(
             {
                 "id": t.id_titulo,
@@ -346,7 +397,7 @@ def listar_titulos():
                 "centro_custo": f"{t.centro_custo.codigo} - {t.centro_custo.nome}" if t.centro_custo else "",
                 "plano": f"{t.plano.cod_estrutural} - {t.plano.nome_conta}" if t.plano else "",
                 "emissao": t.emissao.strftime("%d/%m/%Y") if t.emissao else "",
-                "vencimento": t.vencimento.strftime("%d/%m/%Y") if t.vencimento else "",
+                "vencimento": vencimento_periodo.strftime("%d/%m/%Y") if vencimento_periodo else "",
                 "valor": valor,
                 "baixado": baixado,
                 "aberto": aberto,

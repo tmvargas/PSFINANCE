@@ -604,3 +604,19 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   em `docs/PLA-2171-filtro-empresa-titulos.md`.
 - Limite: alteracao restrita a rota, template e documentacao. Nao altera
   banco, migration, `main`, producao ou dados produtivos.
+
+## 2026-08-12 - PLA-2264 - Consulta mensal de titulos parcelados
+
+- Projeto: PSFINANCE.
+- Decisao: a consulta de titulos por mes e ano deve considerar vencimentos de
+  parcelas ativas em `titulo_parcela` quando o titulo possui parcelamento.
+- Regra: titulos parcelados entram no periodo pela parcela ativa vencida dentro
+  do mes selecionado; titulos legados sem parcelas ativas continuam usando
+  `titulo.vencimento` como fallback.
+- Exibicao: a coluna `Vencimento` passa a mostrar o vencimento da parcela do
+  periodo filtrado quando existir, preservando a linha como representacao do
+  titulo e mantendo valores, baixas e saldo no nivel do titulo.
+- Filtro por empresa: permanece aplicado pelo `id_empresa` do titulo e tambem
+  restringe titulos parcelados.
+- Limite: alteracao restrita a controller e documentacao. Nao altera template,
+  banco, migration, `main`, producao ou dados produtivos.
