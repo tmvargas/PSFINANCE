@@ -16,10 +16,10 @@
     </a>
     {% endif %}
     <a href="{{ url_for('financeiro.dashboard_financeiro') }}" class="btn btn-sm btn-outline-secondary">
-      ⬅ Home
+      Home
     </a>
     <a href="{{ url_for('financeiro.listar_titulos') }}" class="btn btn-sm btn-outline-primary">
-      📃 Voltar para lista de títulos
+      Voltar para lista de títulos
     </a>
   </div>
 </div>
@@ -30,6 +30,31 @@
   <div class="alert alert-info">
     Você está criando uma cópia do título{% if titulo_original %} #{{ titulo_original }}{% endif %}.
     Altere os campos necessários e clique em salvar.
+  </div>
+  {% endif %}
+
+  {% set possui_cadastros_basicos = documentos and credores and empresas and centros_custo and planos %}
+  {% if not possui_cadastros_basicos %}
+  <div class="alert alert-warning">
+    <strong>Cadastro auxiliar pendente.</strong>
+    Para criar um título, mantenha documento, credor, empresa, centro de custo e categoria financeira cadastrados.
+    <div class="d-flex flex-wrap gap-2 mt-2">
+      {% if not credores %}
+      <a class="btn btn-sm btn-outline-primary" href="{{ url_for('financeiro.novo_credor') }}">Criar credor</a>
+      {% endif %}
+      {% if not empresas %}
+      <a class="btn btn-sm btn-outline-primary" href="{{ url_for('financeiro.nova_empresa') }}">Criar empresa</a>
+      {% endif %}
+      {% if not centros_custo %}
+      <a class="btn btn-sm btn-outline-primary" href="{{ url_for('financeiro.novo_centro_custo') }}">Criar centro de custo</a>
+      {% endif %}
+      {% if not planos %}
+      <a class="btn btn-sm btn-outline-primary" href="{{ url_for('financeiro.novo_plano') }}">Criar categoria financeira</a>
+      {% endif %}
+      {% if not documentos %}
+      <span class="badge text-bg-light align-self-center">Documento deve ser cadastrado na base inicial.</span>
+      {% endif %}
+    </div>
   </div>
   {% endif %}
 
@@ -90,7 +115,7 @@
     <div class="col-md-6">
       <label class="form-label">Centro de Custo</label>
       <select name="id_centro_custo" id="id_centro_custo" class="form-select" required>
-        <option value="">Selecione...</option>
+        <option value="">Selecione uma empresa primeiro...</option>
         {% for cc in centros_custo %}
           <option value="{{ cc.id }}" data-empresa="{{ cc.id_empresa }}"
             {% if titulo and titulo.id_centro_custo == cc.id %}selected{% endif %}>
@@ -98,17 +123,20 @@
           </option>
         {% endfor %}
       </select>
+      <div class="form-text" id="centro_custo_help">
+        Os centros de custo aparecem somente após a escolha da empresa.
+      </div>
     </div>
   </div>
 
   <div class="row mb-3">
     <div class="col-md-6">
-      <label class="form-label">Plano Financeiro (Grupo 2)</label>
+      <label class="form-label">Categoria financeira</label>
 
       <select name="id_plano" class="form-select" required>
         <option value="">Selecione...</option>
 
-        <optgroup label="Contas do Grupo 2">
+        <optgroup label="Categorias de despesa">
           {% for p in planos %}
             {# normaliza "Analítica"/"ANALÍTICA" -> "analitica" #}
             {% set tipo_norm = (p.tipo|default('')|lower|trim)
@@ -122,14 +150,14 @@
             <option value="{{ p.id_plano }}"
               {% if not is_analitica %}disabled{% endif %}
               {% if titulo and titulo.id_plano == p.id_plano %}selected{% endif %}>
-              {{ p.cod_estrutural }} - {{ p.nome_conta }}{% if not is_analitica %} (TOTAL){% endif %}
+              {{ p.cod_estrutural }} - {{ p.nome_conta }}{% if not is_analitica %} (grupo, não selecionável){% endif %}
             </option>
           {% endfor %}
         </optgroup>
       </select>
 
       <div class="form-text">
-        Contas totalizadoras aparecem, mas não podem ser selecionadas.
+        Escolha a categoria analítica da despesa. Grupos aparecem apenas para orientar a hierarquia.
       </div>
     </div>
 
@@ -146,7 +174,7 @@
         value="{% if titulo and titulo.valor is not none %}{{ ('%.2f'|format(titulo.valor))|replace('.', ',') }}{% endif %}"
         required
       >
-      <div class="form-text">Digite apenas números: 200 → 2,00</div>
+      <div class="form-text">Digite o valor em reais. Ex.: 200 vira 200,00.</div>
     </div>
 
     <div class="col-md-3">
@@ -183,6 +211,7 @@
       <input
         type="date"
         name="vencimento"
+        id="vencimento"
         class="form-control"
         value="{{ venc_val }}"
         required
@@ -194,6 +223,7 @@
       <input
         type="number"
         name="quantidade_parcelas"
+        id="quantidade_parcelas"
         class="form-control"
         min="1"
         max="120"
@@ -206,11 +236,40 @@
         {% if titulo and not modo_copia %}
           Edição mantém a quantidade atual. Use a guia Parcelas do título para ajustar vencimentos, valores, inclusão ou exclusão.
         {% else %}
-          Cada parcela gera uma parcela mensal do título.
+          Use 1 parcela para salvar direto. Com 2 ou mais, o sistema abrirá a revisão das parcelas após salvar.
         {% endif %}
       </div>
     </div>
   </div>
+
+  {% if not titulo or modo_copia %}
+  <div class="mb-3 pt-2" id="parcelas_preview">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+      <div>
+        <strong>Prévia das parcelas</strong>
+        <div class="form-text mb-0">
+          A prévia usa o valor total, a data do 1º vencimento e a quantidade informada.
+        </div>
+      </div>
+      <span class="badge text-bg-secondary" id="parcelas_preview_total">1 parcela</span>
+    </div>
+    <div class="table-responsive mt-3 d-none" id="parcelas_preview_table">
+      <table class="table table-sm align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Parcela</th>
+            <th>Vencimento</th>
+            <th class="text-end">Valor</th>
+          </tr>
+        </thead>
+        <tbody id="parcelas_preview_body"></tbody>
+      </table>
+    </div>
+    <div class="text-muted small mt-2" id="parcelas_preview_empty">
+      Informe valor e vencimento para visualizar a distribuição.
+    </div>
+  </div>
+  {% endif %}
 
   <div class="mb-3">
     <label class="form-label">Observação</label>
@@ -226,22 +285,25 @@
 
   <hr>
 
-  <div class="mb-3">
-    <label class="form-label">Anexos (máx. 5 arquivos)</label>
-    <input
-      type="file"
-      name="arquivos"
-      class="form-control"
-      multiple
-      {% if anexos and anexos|length >= 5 %}disabled{% endif %}
-    >
-    <div class="form-text">
-      Você pode anexar até 5 documentos por título.
-      {% if anexos and anexos|length >= 5 %}
-        <span class="text-danger">Limite atingido (5/5).</span>
-      {% endif %}
+  <details class="mb-3">
+    <summary class="fw-semibold">Anexos do título</summary>
+    <div class="mt-3">
+      <label class="form-label">Arquivos do título (máx. 5)</label>
+      <input
+        type="file"
+        name="arquivos"
+        class="form-control"
+        multiple
+        {% if anexos and anexos|length >= 5 %}disabled{% endif %}
+      >
+      <div class="form-text">
+        Anexos podem ser incluídos agora ou depois da criação do título.
+        {% if anexos and anexos|length >= 5 %}
+          <span class="text-danger">Limite atingido (5/5).</span>
+        {% endif %}
+      </div>
     </div>
-  </div>
+  </details>
 
   {% if anexos and anexos|length > 0 %}
   <div class="mb-3">
@@ -276,7 +338,7 @@
 
   <div class="d-flex justify-content-end">
     <button type="submit" class="btn btn-success">
-      {% if modo_copia %}💾 Salvar cópia{% else %}💾 Salvar{% endif %}
+      {% if modo_copia %}Salvar cópia{% else %}Salvar título{% endif %}
     </button>
   </div>
 
@@ -289,33 +351,42 @@
     maximumFractionDigits: 2
   });
 
-  function formatAsCents(raw) {
-    const digits = String(raw || '').replace(/\D/g, '');
-    if (!digits) return '';
-    const cents = parseInt(digits, 10);
-    const value = cents / 100;
-    return nf.format(value); // ex: 2,00 | 1.234,56
+  function parseBrazilianMoney(raw) {
+    let value = String(raw || '').trim().replace(/R\$/g, '').replace(/\s/g, '');
+    if (!value) return null;
+    if (value.includes(',')) {
+      value = value.replace(/\./g, '').replace(',', '.');
+    } else {
+      const parts = value.split('.');
+      if (parts.length > 2 || (parts.length === 2 && parts[1].length > 2)) {
+        value = value.replace(/\./g, '');
+      }
+    }
+    const number = Number(value);
+    return Number.isFinite(number) ? number : null;
+  }
+
+  function formatAsReais(raw) {
+    const value = parseBrazilianMoney(raw);
+    if (value === null) return '';
+    return nf.format(value);
   }
 
   function attachMoneyMask(input) {
     input.addEventListener('input', function () {
-      const formatted = formatAsCents(input.value);
-      input.value = formatted;
-      // cursor no fim (simples e estável)
-      try { input.setSelectionRange(input.value.length, input.value.length); } catch (e) {}
+      input.value = input.value.replace(/[^\d.,]/g, '');
     });
 
     input.addEventListener('blur', function () {
-      // se ficou vazio, mantém vazio; se não, garante 2 casas
-      input.value = formatAsCents(input.value);
+      input.value = formatAsReais(input.value);
+      input.dispatchEvent(new Event('psfinance:money-formatted'));
     });
   }
 
   document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.js-money').forEach((el) => {
       attachMoneyMask(el);
-      // formata valor inicial (edição)
-      if (el.value) el.value = formatAsCents(el.value);
+      if (el.value) el.value = formatAsReais(el.value);
     });
   });
 })();
@@ -328,19 +399,115 @@
 
   function filtrarCentros() {
     const idEmpresa = empresa.value || "";
+    const placeholder = centro.options[0];
+    let opcoesVisiveis = 0;
     Array.from(centro.options).forEach((option) => {
       if (!option.value) {
         option.hidden = false;
         return;
       }
-      const visivel = !idEmpresa || option.dataset.empresa === idEmpresa;
+      const visivel = Boolean(idEmpresa) && option.dataset.empresa === idEmpresa;
       option.hidden = !visivel;
+      option.disabled = !visivel;
+      if (visivel) opcoesVisiveis += 1;
       if (!visivel && option.selected) centro.value = "";
     });
+    centro.disabled = !idEmpresa || opcoesVisiveis === 0;
+    if (placeholder) {
+      placeholder.textContent = idEmpresa
+        ? (opcoesVisiveis ? "Selecione..." : "Nenhum centro de custo ativo para esta empresa")
+        : "Selecione uma empresa primeiro...";
+    }
   }
 
   empresa.addEventListener("change", filtrarCentros);
   filtrarCentros();
+})();
+</script>
+
+<script>
+(function () {
+  const valorInput = document.getElementById("valor");
+  const vencimentoInput = document.getElementById("vencimento");
+  const quantidadeInput = document.getElementById("quantidade_parcelas");
+  const table = document.getElementById("parcelas_preview_table");
+  const body = document.getElementById("parcelas_preview_body");
+  const empty = document.getElementById("parcelas_preview_empty");
+  const total = document.getElementById("parcelas_preview_total");
+
+  if (!valorInput || !vencimentoInput || !quantidadeInput || !table || !body) return;
+
+  const nf = new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  function parseMoney(raw) {
+    let value = String(raw || "").trim().replace(/R\$/g, "").replace(/\s/g, "");
+    if (!value) return null;
+    if (value.includes(",")) {
+      value = value.replace(/\./g, "").replace(",", ".");
+    } else {
+      const parts = value.split(".");
+      if (parts.length > 2 || (parts.length === 2 && parts[1].length > 2)) {
+        value = value.replace(/\./g, "");
+      }
+    }
+    const number = Number(value);
+    return Number.isFinite(number) ? number : null;
+  }
+
+  function addMonths(date, months) {
+    const baseDay = date.getUTCDate();
+    const result = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, 1));
+    const lastDay = new Date(Date.UTC(result.getUTCFullYear(), result.getUTCMonth() + 1, 0)).getUTCDate();
+    result.setUTCDate(Math.min(baseDay, lastDay));
+    return result;
+  }
+
+  function formatDate(date) {
+    return date.toLocaleDateString("pt-BR", { timeZone: "UTC" });
+  }
+
+  function renderPreview() {
+    const value = parseMoney(valorInput.value);
+    const vencimento = vencimentoInput.value ? new Date(`${vencimentoInput.value}T00:00:00Z`) : null;
+    const quantidade = Math.max(1, Math.min(120, parseInt(quantidadeInput.value || "1", 10) || 1));
+    total.textContent = `${quantidade} ${quantidade === 1 ? "parcela" : "parcelas"}`;
+
+    if (!value || value <= 0 || !vencimento || Number.isNaN(vencimento.getTime())) {
+      table.classList.add("d-none");
+      empty.classList.remove("d-none");
+      body.innerHTML = "";
+      return;
+    }
+
+    const totalCents = Math.round(value * 100);
+    const baseCents = Math.floor(totalCents / quantidade);
+    const remainder = totalCents % quantidade;
+    const visibleRows = Math.min(quantidade, 6);
+    const rows = [];
+    for (let index = 0; index < visibleRows; index += 1) {
+      const cents = baseCents + (index < remainder ? 1 : 0);
+      rows.push(`
+        <tr>
+          <td>${index + 1}/${quantidade}</td>
+          <td>${formatDate(addMonths(vencimento, index))}</td>
+          <td class="text-end">R$ ${nf.format(cents / 100)}</td>
+        </tr>
+      `);
+    }
+    if (quantidade > visibleRows) {
+      rows.push(`<tr><td colspan="3" class="text-muted">Mais ${quantidade - visibleRows} parcelas serão geradas na sequência mensal.</td></tr>`);
+    }
+    body.innerHTML = rows.join("");
+    empty.classList.add("d-none");
+    table.classList.remove("d-none");
+  }
+
+  ["input", "change", "psfinance:money-formatted"].forEach((eventName) => {
+    valorInput.addEventListener(eventName, renderPreview);
+    vencimentoInput.addEventListener(eventName, renderPreview);
+    quantidadeInput.addEventListener(eventName, renderPreview);
+  });
+  document.addEventListener("DOMContentLoaded", renderPreview);
 })();
 </script>
 {% endblock %}

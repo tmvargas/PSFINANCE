@@ -519,3 +519,21 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   `docs/evidencias/PLA-2106/`.
 - Limite: acao restrita a VPS e banco de staging. Nao altera `main`, producao,
   banco de producao, secrets, credenciais ou dados operacionais produtivos.
+
+## 2026-08-12 - PLA-2111 - UX do cadastro de novo titulo
+
+- Projeto: PSFINANCE.
+- Decisao: o cadastro de novo titulo deve usar linguagem de negocio para o
+  usuario final, tratando o plano financeiro como `Categoria financeira` e
+  evitando expor a regra tecnica `Grupo 2` no rotulo principal.
+- Regra de UX: o campo de valor passa a interpretar entrada simples em reais;
+  por exemplo, `200` deve virar `200,00`, sem mascara obrigatoria em centavos.
+- Regra de fluxo: Centro de Custo fica indisponivel ate a escolha da Empresa,
+  exibindo somente centros compativeis com a empresa selecionada.
+- Fluxo pos-salvamento: criacao ou copia com uma parcela retorna para a lista
+  de titulos; somente criacao/copia com duas ou mais parcelas abre a revisao
+  de parcelas apos salvar.
+- Complemento: o formulario exibe orientacao para cadastros auxiliares ausentes
+  e deixa anexos como secao secundaria, reduzindo ruido no primeiro cadastro.
+- Limite: alteracao restrita a rota e template de titulos. Nao altera banco,
+  migration, `main`, producao ou dados produtivos.
