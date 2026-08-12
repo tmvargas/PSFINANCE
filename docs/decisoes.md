@@ -500,8 +500,9 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   repositorio operacional de `staging` do commit
   `e17896e7838cdea30f6deea9f8aecd003cc3b0f0` para o commit
   `b7d10c1a18574aff8186573829aba2786c1df80c`, ja existente em
-  `origin/staging`; a entrega revisada ficou consolidada no commit
-  `89d6d4d6b7325589a67bf54864036590d2f07627`.
+  `origin/staging`; a entrega revisada com evidencias complementares ficou
+  consolidada e publicada no commit
+  `9745b5e7cb4991c4429078b7046aa23a1cf09c63`.
 - Motivo: a porta publica `5001` respondia com tela funcional, mas a tela real
   de edicao de titulo ainda nao continha `Parcelas do titulo`, `Valor total` e
   `Data do 1º Vencimento`, porque a VPS estava defasada em relacao ao GitHub.

@@ -15,8 +15,8 @@ Corrigir o staging real da aba de parcelas.
 - O GitHub `origin/staging` estava no commit
   `b7d10c1a18574aff8186573829aba2786c1df80c`, que ja continha as entregas
   PLA-1816 e PLA-2073.
-- Apos a consolidacao documental da correcao, o `origin/staging` passou ao
-  commit `89d6d4d6b7325589a67bf54864036590d2f07627`.
+- Apos a consolidacao das evidencias da devolucao, o `origin/staging` e a VPS
+  de teste passaram ao commit `9745b5e7cb4991c4429078b7046aa23a1cf09c63`.
 - A tela real em `http://vps69143.publiccloud.com.br:5001/financeiro/titulos/1/editar`
   retornava HTTP 200, mas nao exibia `Parcelas do titulo`, `Valor total` nem
   `Data do 1º Vencimento`.
@@ -35,7 +35,7 @@ Corrigir o staging real da aba de parcelas.
 - Reiniciados somente os servicos de staging:
   `psfinance-staging` e `psfinance-staging-gate`.
 - Revisao da devolucao executiva: confirmado que o staging real da porta `5001`
-  esta no commit `89d6d4d6b7325589a67bf54864036590d2f07627`, com os elementos
+  esta no commit `9745b5e7cb4991c4429078b7046aa23a1cf09c63`, com os elementos
   visuais e funcionais exigidos.
 
 ## Validacao
@@ -44,7 +44,7 @@ Executada em 2026-08-12 na porta publica corporativa `5001`.
 
 | Caso | Resultado |
 | --- | --- |
-| `GET /health` | HTTP 200, `branch=staging`, `commit=89d6d4d6b7325589a67bf54864036590d2f07627`, `db_dialect=postgresql`, `database_url_source=PSFINANCE_STAGING_DATABASE_URL` |
+| `GET /health` | HTTP 200, `branch=staging`, `commit=9745b5e7cb4991c4429078b7046aa23a1cf09c63`, `db_dialect=postgresql`, `database_url_source=PSFINANCE_STAGING_DATABASE_URL` |
 | `GET /financeiro/titulos/1/editar` | HTTP 200, HTML contem `Parcelas do titulo`, `Valor total`, `Data do 1º Vencimento` e link `/financeiro/titulos/1/parcelas` |
 | `GET /financeiro/titulos/1/parcelas` | HTTP 200, HTML contem `Parcelas do Titulo #1`, `Valor total do titulo`, `Soma das parcelas` e `Salvar parcelas` |
 | Banco de staging | Tabela `titulo_parcela` criada com colunas `id_parcela`, `uuid`, `id_titulo`, `numero_parcela`, `vencimento`, `valor`, `created_at`, `updated_at` e `deleted` |
