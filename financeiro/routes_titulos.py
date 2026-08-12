@@ -234,14 +234,16 @@ def listar_titulos():
     hoje = date.today()
     mes = request.args.get("mes", type=int) or hoje.month
     ano = request.args.get("ano", type=int) or hoje.year
+    id_empresa = request.args.get("id_empresa", type=int)
 
     if mes < 1 or mes > 12:
         mes = hoje.month
 
     data_ini = date(ano, mes, 1)
     data_fim = date(ano + 1, 1, 1) if mes == 12 else date(ano, mes + 1, 1)
+    empresas_view, _centros_custo_view = listar_empresas_centros_ativos(session)
 
-    titulos = (
+    query = (
         session.query(Titulo)
         .options(
             joinedload(Titulo.credor),
@@ -255,6 +257,13 @@ def listar_titulos():
             Titulo.vencimento >= data_ini,
             Titulo.vencimento < data_fim,
         )
+    )
+
+    if id_empresa:
+        query = query.filter(Titulo.id_empresa == id_empresa)
+
+    titulos = (
+        query
         .order_by(Titulo.vencimento.asc(), Titulo.id_titulo.desc())
         .all()
     )
@@ -325,6 +334,8 @@ def listar_titulos():
         ano=ano,
         meses=meses,
         anos=anos,
+        empresas=empresas_view,
+        id_empresa=id_empresa,
         total_valor=total_valor,
         total_baixado=total_baixado,
         total_aberto=total_aberto,

@@ -583,3 +583,15 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   orientacao somente nos fluxos de novo titulo e copia.
 - Limite: alteracao restrita ao template da tela de titulo. Nao altera banco,
   migration, `main`, producao ou dados produtivos.
+
+## 2026-08-12 - PLA-2171 - Filtro por empresa na consulta de titulos
+
+- Projeto: PSFINANCE.
+- Decisao: a consulta de titulos deve permitir filtrar os registros por
+  empresa ativa, mantendo o filtro existente de mes e ano por vencimento.
+- Regra: quando uma empresa e selecionada, a listagem e os totais financeiros
+  devem considerar somente titulos vinculados ao respectivo `id_empresa`;
+  quando nenhuma empresa e selecionada, a consulta permanece abrangendo todas
+  as empresas do periodo.
+- Limite: alteracao restrita a rota, template e documentacao. Nao altera
+  banco, migration, `main`, producao ou dados produtivos.
