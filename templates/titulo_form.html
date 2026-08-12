@@ -232,13 +232,11 @@
         {% if titulo and not modo_copia %}disabled{% endif %}
         required
       >
+      {% if not titulo or modo_copia %}
       <div class="form-text">
-        {% if titulo and not modo_copia %}
-          Edição mantém a quantidade atual. Use a guia Parcelas do título para ajustar vencimentos, valores, inclusão ou exclusão.
-        {% else %}
           Use 1 parcela para salvar direto. Com 2 ou mais, o sistema abrirá a revisão das parcelas após salvar.
-        {% endif %}
       </div>
+      {% endif %}
     </div>
   </div>
 

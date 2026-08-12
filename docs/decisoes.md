@@ -569,3 +569,14 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   antes de salvar.
 - Limite: alteracao restrita a controller, template e documentacao. Nao altera
   banco, migration, `main`, producao ou dados produtivos.
+
+## 2026-08-12 - PLA-2155 - Remover texto indevido da edicao de titulo
+
+- Projeto: PSFINANCE.
+- Decisao: a edicao de titulo existente nao deve exibir texto explicativo
+  abaixo do campo `Parcelas`, porque a alteracao de parcelas deve ocorrer pela
+  acao explicita `Parcelas do titulo`.
+- Regra: manter o campo `Parcelas` desabilitado na edicao e preservar a
+  orientacao somente nos fluxos de novo titulo e copia.
+- Limite: alteracao restrita ao template da tela de titulo. Nao altera banco,
+  migration, `main`, producao ou dados produtivos.
