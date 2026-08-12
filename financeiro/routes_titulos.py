@@ -178,6 +178,21 @@ def _sincronizar_parcela_unica_com_titulo(session, titulo: Titulo):
         parcela.valor = float(titulo.valor or 0)
 
 
+def _quantidade_parcelas_ativas(session, id_titulo: int | None) -> int:
+    if id_titulo is None:
+        return 1
+
+    quantidade = (
+        session.query(func.count(TituloParcela.id_parcela))
+        .filter(
+            TituloParcela.deleted.is_(False),
+            TituloParcela.id_titulo == id_titulo,
+        )
+        .scalar()
+    )
+    return max(1, int(quantidade or 0))
+
+
 
 def _uploads_dir() -> Path:
     # guarda dentro da pasta do app (não versionada)
@@ -554,6 +569,7 @@ def _upsert_titulo(id_titulo: int | None, id_titulo_copia: int | None = None):
             "emissao": titulo_ref.emissao,        # date (tem isoformat)
             "vencimento": titulo_ref.vencimento,  # date (tem isoformat)
             "observacao": getattr(titulo_ref, "observacao", "") or "",
+            "quantidade_parcelas": _quantidade_parcelas_ativas(session, titulo_ref.id_titulo),
 
         }
 

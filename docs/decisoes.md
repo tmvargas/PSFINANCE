@@ -556,3 +556,16 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   e deixa anexos como secao secundaria, reduzindo ruido no primeiro cadastro.
 - Limite: alteracao restrita a rota e template de titulos. Nao altera banco,
   migration, `main`, producao ou dados produtivos.
+
+## 2026-08-12 - PLA-2148 - Quantidade real de parcelas no titulo
+
+- Projeto: PSFINANCE.
+- Decisao: a tela principal de titulo deve exibir no campo `Parcelas` a
+  quantidade de parcelas ativas persistidas para o titulo, em vez de manter o
+  valor fixo `1`.
+- Regra: na edicao, o campo permanece desabilitado para preservar a quantidade
+  atual e os ajustes continuam centralizados na guia `Parcelas do titulo`; na
+  copia, a quantidade inicial acompanha o titulo de origem e pode ser alterada
+  antes de salvar.
+- Limite: alteracao restrita a controller, template e documentacao. Nao altera
+  banco, migration, `main`, producao ou dados produtivos.
