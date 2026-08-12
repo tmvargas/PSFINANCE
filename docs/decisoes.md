@@ -599,5 +599,8 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
 - Seguranca: escolher `Todas` remove a preferencia da sessao e qualquer
   `id_empresa` invalido ou inativo tambem limpa a memorizacao, evitando filtro
   persistente para empresa inexistente.
+- Complemento: a branch da tarefa foi integrada em `staging`, publicada na VPS
+  de teste e validada pela porta corporativa `5001`, com evidencia registrada
+  em `docs/PLA-2171-filtro-empresa-titulos.md`.
 - Limite: alteracao restrita a rota, template e documentacao. Nao altera
   banco, migration, `main`, producao ou dados produtivos.
