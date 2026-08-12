@@ -500,7 +500,8 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   repositorio operacional de `staging` do commit
   `e17896e7838cdea30f6deea9f8aecd003cc3b0f0` para o commit
   `b7d10c1a18574aff8186573829aba2786c1df80c`, ja existente em
-  `origin/staging`.
+  `origin/staging`; a entrega revisada ficou consolidada no commit
+  `89d6d4d6b7325589a67bf54864036590d2f07627`.
 - Motivo: a porta publica `5001` respondia com tela funcional, mas a tela real
   de edicao de titulo ainda nao continha `Parcelas do titulo`, `Valor total` e
   `Data do 1º Vencimento`, porque a VPS estava defasada em relacao ao GitHub.
@@ -510,5 +511,10 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
 - Infraestrutura: atualizados somente metadados nao sensiveis de `GIT_BRANCH`
   e `GIT_COMMIT` do ambiente de staging, com backup do arquivo operacional de
   ambiente antes da alteracao.
+- Evidencia complementar: revisao executiva solicitou screenshots, comparacao
+  com o print de Thiago e validacao funcional de edicao/inclusao/recalculo das
+  parcelas; esses itens foram registrados em
+  `docs/PLA-2106-staging-real-aba-parcelas.md` e
+  `docs/evidencias/PLA-2106/`.
 - Limite: acao restrita a VPS e banco de staging. Nao altera `main`, producao,
   banco de producao, secrets, credenciais ou dados operacionais produtivos.
