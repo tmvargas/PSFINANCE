@@ -52,6 +52,16 @@ tela exibe a previa de `3 parcelas`.
   - versao anterior: `200` formatou como `2,00`;
   - versao ajustada: `200` formatou como `200,00`;
   - previa dinamica exibiu `3 parcelas`.
+- VPS de staging publicada na porta `5001`:
+  - `GET /health`: HTTP 200, `branch=staging`,
+    `commit=569fadd54816e806872825df3e49a6433155c5ff`,
+    `db_dialect=postgresql`;
+  - `GET /gate`: HTTP 200, `status=healthy`, check interno
+    `psfinance_staging` com HTTP 200;
+  - `GET /financeiro/titulos/novo`: HTTP 200 e HTML contendo
+    `Categoria financeira`, `Digite o valor em reais`,
+    `Selecione uma empresa primeiro`, `Previa das parcelas` e
+    `Anexos do titulo`.
 
 ## Limites
 
@@ -59,5 +69,4 @@ tela exibe a previa de `3 parcelas`.
 - Sem migration.
 - Sem alteracao em `main`.
 - Sem producao.
-- Validacao em VPS/staging real e porta corporativa `5001` ainda depende de
-  publicacao da branch na `staging`.
+- Publicacao realizada somente em `staging`, sem deploy produtivo.
