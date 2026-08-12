@@ -382,12 +382,11 @@ def listar_titulos():
     total_aberto = 0.0
 
     for t in titulos:
-        valor = float(t.valor or 0)
         valor_periodo = float(titulos_periodo[t.id_titulo]["valor"] or 0)
         baixado = float(baixas_soma.get(t.id_titulo, 0) or 0)
         aberto = max(0.0, valor_periodo - baixado)
 
-        total_valor += valor
+        total_valor += valor_periodo
         total_baixado += baixado
         total_aberto += aberto
 
@@ -411,7 +410,7 @@ def listar_titulos():
                 "plano": f"{t.plano.cod_estrutural} - {t.plano.nome_conta}" if t.plano else "",
                 "emissao": t.emissao.strftime("%d/%m/%Y") if t.emissao else "",
                 "vencimento": vencimento_periodo.strftime("%d/%m/%Y") if vencimento_periodo else "",
-                "valor": valor,
+                "valor": valor_periodo,
                 "baixado": baixado,
                 "aberto": aberto,
             }

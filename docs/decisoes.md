@@ -1,5 +1,23 @@
 # Decisoes - PSCONTROL
 
+## 2026-08-12 - Valor da consulta mensal usa parcela vencida no mes
+
+Decisao: na consulta de titulos do PSFINANCE, a coluna `Valor` e o total do
+periodo passam a exibir o valor vencido no mes filtrado. Para titulos com
+parcelas ativas, o valor exibido e a soma das parcelas ativas com vencimento no
+mes consultado; para titulos sem parcelas ativas, permanece o valor do titulo
+legado encontrado pelo vencimento principal.
+
+Motivo: apos a correcao da consulta por vencimento da parcela, manter a coluna
+`Valor` com o valor total do titulo gerava divergencia operacional na leitura
+mensal, pois a consulta do mes deve apresentar o valor da parcela que vence
+naquele periodo.
+
+Impacto: a alteracao preserva a linha da consulta como representacao do titulo,
+mantem baixas filtradas pelo mes e saldo calculado sobre o valor do periodo,
+sem migration, sem banco de producao e sem alteracao de infraestrutura de
+producao.
+
 ## 2026-08-12 - Sincronizacao da parcela unica do titulo conforme Sienge
 
 Decisao: na edicao de um titulo existente com exatamente uma parcela ativa, o
