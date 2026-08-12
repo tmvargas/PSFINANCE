@@ -21,6 +21,31 @@
 </div>
 
 <form method="post" class="card p-3 shadow-sm">
+  <style>
+    .parcel-row.is-deleting {
+      background: #fff1f0;
+    }
+
+    .parcel-row.is-deleting td {
+      color: #9f1d18;
+    }
+
+    .parcel-number-label {
+      display: inline-flex;
+      align-items: center;
+      min-height: 38px;
+      font-weight: 600;
+    }
+
+    .parcel-delete-button {
+      align-items: center;
+      display: inline-flex;
+      justify-content: center;
+      min-height: 34px;
+      width: 38px;
+    }
+  </style>
+
   <div class="d-flex flex-wrap justify-content-between gap-2 mb-3">
     <div>
       <strong>Valor total do título:</strong>
@@ -44,18 +69,11 @@
       </thead>
       <tbody>
         {% for parcela in parcelas %}
-          <tr>
+          <tr class="parcel-row">
             <td>
               <input type="hidden" name="parcela_id" value="{{ parcela.id_parcela }}">
-              <input
-                type="number"
-                name="numero_parcela"
-                class="form-control"
-                min="1"
-                step="1"
-                value="{{ parcela.numero_parcela }}"
-                required
-              >
+              <input type="hidden" name="numero_parcela" value="{{ parcela.numero_parcela }}">
+              <span class="parcel-number-label">{{ parcela.numero_parcela }}</span>
             </td>
             <td>
               <input
@@ -78,16 +96,22 @@
               >
             </td>
             <td>
-              <div class="form-check">
-                <input
-                  class="form-check-input"
-                  type="checkbox"
-                  name="excluir_parcela"
-                  value="{{ parcela.id_parcela }}"
-                  id="excluir_parcela_{{ parcela.id_parcela }}"
-                >
-                <label class="form-check-label" for="excluir_parcela_{{ parcela.id_parcela }}">Excluir</label>
-              </div>
+              <input
+                class="d-none js-delete-parcel"
+                type="checkbox"
+                name="excluir_parcela"
+                value="{{ parcela.id_parcela }}"
+                id="excluir_parcela_{{ parcela.id_parcela }}"
+              >
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-danger parcel-delete-button js-delete-parcel-button"
+                aria-label="Excluir parcela {{ parcela.numero_parcela }}"
+                title="Excluir parcela"
+                aria-pressed="false"
+              >
+                <svg class="icon" aria-hidden="true"><use href="#icon-trash"></use></svg>
+              </button>
             </td>
           </tr>
         {% endfor %}
@@ -97,19 +121,26 @@
 
   <hr>
 
-  <h3 class="h6 mb-3">Nova parcela</h3>
-  <div class="row g-3 mb-3">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <h3 class="h6 mb-0">Nova parcela</h3>
+    <button type="button" class="btn btn-sm btn-outline-primary btn-icon-label" id="addParcelButton">
+      <svg class="icon" aria-hidden="true"><use href="#icon-plus"></use></svg>
+      Adicionar parcela
+    </button>
+  </div>
+  <div class="row g-3 mb-3 d-none" id="newParcelFields">
     <div class="col-md-2">
       <label class="form-label">Parcela</label>
-      <input type="number" name="novo_numero_parcela" class="form-control" min="1" step="1" value="{{ proximo_numero }}">
+      <input type="hidden" name="novo_numero_parcela" value="{{ proximo_numero }}" disabled>
+      <span class="parcel-number-label">{{ proximo_numero }}</span>
     </div>
     <div class="col-md-3">
       <label class="form-label">Vencimento</label>
-      <input type="date" name="novo_vencimento_parcela" class="form-control" value="">
+      <input type="date" name="novo_vencimento_parcela" class="form-control" value="" disabled>
     </div>
     <div class="col-md-3">
       <label class="form-label">Valor</label>
-      <input type="text" name="novo_valor_parcela" class="form-control js-money" inputmode="numeric" autocomplete="off" placeholder="0,00">
+      <input type="text" name="novo_valor_parcela" class="form-control js-money" inputmode="numeric" autocomplete="off" placeholder="0,00" disabled>
     </div>
   </div>
 
@@ -150,6 +181,35 @@
       attachMoneyMask(el);
       if (el.value) el.value = formatAsCents(el.value);
     });
+
+    document.querySelectorAll('.js-delete-parcel-button').forEach((button) => {
+      button.addEventListener('click', function () {
+        const row = button.closest('.parcel-row');
+        const checkbox = row ? row.querySelector('.js-delete-parcel') : null;
+        if (!row || !checkbox) return;
+
+        checkbox.checked = !checkbox.checked;
+        row.classList.toggle('is-deleting', checkbox.checked);
+        button.setAttribute('aria-pressed', checkbox.checked ? 'true' : 'false');
+        button.classList.toggle('btn-danger', checkbox.checked);
+        button.classList.toggle('btn-outline-danger', !checkbox.checked);
+        button.title = checkbox.checked ? 'Desfazer exclusão' : 'Excluir parcela';
+      });
+    });
+
+    const addButton = document.getElementById('addParcelButton');
+    const newFields = document.getElementById('newParcelFields');
+    if (addButton && newFields) {
+      addButton.addEventListener('click', function () {
+        newFields.classList.remove('d-none');
+        newFields.querySelectorAll('input').forEach((input) => {
+          input.disabled = false;
+        });
+        addButton.classList.add('d-none');
+        const firstInput = newFields.querySelector('input[type="date"], input[type="text"]');
+        if (firstInput) firstInput.focus();
+      });
+    }
   });
 })();
 </script>

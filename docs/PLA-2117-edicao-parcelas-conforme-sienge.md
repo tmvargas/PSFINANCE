@@ -16,6 +16,12 @@ Corrigir a edicao de parcelas do titulo conforme o comportamento do Sienge.
   no suporte Sienge para titulo a pagar.
 - Ao salvar a aba `Parcelas`, o valor total do titulo continua refletindo a
   soma das parcelas ativas.
+- Editar e salvar parcela existente nao dispara validacao de nova parcela.
+- O bloco `Nova parcela` fica fechado por padrao e abre somente pelo botao
+  `Adicionar parcela`.
+- O numero da parcela aparece como texto/rotulo, nao como campo editavel.
+- A exclusao usa icone de lixeira; ao acionar, a linha fica marcada em vermelho
+  antes de salvar.
 - Quando o titulo possui exatamente uma parcela ativa, a edicao do valor total
   ou da data do primeiro vencimento na tela principal tambem sincroniza essa
   parcela unica.
@@ -33,8 +39,9 @@ Corrigir a edicao de parcelas do titulo conforme o comportamento do Sienge.
 ## Arquitetura
 
 - Controller: `financeiro/routes_titulos.py`.
-- Nao houve alteracao em model, migration, banco de dados, template, CSS,
-  JavaScript, VPS ou producao.
+- Template: `templates/titulo_parcelas_form.html`.
+- Nao houve alteracao em model, migration, banco de dados, CSS externo, VPS de
+  producao ou producao.
 
 ## Validacao executada
 
@@ -48,6 +55,7 @@ Teste focal com banco SQLite temporario e `Flask test_client`:
 
 ```text
 OK PLA-2117: parcela unica sincronizada; multiplas parcelas preservadas para edicao pela aba Parcelas
+OK PLA-2117 UI: edicao sem erro de nova parcela; add via botao; exclusao e recalculo preservados
 ```
 
 Matriz funcional:
@@ -56,6 +64,37 @@ Matriz funcional:
 | --- | --- | --- |
 | Titulo com uma parcela ativa | Editar valor para `150,50` e vencimento para `2026-11-15` na tela principal | Titulo salvo; parcela unica ativa fica como parcela `1`, valor `150.50` e vencimento `2026-11-15` |
 | Titulo com duas parcelas ativas | Editar valor e vencimento na tela principal | Titulo salvo; parcelas existentes continuam com valores e vencimentos originais para ajuste pela aba `Parcelas` |
+| Edicao de parcela existente | Alterar valor/vencimento de parcela existente sem preencher nova parcela | Salvamento sem erro `Vencimento da nova parcela invalido`; titulo recalculado |
+| Inclusao de nova parcela | Abrir `Adicionar parcela`, preencher vencimento e valor | Nova parcela persistida; titulo recalculado |
+| Exclusao de parcela | Acionar lixeira, confirmar linha vermelha e salvar | Parcela marcada como excluida; titulo recalculado com parcelas ativas |
+
+## Gate visual
+
+Referencia obrigatoria da tarefa mae:
+
+- `docs/evidencias/PLA-2117/referencia-sienge.png` - Print do Sienge anexado no
+  comentario de Thiago na PLA-743.
+
+Evidencias geradas em navegador automatizado local na porta `5001`:
+
+- `docs/evidencias/PLA-2117/parcelas-inicial-nova-parcela-fechada.png` - Tela
+  de parcelas com `Nova parcela` fechada por padrao, numeros exibidos como
+  rotulos e lixeira por linha.
+- `docs/evidencias/PLA-2117/parcelas-adicionar-parcela-aberta.png` - Tela apos
+  clicar em `Adicionar parcela`, exibindo campos da nova parcela.
+- `docs/evidencias/PLA-2117/parcelas-lixeira-linha-vermelha.png` - Tela apos
+  clicar na lixeira, com a linha marcada em vermelho antes de salvar.
+
+Comparacao objetiva com o print do Sienge:
+
+| Item do Sienge | Resultado no PSFINANCE |
+| --- | --- |
+| Aba/grade de parcelas com linhas existentes | Preservada a tela `Parcelas do Titulo` com tabela de parcelas existentes |
+| Numero da parcela aparece como texto | Corrigido: numero da parcela e rotulo, com valor oculto apenas para submissao |
+| Lixeira por linha | Corrigido: exclusao por botao com icone de lixeira |
+| Linha destacada ao selecionar/excluir | Corrigido: linha marcada em vermelho antes do salvamento |
+| Inclusao acionada por botao `ADICIONAR` | Corrigido: campos de `Nova parcela` ficam fechados e abrem por `Adicionar parcela` |
+| Valor total/soma coerente | Preservado: valor do titulo recalculado pela soma das parcelas ativas |
 
 ## Validacao em staging
 
