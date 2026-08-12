@@ -34,6 +34,17 @@ parcelas ativas. Revalidacao final feita na branch `staging` publicada:
   botao `Adicionar parcela`, numeros seguem como rotulos, lixeira preservada e
   linha marcada com classe `is-deleting` antes de salvar.
 
+Validacao complementar na VPS (Servidor Virtual Privado) de staging, porta
+`5001`, PostgreSQL, branch `staging` publicada:
+
+- `/health`: HTTP 200, `status=healthy`, `db_dialect=postgresql`,
+  `database_url_source=PSFINANCE_STAGING_DATABASE_URL`.
+- `GET /financeiro/titulos/59/editar`: HTTP 200.
+- `GET /financeiro/titulos/59/parcelas`: HTTP 200.
+- Caso multi-parcela real: titulo `59` com `10` parcelas ativas existentes na
+  aba `Parcelas`; o campo `Parcelas` na edicao exibe `10`, desabilitado e sem a
+  mensagem removida.
+
 ## Evidencias
 
 - `docs/evidencias/PLA-2148/edicao-titulo-quantidade-real-sem-texto.png` -
@@ -45,6 +56,10 @@ parcelas ativas. Revalidacao final feita na branch `staging` publicada:
   parcelas apos clicar em `Adicionar parcela`.
 - `docs/evidencias/PLA-2148/aba-parcelas-lixeira-linha-vermelha.png` - Aba de
   parcelas apos acionar a lixeira, com linha marcada antes de salvar.
+- `docs/evidencias/PLA-2148/vps-staging-edicao-titulo-59-quantidade-real.png`
+  - Edicao real na VPS de staging mostrando `Parcelas = 10`.
+- `docs/evidencias/PLA-2148/vps-staging-parcelas-titulo-59.png` - Aba de
+  parcelas real na VPS de staging para o titulo `59`, com `10` parcelas ativas.
 
 ## Limites
 
