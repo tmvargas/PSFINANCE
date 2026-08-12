@@ -430,9 +430,9 @@
 
                   <td class="text-center">
                     {% if nao_pago_mes <= 0 %}
-                      <span class="titles-status titles-status-paid">Baixado</span>
+                      <span class="titles-status titles-status-paid">Pago no mês</span>
                     {% else %}
-                      <span class="titles-status titles-status-open">Aberto</span>
+                      <span class="titles-status titles-status-open">Não pago no mês</span>
                     {% endif %}
                   </td>
 
@@ -448,7 +448,7 @@
                           <svg class="icon"><use href="#icon-check-circle"></use></svg>
                         </a>
                       {% else %}
-                        <span class="titles-action titles-action-disabled" title="Título já baixado" aria-label="Título já baixado">
+                        <span class="titles-action titles-action-disabled" title="Parcela do mês já paga" aria-label="Parcela do mês já paga">
                           <svg class="icon"><use href="#icon-check-circle"></use></svg>
                         </span>
                       {% endif %}
