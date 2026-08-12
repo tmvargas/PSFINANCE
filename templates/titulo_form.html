@@ -228,7 +228,7 @@
         min="1"
         max="120"
         step="1"
-        value="1"
+        value="{{ titulo.quantidade_parcelas if titulo and titulo.quantidade_parcelas else 1 }}"
         {% if titulo and not modo_copia %}disabled{% endif %}
         required
       >
