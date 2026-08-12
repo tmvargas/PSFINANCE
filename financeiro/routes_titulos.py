@@ -158,6 +158,26 @@ def _garantir_parcela_unica(session, titulo: Titulo):
         )
 
 
+def _sincronizar_parcela_unica_com_titulo(session, titulo: Titulo):
+    _garantir_parcela_unica(session, titulo)
+    session.flush()
+
+    parcelas_ativas = (
+        session.query(TituloParcela)
+        .filter(
+            TituloParcela.deleted.is_(False),
+            TituloParcela.id_titulo == titulo.id_titulo,
+        )
+        .order_by(TituloParcela.numero_parcela.asc(), TituloParcela.id_parcela.asc())
+        .all()
+    )
+    if len(parcelas_ativas) == 1:
+        parcela = parcelas_ativas[0]
+        parcela.numero_parcela = 1
+        parcela.vencimento = titulo.vencimento
+        parcela.valor = float(titulo.valor or 0)
+
+
 
 def _uploads_dir() -> Path:
     # guarda dentro da pasta do app (não versionada)
@@ -474,7 +494,7 @@ def _upsert_titulo(id_titulo: int | None, id_titulo_copia: int | None = None):
                 titulo_obj.emissao = emissao
                 titulo_obj.vencimento = vencimento
                 titulo_obj.observacao = observacao
-                _garantir_parcela_unica(session, titulo_obj)
+                _sincronizar_parcela_unica_com_titulo(session, titulo_obj)
       
             if files:
                 existentes = (
