@@ -567,6 +567,9 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   atual e os ajustes continuam centralizados na guia `Parcelas do titulo`; na
   copia, a quantidade inicial acompanha o titulo de origem e pode ser alterada
   antes de salvar.
+- Ajuste pos-revisao: removida a mensagem explicativa exibida abaixo do campo
+  `Parcelas` na edicao de titulo existente, mantendo o campo desabilitado e o
+  acesso explicito pela acao `Parcelas do titulo`.
 - Limite: alteracao restrita a controller, template e documentacao. Nao altera
   banco, migration, `main`, producao ou dados produtivos.
 
