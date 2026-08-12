@@ -377,18 +377,21 @@ def listar_titulos():
     )
 
     rows = []
-    total_valor = 0.0
-    total_baixado = 0.0
-    total_aberto = 0.0
+    total_valor_titulo = 0.0
+    total_valor_parcela_mes = 0.0
+    total_pago_mes = 0.0
+    total_nao_pago_mes = 0.0
 
     for t in titulos:
-        valor_periodo = float(titulos_periodo[t.id_titulo]["valor"] or 0)
-        baixado = float(baixas_soma.get(t.id_titulo, 0) or 0)
-        aberto = max(0.0, valor_periodo - baixado)
+        valor_total_titulo = float(t.valor or 0)
+        valor_parcela_mes = float(titulos_periodo[t.id_titulo]["valor"] or 0)
+        pago_mes = float(baixas_soma.get(t.id_titulo, 0) or 0)
+        nao_pago_mes = max(0.0, valor_parcela_mes - pago_mes)
 
-        total_valor += valor_periodo
-        total_baixado += baixado
-        total_aberto += aberto
+        total_valor_titulo += valor_total_titulo
+        total_valor_parcela_mes += valor_parcela_mes
+        total_pago_mes += pago_mes
+        total_nao_pago_mes += nao_pago_mes
 
         doc_label = ""
         if getattr(t, "documento", None) is not None:
@@ -410,9 +413,10 @@ def listar_titulos():
                 "plano": f"{t.plano.cod_estrutural} - {t.plano.nome_conta}" if t.plano else "",
                 "emissao": t.emissao.strftime("%d/%m/%Y") if t.emissao else "",
                 "vencimento": vencimento_periodo.strftime("%d/%m/%Y") if vencimento_periodo else "",
-                "valor": valor_periodo,
-                "baixado": baixado,
-                "aberto": aberto,
+                "valor_total_titulo": valor_total_titulo,
+                "valor_parcela_mes": valor_parcela_mes,
+                "pago_mes": pago_mes,
+                "nao_pago_mes": nao_pago_mes,
             }
         )
 
@@ -433,9 +437,10 @@ def listar_titulos():
         anos=anos,
         empresas=empresas_view,
         id_empresa=id_empresa,
-        total_valor=total_valor,
-        total_baixado=total_baixado,
-        total_aberto=total_aberto,
+        total_valor_titulo=total_valor_titulo,
+        total_valor_parcela_mes=total_valor_parcela_mes,
+        total_pago_mes=total_pago_mes,
+        total_nao_pago_mes=total_nao_pago_mes,
     )
 
 

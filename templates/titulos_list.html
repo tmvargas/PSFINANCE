@@ -60,7 +60,7 @@
     .titles-summary {
       display: grid;
       gap: 12px;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(5, minmax(0, 1fr));
     }
 
     .titles-metric {
@@ -122,7 +122,7 @@
     }
 
     .titles-col-values {
-      width: 144px;
+      width: 210px;
     }
 
     .titles-col-actions {
@@ -340,16 +340,20 @@
         <strong>{{ titulos|length }}</strong>
       </div>
       <div class="titles-metric">
-        <span>Valor original</span>
-        <strong>R$ {{ "%.2f"|format(total_valor or 0) }}</strong>
+        <span>Valor total dos títulos</span>
+        <strong>R$ {{ "%.2f"|format(total_valor_titulo or 0) }}</strong>
       </div>
       <div class="titles-metric">
-        <span>Valor baixado</span>
-        <strong>R$ {{ "%.2f"|format(total_baixado or 0) }}</strong>
+        <span>Valor da parcela no mês</span>
+        <strong>R$ {{ "%.2f"|format(total_valor_parcela_mes or 0) }}</strong>
       </div>
       <div class="titles-metric">
-        <span>Saldo em aberto</span>
-        <strong>R$ {{ "%.2f"|format(total_aberto or 0) }}</strong>
+        <span>Pago no mês</span>
+        <strong>R$ {{ "%.2f"|format(total_pago_mes or 0) }}</strong>
+      </div>
+      <div class="titles-metric">
+        <span>Não pago no mês</span>
+        <strong>R$ {{ "%.2f"|format(total_nao_pago_mes or 0) }}</strong>
       </div>
     </div>
 
@@ -371,7 +375,7 @@
 
             <tbody>
               {% for t in titulos %}
-                {% set aberto = (t.aberto or 0) %}
+                {% set nao_pago_mes = (t.nao_pago_mes or 0) %}
 
                 <tr>
                   <td>
@@ -406,22 +410,26 @@
                   <td class="text-end">
                     <div class="titles-values">
                       <div class="titles-value-row">
-                        <span>Valor</span>
-                        <strong>R$ {{ "%.2f"|format(t.valor or 0) }}</strong>
+                        <span>Valor total do título</span>
+                        <strong>R$ {{ "%.2f"|format(t.valor_total_titulo or 0) }}</strong>
                       </div>
                       <div class="titles-value-row">
-                        <span>Baixado</span>
-                        <strong>R$ {{ "%.2f"|format(t.baixado or 0) }}</strong>
+                        <span>Valor da parcela no mês</span>
+                        <strong>R$ {{ "%.2f"|format(t.valor_parcela_mes or 0) }}</strong>
                       </div>
                       <div class="titles-value-row">
-                        <span>Saldo</span>
-                        <strong>R$ {{ "%.2f"|format(aberto) }}</strong>
+                        <span>Pago no mês</span>
+                        <strong>R$ {{ "%.2f"|format(t.pago_mes or 0) }}</strong>
+                      </div>
+                      <div class="titles-value-row">
+                        <span>Não pago no mês</span>
+                        <strong>R$ {{ "%.2f"|format(nao_pago_mes) }}</strong>
                       </div>
                     </div>
                   </td>
 
                   <td class="text-center">
-                    {% if aberto <= 0 %}
+                    {% if nao_pago_mes <= 0 %}
                       <span class="titles-status titles-status-paid">Baixado</span>
                     {% else %}
                       <span class="titles-status titles-status-open">Aberto</span>
@@ -430,7 +438,7 @@
 
                   <td class="text-center">
                     <div class="titles-actions" aria-label="Ações do título {{ t.id }}">
-                      {% if aberto > 0 %}
+                      {% if nao_pago_mes > 0 %}
                         <a
                           href="{{ url_for('financeiro.baixar_titulo', id_titulo=t.id) }}"
                           class="titles-action"
@@ -445,7 +453,7 @@
                         </span>
                       {% endif %}
 
-                      {% if (t.baixado or 0) > 0 %}
+                      {% if (t.pago_mes or 0) > 0 %}
                         <a
                           href="{{ url_for('financeiro.listar_baixas_titulo', id_titulo=t.id) }}"
                           class="titles-action"
@@ -496,9 +504,9 @@
                         <button
                           type="submit"
                           class="titles-action titles-action-danger"
-                          title="{% if (t.baixado or 0) > 0 %}Título possui baixa e não pode ser excluído{% else %}Excluir título{% endif %}"
+                          title="{% if (t.pago_mes or 0) > 0 %}Título possui baixa e não pode ser excluído{% else %}Excluir título{% endif %}"
                           aria-label="Excluir título {{ t.id }}"
-                          {% if (t.baixado or 0) > 0 %}disabled{% endif %}
+                          {% if (t.pago_mes or 0) > 0 %}disabled{% endif %}
                         >
                           <svg class="icon"><use href="#icon-trash"></use></svg>
                         </button>
@@ -515,16 +523,20 @@
                 <td class="text-end">
                   <div class="titles-values">
                     <div class="titles-value-row">
-                      <span>Valor</span>
-                      <strong>R$ {{ "%.2f"|format(total_valor or 0) }}</strong>
+                      <span>Valor total do título</span>
+                      <strong>R$ {{ "%.2f"|format(total_valor_titulo or 0) }}</strong>
                     </div>
                     <div class="titles-value-row">
-                      <span>Baixado</span>
-                      <strong>R$ {{ "%.2f"|format(total_baixado or 0) }}</strong>
+                      <span>Valor da parcela no mês</span>
+                      <strong>R$ {{ "%.2f"|format(total_valor_parcela_mes or 0) }}</strong>
                     </div>
                     <div class="titles-value-row">
-                      <span>Saldo</span>
-                      <strong>R$ {{ "%.2f"|format(total_aberto or 0) }}</strong>
+                      <span>Pago no mês</span>
+                      <strong>R$ {{ "%.2f"|format(total_pago_mes or 0) }}</strong>
+                    </div>
+                    <div class="titles-value-row">
+                      <span>Não pago no mês</span>
+                      <strong>R$ {{ "%.2f"|format(total_nao_pago_mes or 0) }}</strong>
                     </div>
                   </div>
                 </td>
