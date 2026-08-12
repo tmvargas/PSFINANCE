@@ -56,7 +56,9 @@ Correcao aplicada:
 - o resumo superior e o rodape da tabela passaram a exibir totais separados
   para os mesmos conceitos;
 - o template deixou de apresentar `Valor`, `Baixado` e `Saldo` como leitura
-  principal da consulta mensal.
+  principal da consulta mensal;
+- o status visual deixou de usar `Baixado` e passou a indicar `Pago no mes` ou
+  `Nao pago no mes`, coerente com a leitura de caixa do filtro.
 
 ## Validacao local
 
