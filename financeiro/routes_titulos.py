@@ -510,10 +510,10 @@ def _upsert_titulo(id_titulo: int | None, id_titulo_copia: int | None = None):
                 return redirect(url_for("financeiro.editar_parcelas_titulo", id_titulo=id_titulo_salvo))
             if modo_copia:
                 flash("Cópia do título salva com sucesso!", "sucesso")
-                return redirect(url_for("financeiro.editar_parcelas_titulo", id_titulo=id_titulo_salvo))
+                return redirect(url_for("financeiro.listar_titulos"))
             if titulo_criado:
-                flash("Título salvo com sucesso. Revise as parcelas.", "sucesso")
-                return redirect(url_for("financeiro.editar_parcelas_titulo", id_titulo=id_titulo_salvo))
+                flash("Título salvo com sucesso com parcela única.", "sucesso")
+                return redirect(url_for("financeiro.listar_titulos"))
             flash("Título salvo com sucesso!", "sucesso")
             return redirect(url_for("financeiro.listar_titulos"))
 
