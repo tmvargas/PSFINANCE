@@ -115,7 +115,7 @@ class ExclusaoParcelaComBaixaTest(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Parcela com baixa n\xc3\xa3o pode ser exclu\xc3\xadda", response.data)
         self.assertIn(
-            b"Possui baixa. Exclua a baixa primeiro para liberar a exclus\xc3\xa3o da parcela.",
+            b"Possui baixa. Exclua a baixa primeiro para liberar a edi\xc3\xa7\xc3\xa3o ou exclus\xc3\xa3o da parcela.",
             response.data,
         )
         html = response.get_data(as_text=True)
@@ -126,6 +126,59 @@ class ExclusaoParcelaComBaixaTest(unittest.TestCase):
         inicio_botao_livre = html.index('aria-label="Excluir parcela 2"')
         fim_botao_livre = html.index("</button>", inicio_botao_livre)
         self.assertNotIn("disabled", html[inicio_botao_livre:fim_botao_livre])
+
+    def test_interface_bloqueia_campos_com_baixa_e_exibe_saldo(self):
+        response = app.test_client().get(
+            f"/financeiro/titulos/{self.titulo_id}/parcelas"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        html = response.get_data(as_text=True)
+        linha_com_baixa = html.split('<tr class="parcel-row">')[1].split("</tr>", 1)[0]
+        linha_sem_baixa = html.split('<tr class="parcel-row">')[2].split("</tr>", 1)[0]
+        self.assertGreaterEqual(linha_com_baixa.count("readonly"), 2)
+        self.assertNotIn("readonly", linha_sem_baixa)
+        self.assertIn("Saldo", html)
+        self.assertIn("R$ 50,00", linha_com_baixa)
+        self.assertIn("R$ 100,00", linha_sem_baixa)
+
+    def test_bloqueia_edicao_no_backend_mesmo_com_post_manipulado(self):
+        dados = self._dados_post("")
+        dados.pop("excluir_parcela")
+        dados["vencimento_parcela"][0] = "2026-08-20"
+        dados["valor_parcela"][0] = "80,00"
+
+        response = app.test_client().post(
+            f"/financeiro/titulos/{self.titulo_id}/parcelas",
+            data=dados,
+            follow_redirects=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"possui baixa", response.data)
+        session = SessionLocal()
+        parcela = session.get(TituloParcela, self.parcela_com_baixa_id)
+        self.assertEqual(parcela.vencimento, date(2026, 8, 10))
+        self.assertEqual(float(parcela.valor), 100.0)
+        session.close()
+
+    def test_preserva_edicao_da_parcela_sem_baixa(self):
+        dados = self._dados_post("")
+        dados.pop("excluir_parcela")
+        dados["vencimento_parcela"][1] = "2026-09-20"
+        dados["valor_parcela"][1] = "120,00"
+
+        response = app.test_client().post(
+            f"/financeiro/titulos/{self.titulo_id}/parcelas",
+            data=dados,
+        )
+
+        self.assertEqual(response.status_code, 302)
+        session = SessionLocal()
+        parcela = session.get(TituloParcela, self.parcela_sem_baixa_id)
+        self.assertEqual(parcela.vencimento, date(2026, 9, 20))
+        self.assertEqual(float(parcela.valor), 120.0)
+        session.close()
 
     def test_preserva_exclusao_de_parcela_sem_baixa(self):
         response = app.test_client().post(
