@@ -78,10 +78,14 @@
 
           <div class="col-md-4">
             <label class="form-label">Parcela</label>
-            <select name="id_parcela" class="form-select" required>
+            <select name="id_parcela" id="id_parcela" class="form-select" required>
               <option value="">Selecione...</option>
               {% for p in parcelas %}
-                <option value="{{ p.id }}" {% if (p.saldo or 0) <= 0 %}disabled{% endif %}>
+                <option
+                  value="{{ p.id }}"
+                  data-saldo="{{ '%.2f'|format(p.saldo or 0) }}"
+                  {% if (p.saldo or 0) <= 0 %}disabled{% endif %}
+                >
                   Parcela {{ p.numero }} - {{ p.vencimento }} - saldo R$ {{ "%.2f"|format(p.saldo or 0) }}
                 </option>
               {% endfor %}
@@ -93,7 +97,10 @@
             <input
               type="text"
               name="valor_baixa"
-              class="form-control"
+              id="valor_baixa"
+              class="form-control js-money"
+              inputmode="decimal"
+              autocomplete="off"
               placeholder="0,00"
               required
             >
@@ -119,4 +126,69 @@
       </form>
     </div>
   </div>
+  <script>
+  (function () {
+    const nf = new Intl.NumberFormat('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+
+    function parseBrazilianMoney(raw) {
+      let value = String(raw || '').trim().replace(/R\$/g, '').replace(/\s/g, '');
+      if (!value) return null;
+      if (value.includes(',')) {
+        value = value.replace(/\./g, '').replace(',', '.');
+      } else {
+        const parts = value.split('.');
+        if (parts.length > 2 || (parts.length === 2 && parts[1].length > 2)) {
+          value = value.replace(/\./g, '');
+        }
+      }
+      const number = Number(value);
+      return Number.isFinite(number) ? number : null;
+    }
+
+    function formatAsReais(raw) {
+      const value = parseBrazilianMoney(raw);
+      if (value === null) return '';
+      return nf.format(value);
+    }
+
+    function attachMoneyMask(input) {
+      input.addEventListener('input', function () {
+        input.value = input.value.replace(/[^\d.,]/g, '');
+      });
+
+      input.addEventListener('blur', function () {
+        input.value = formatAsReais(input.value);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const parcelaSelect = document.getElementById('id_parcela');
+      const valorInput = document.getElementById('valor_baixa');
+      if (!parcelaSelect || !valorInput) return;
+
+      attachMoneyMask(valorInput);
+
+      function sugerirSaldoParcela() {
+        const option = parcelaSelect.selectedOptions[0];
+        const saldo = option ? option.dataset.saldo : '';
+        valorInput.value = saldo ? formatAsReais(saldo) : '';
+      }
+
+      parcelaSelect.addEventListener('change', sugerirSaldoParcela);
+
+      const parcelasDisponiveis = Array.from(parcelaSelect.options).filter((option) => (
+        option.value && !option.disabled
+      ));
+      if (!parcelaSelect.value && parcelasDisponiveis.length === 1) {
+        parcelasDisponiveis[0].selected = true;
+      }
+      if (parcelaSelect.value) {
+        sugerirSaldoParcela();
+      }
+    });
+  })();
+  </script>
 {% endblock %}
