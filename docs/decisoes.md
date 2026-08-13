@@ -686,3 +686,15 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   e `titulo_parcela.id_parcela`.
 - Impacto: não há alteração de banco. Parcelas sem baixa continuam editáveis e
   podem ser excluídas pelo fluxo existente.
+
+## 2026-08-13 - PLA-2409 - Limite de 999 parcelas por título
+
+- Decisão: a criação e a cópia de títulos passam a aceitar de 1 até 999
+  parcelas, substituindo o limite anterior de 120.
+- Regra: o backend permanece como validação obrigatória e fornece o mesmo
+  limite ao template, mantendo sincronizados o atributo `max` do formulário e
+  a prévia das parcelas no navegador.
+- Motivo: atender títulos com parcelamentos longos sem permitir quantidade
+  ilimitada ou divergência entre frontend e backend.
+- Impacto: não há alteração de banco ou migration. A geração mensal, a divisão
+  por centavos e a revisão das parcelas preservam o fluxo existente.
