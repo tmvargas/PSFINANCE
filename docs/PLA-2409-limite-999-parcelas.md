@@ -48,12 +48,14 @@
 .venv/bin/python -m unittest discover -s tests -p 'test_*.py'
 ```
 
-Resultado após a correção solicitada na revisão: compilação sem erros e testes
-focais aprovados, incluindo casos explícitos de 120, 180, 999, 1000, cópia e
-edição. O único aviso foi a
+Resultado após a correção solicitada na revisão: compilação sem erros e `12`
+testes do repositório aprovados. Os `7` testes focais incluem casos explícitos
+de 120, 180, 999, 1000, cópia e edição. O único aviso foi a
 depreciação já existente de `datetime.utcnow()` no SQLAlchemy, sem falha.
 
-- Medição local da criação e consulta de 999 parcelas: `2,035 s`.
+- Medição local da criação e consulta de 999 parcelas: `1,880 s`.
+- Medição na VPS de staging da criação e consulta de 999 parcelas: `0,232 s`;
+  suíte focal completa na VPS: `2,30 s`.
 - Evidência visual na porta `5001`: campo preenchido com `180`, atributo
   `max="999"` confirmado pelo navegador e prévia exibindo `180 parcelas`.
 - Screenshot: `docs/evidencias/PLA-2409/campo-180-parcelas-staging-5001.png`.
@@ -76,6 +78,7 @@ depreciação já existente de `datetime.utcnow()` no SQLAlchemy, sem falha.
 - VPS: `/opt/plansmart/sistemas/psfinance/staging/repo`, branch `staging`,
   diretório sem alterações locais e HEAD igual ao `origin/staging`.
 - Serviços `psfinance-staging` e `psfinance-staging-gate`: ativos.
+- Runtime da VPS: Python `3.12`, com os 7 testes focais aprovados.
 
 ## Validação na porta 5001
 
