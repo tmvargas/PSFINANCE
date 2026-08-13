@@ -114,7 +114,9 @@
                 <svg class="icon" aria-hidden="true"><use href="#icon-trash"></use></svg>
               </button>
               {% if parcela.tem_baixa %}
-                <div class="form-text text-danger">Possui baixa</div>
+                <div class="form-text text-danger">
+                  Possui baixa. Exclua a baixa primeiro para liberar a exclusão da parcela.
+                </div>
               {% endif %}
             </td>
           </tr>

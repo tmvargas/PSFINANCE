@@ -11,8 +11,8 @@ exclusão lógica de uma parcela que possua baixa ativa.
   excluída.
 - A validação do backend é obrigatória e protege inclusive contra requisição
   POST manipulada.
-- Na tela, a lixeira da parcela com baixa fica desabilitada e a linha exibe
-  `Possui baixa`.
+- Na tela, a lixeira da parcela com baixa fica desabilitada e a linha orienta
+  `Possui baixa. Exclua a baixa primeiro para liberar a exclusão da parcela.`.
 - Parcela sem baixa mantém o fluxo existente de exclusão lógica.
 - Baixa excluída logicamente (`deleted = true`) não bloqueia a parcela.
 
@@ -36,6 +36,8 @@ exclusão lógica de uma parcela que possua baixa ativa.
 | Parcela com baixa ativa; lixeira na tela | Botão desabilitado e texto `Possui baixa` | Aprovado |
 | Parcela com baixa ativa; POST manipulado | Exclusão rejeitada e parcela preservada | Aprovado |
 | Parcela sem baixa ativa | Exclusão lógica permanece disponível | Aprovado |
+| Baixa não conciliada excluída antes da parcela | Baixa é excluída e a parcela passa a aceitar exclusão | Aprovado |
+| Baixa conciliada | Exclusão da baixa é rejeitada e a parcela permanece protegida | Aprovado |
 
 ## Validação local
 
@@ -45,7 +47,7 @@ exclusão lógica de uma parcela que possua baixa ativa.
 git diff --check
 ```
 
-Resultado: três testes aprovados, compilação aprovada e nenhuma inconsistência
+Resultado: cinco testes aprovados, compilação aprovada e nenhuma inconsistência
 de whitespace encontrada.
 
 ## Validação no staging real
