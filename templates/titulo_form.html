@@ -226,7 +226,7 @@
         id="quantidade_parcelas"
         class="form-control"
         min="1"
-        max="120"
+        max="{{ limite_parcelas_titulo }}"
         step="1"
         value="{{ titulo.quantidade_parcelas if titulo and titulo.quantidade_parcelas else 1 }}"
         {% if titulo and not modo_copia %}disabled{% endif %}
@@ -467,7 +467,7 @@
   function renderPreview() {
     const value = parseMoney(valorInput.value);
     const vencimento = vencimentoInput.value ? new Date(`${vencimentoInput.value}T00:00:00Z`) : null;
-    const quantidade = Math.max(1, Math.min(120, parseInt(quantidadeInput.value || "1", 10) || 1));
+    const quantidade = Math.max(1, Math.min({{ limite_parcelas_titulo }}, parseInt(quantidadeInput.value || "1", 10) || 1));
     total.textContent = `${quantidade} ${quantidade === 1 ? "parcela" : "parcelas"}`;
 
     if (!value || value <= 0 || !vencimento || Number.isNaN(vencimento.getTime())) {

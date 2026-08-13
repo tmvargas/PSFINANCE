@@ -37,6 +37,7 @@ from models import (
 )
 
 FILTRO_TITULOS_EMPRESA_SESSION_KEY = "titulos_filtro_id_empresa"
+LIMITE_PARCELAS_TITULO = 999
 
 
 def get_session():
@@ -686,8 +687,14 @@ def _upsert_titulo(id_titulo: int | None, id_titulo_copia: int | None = None):
             erros.append("Data de emissão inválida.")
         if not vencimento:
             erros.append("Data de vencimento inválida.")
-        if quantidade_parcelas is None or quantidade_parcelas < 1 or quantidade_parcelas > 120:
-            erros.append("Quantidade de parcelas deve estar entre 1 e 120.")
+        if (
+            quantidade_parcelas is None
+            or quantidade_parcelas < 1
+            or quantidade_parcelas > LIMITE_PARCELAS_TITULO
+        ):
+            erros.append(
+                f"Quantidade de parcelas deve estar entre 1 e {LIMITE_PARCELAS_TITULO}."
+            )
         if quantidade_parcelas is None:
             quantidade_parcelas = 1
         if not permitir_multi_parcela and quantidade_parcelas != 1:
@@ -842,6 +849,7 @@ def _upsert_titulo(id_titulo: int | None, id_titulo_copia: int | None = None):
         hoje=hoje_str,
         modo_copia=modo_copia,
         titulo_original=titulo_base.id_titulo if titulo_base else None,
+        limite_parcelas_titulo=LIMITE_PARCELAS_TITULO,
     )
 
 
