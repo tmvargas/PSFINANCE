@@ -1,0 +1,1257 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8">
+    <title>Baixar Título</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    >
+
+    <style>
+      :root {
+        --ps-bg: #f4f7f5;
+        --ps-surface: #ffffff;
+        --ps-surface-muted: #eef5f1;
+        --ps-border: #d6e1da;
+        --ps-text: #1b2520;
+        --ps-muted: #66756c;
+        --ps-green: #16834a;
+        --ps-green-dark: #0f5c36;
+        --ps-green-soft: #dff3e8;
+        --ps-sidebar: #11241a;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        background: var(--ps-bg);
+        color: var(--ps-text);
+        font-family: Inter, Arial, sans-serif;
+        margin: 0;
+      }
+
+      .dropdown-toggle::after {
+        display: none;
+      }
+
+      .app-shell {
+        display: grid;
+        grid-template-columns: 292px minmax(0, 1fr);
+        min-height: 100vh;
+        transition: grid-template-columns 180ms ease;
+      }
+
+      .app-shell.sidebar-compact {
+        grid-template-columns: 72px minmax(0, 1fr);
+      }
+
+      .sidebar {
+        background: var(--ps-sidebar);
+        color: #ffffff;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        min-width: 0;
+        padding: 18px 14px;
+      }
+
+      .brand {
+        align-items: center;
+        color: #ffffff;
+        display: flex;
+        gap: 10px;
+        min-height: 42px;
+        text-decoration: none;
+      }
+
+      .brand-mark {
+        align-items: center;
+        background: #ffffff;
+        border-radius: 7px;
+        color: var(--ps-green-dark);
+        display: inline-flex;
+        font-size: 0.78rem;
+        font-weight: 800;
+        height: 38px;
+        justify-content: center;
+        width: 42px;
+      }
+
+      .brand-name {
+        font-size: 1rem;
+        font-weight: 800;
+        letter-spacing: 0;
+        white-space: nowrap;
+      }
+
+      .sidebar-actions {
+        display: grid;
+        gap: 8px;
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .icon-button {
+        align-items: center;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 7px;
+        color: #ffffff;
+        cursor: pointer;
+        display: inline-flex;
+        font: inherit;
+        font-weight: 800;
+        height: 38px;
+        justify-content: center;
+      }
+
+      .menu-group {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 14px;
+      }
+
+      .group-header {
+        align-items: center;
+        display: flex;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+
+      .group-icon,
+      .nav-icon {
+        align-items: center;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        display: inline-flex;
+        flex: 0 0 auto;
+        height: 24px;
+        justify-content: center;
+        width: 24px;
+      }
+
+      .group-icon {
+        color: rgba(255, 255, 255, 0.78);
+      }
+
+      .icon {
+        display: block;
+        fill: none;
+        height: 16px;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 2;
+        width: 16px;
+      }
+
+      .group-title {
+        color: rgba(255, 255, 255, 0.58);
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        margin: 0;
+      }
+
+      .menu-list {
+        display: grid;
+        gap: 6px;
+        margin: 0;
+        padding: 0;
+      }
+
+      .menu-node {
+        position: relative;
+      }
+
+      .menu-node.compact-only {
+        display: none;
+      }
+
+      .menu-item {
+        align-items: center;
+        background: transparent;
+        border: 0;
+        border-radius: 7px;
+        color: rgba(255, 255, 255, 0.82);
+        display: flex;
+        gap: 10px;
+        min-height: 42px;
+        padding: 8px 9px;
+        text-align: left;
+        text-decoration: none;
+        width: 100%;
+      }
+
+      button.menu-item {
+        cursor: pointer;
+        font: inherit;
+      }
+
+      .menu-node.submenu-open > .menu-item,
+      .menu-item.active,
+      .menu-item:hover,
+      .menu-item:focus-visible {
+        background: var(--ps-green);
+        color: #ffffff;
+        outline: 0;
+      }
+
+      .menu-item.active .nav-icon,
+      .menu-item:hover .nav-icon,
+      .menu-node.submenu-open > .menu-item .nav-icon {
+        background: rgba(255, 255, 255, 0.18);
+      }
+
+      .submenu-toggle {
+        color: #ffffff;
+        padding: 8px 9px;
+      }
+
+      .nav-label {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .nav-chevron {
+        color: rgba(255, 255, 255, 0.46);
+      }
+
+      .submenu {
+        display: none;
+        gap: 4px;
+        margin: 4px 0 2px 34px;
+        padding: 0 0 0 10px;
+        position: static;
+      }
+
+      .submenu-title {
+        display: none;
+      }
+
+      .menu-node.submenu-open > .submenu {
+        display: grid;
+      }
+
+      .submenu-item {
+        align-items: center;
+        background: transparent;
+        border-left: 2px solid rgba(255, 255, 255, 0.16);
+        border-bottom: 0;
+        border-right: 0;
+        border-top: 0;
+        border-radius: 0 7px 7px 0;
+        color: rgba(255, 255, 255, 0.78);
+        display: flex;
+        gap: 10px;
+        font: inherit;
+        min-height: 34px;
+        padding: 6px 9px;
+        text-align: left;
+        text-decoration: none;
+        width: 100%;
+      }
+
+      .submenu-item.active,
+      .submenu-item:hover,
+      .submenu-item:focus-visible {
+        background: var(--ps-green);
+        color: #ffffff;
+        outline: 0;
+      }
+
+      .app-shell.sidebar-compact .sidebar {
+        align-items: center;
+        padding: 18px 8px;
+      }
+
+      .app-shell.sidebar-compact .brand {
+        justify-content: center;
+      }
+
+      .app-shell.sidebar-compact .brand-mark {
+        height: 38px;
+        width: 38px;
+      }
+
+      .app-shell.sidebar-compact .brand-name,
+      .app-shell.sidebar-compact .group-title,
+      .app-shell.sidebar-compact .nav-label,
+      .app-shell.sidebar-compact .nav-chevron,
+      .app-shell.sidebar-compact .group-header,
+      .app-shell.sidebar-compact #toggleGroups {
+        display: none;
+      }
+
+      .app-shell.sidebar-compact .sidebar-actions {
+        grid-template-columns: 1fr;
+        width: 38px;
+      }
+
+      .app-shell.sidebar-compact .app-nav {
+        display: grid;
+        gap: 12px;
+        width: 100%;
+      }
+
+      .app-shell.sidebar-compact .menu-group {
+        padding-top: 12px;
+        width: 100%;
+      }
+
+      .app-shell.sidebar-compact .menu-list {
+        justify-items: center;
+      }
+
+      .app-shell.sidebar-compact .menu-node,
+      .app-shell.sidebar-compact .menu-item {
+        width: 38px;
+      }
+
+      .app-shell.sidebar-compact .menu-node.compact-only {
+        display: block;
+        margin-inline: auto;
+      }
+
+      .app-shell.sidebar-compact .menu-list.open-only {
+        display: none;
+      }
+
+      .app-shell.sidebar-compact .menu-item {
+        gap: 0;
+        justify-content: center;
+        min-height: 38px;
+        padding: 7px;
+      }
+
+      .app-shell.sidebar-compact .submenu {
+        background: #173c28;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 8px;
+        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.24);
+        left: calc(100% + 10px);
+        margin: 0;
+        min-width: 220px;
+        padding: 8px;
+        position: absolute;
+        top: 0;
+        z-index: 10;
+      }
+
+      .app-shell.sidebar-compact .submenu-title {
+        color: #ffffff;
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0;
+        padding: 3px 8px 6px;
+        text-transform: uppercase;
+      }
+
+      .sidebar.groups-compact .menu-item:not(.active) {
+        min-height: 36px;
+        padding-block: 6px;
+      }
+
+      .content {
+        min-width: 0;
+      }
+
+      .topbar {
+        align-items: center;
+        background: var(--ps-surface);
+        border-bottom: 1px solid var(--ps-border);
+        display: flex;
+        gap: 16px;
+        justify-content: space-between;
+        min-height: 66px;
+        padding: 0 26px;
+      }
+
+      .search-shell {
+        background: var(--ps-surface-muted);
+        border: 1px solid var(--ps-border);
+        border-radius: 7px;
+        color: var(--ps-muted);
+        min-height: 38px;
+        padding: 9px 12px;
+        width: min(420px, 42vw);
+      }
+
+      .user-pill {
+        align-items: center;
+        background: var(--ps-green-soft);
+        border: 1px solid #bfe7cf;
+        border-radius: 999px;
+        color: var(--ps-green-dark);
+        display: inline-flex;
+        font-size: 0.86rem;
+        font-weight: 700;
+        min-height: 36px;
+        padding: 0 14px;
+        white-space: nowrap;
+      }
+
+      .content-main {
+        padding: 24px 26px 34px;
+      }
+
+      .content-main > .alert:first-child,
+      .flash-stack {
+        margin-bottom: 16px;
+      }
+
+      .card,
+      .modal-content {
+        border-color: var(--ps-border);
+        border-radius: 8px;
+      }
+
+      .btn {
+        border-radius: 7px;
+        font-weight: 700;
+        letter-spacing: 0;
+      }
+
+      .btn-primary,
+      .btn-success {
+        background-color: var(--ps-green);
+        border-color: var(--ps-green);
+      }
+
+      .btn-primary:hover,
+      .btn-success:hover {
+        background-color: var(--ps-green-dark);
+        border-color: var(--ps-green-dark);
+      }
+
+      .btn-outline-primary {
+        border-color: var(--ps-green);
+        color: var(--ps-green-dark);
+      }
+
+      .btn-outline-primary:hover {
+        background-color: var(--ps-green);
+        border-color: var(--ps-green);
+      }
+
+      .table {
+        --bs-table-bg: var(--ps-surface);
+        --bs-table-border-color: var(--ps-border);
+      }
+
+      .consultation-page {
+        display: grid;
+        gap: 18px;
+      }
+
+      .consultation-header {
+        align-items: start;
+        display: flex;
+        gap: 14px;
+        justify-content: space-between;
+      }
+
+      .consultation-kicker {
+        color: var(--ps-green-dark);
+        font-size: 0.75rem;
+        font-weight: 800;
+        margin-bottom: 4px;
+        text-transform: uppercase;
+      }
+
+      .consultation-subtitle {
+        color: var(--ps-muted);
+        margin: 4px 0 0;
+      }
+
+      .consultation-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+
+      .consultation-table-shell {
+        background: var(--ps-surface);
+        border: 1px solid var(--ps-border);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .consultation-table {
+        margin-bottom: 0;
+      }
+
+      .consultation-table thead th {
+        background: #173c28;
+        border-bottom: 0;
+        color: #ffffff;
+        font-size: 0.74rem;
+        letter-spacing: 0;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+
+      .consultation-table td {
+        vertical-align: middle;
+      }
+
+      .consultation-empty {
+        background: var(--ps-surface);
+        border: 1px solid var(--ps-border);
+        border-radius: 8px;
+        color: var(--ps-muted);
+        padding: 28px;
+        text-align: center;
+      }
+
+      .consultation-text-main {
+        font-weight: 700;
+        max-width: 260px;
+      }
+
+      .consultation-text-muted {
+        color: var(--ps-muted);
+        font-size: 0.82rem;
+        max-width: 260px;
+      }
+
+      .consultation-truncate {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .consultation-row-actions {
+        display: inline-flex;
+        gap: 6px;
+        justify-content: center;
+        white-space: nowrap;
+      }
+
+      .consultation-action-form {
+        display: inline-flex;
+        margin: 0;
+      }
+
+      .consultation-action {
+        align-items: center;
+        background: #ffffff;
+        border: 1px solid var(--ps-border);
+        border-radius: 7px;
+        color: var(--ps-green-dark);
+        display: inline-flex;
+        height: 32px;
+        justify-content: center;
+        padding: 0;
+        text-decoration: none;
+        width: 32px;
+      }
+
+      .consultation-action:hover,
+      .consultation-action:focus-visible {
+        background: var(--ps-green-soft);
+        border-color: #9fd8b8;
+        color: var(--ps-green-dark);
+        outline: 0;
+      }
+
+      .consultation-action-danger {
+        color: #b42318;
+      }
+
+      .consultation-action-danger:hover,
+      .consultation-action-danger:focus-visible {
+        background: #ffe8e5;
+        border-color: #ffc8c1;
+        color: #8f1b12;
+      }
+
+      .consultation-action-success {
+        color: var(--ps-green-dark);
+      }
+
+      .consultation-action .icon,
+      .btn .icon {
+        height: 15px;
+        width: 15px;
+      }
+
+      .btn-icon-label {
+        align-items: center;
+        display: inline-flex;
+        gap: 6px;
+      }
+
+      @media (max-width: 980px) {
+        .consultation-header {
+          display: grid;
+        }
+
+        .consultation-actions {
+          justify-content: stretch;
+        }
+
+        .consultation-actions .btn {
+          justify-content: center;
+        }
+
+        .app-shell {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+          display: block;
+          overflow-x: auto;
+          padding: 12px;
+          white-space: nowrap;
+        }
+
+        .brand,
+        .sidebar-actions,
+        .menu-group,
+        .group-header,
+        .menu-list,
+        .menu-node,
+        .menu-item {
+          display: inline-flex;
+          vertical-align: middle;
+        }
+
+        .group-title,
+        .nav-chevron,
+        .group-icon,
+        .app-shell.sidebar-compact .group-title,
+        .app-shell.sidebar-compact .nav-label,
+        .app-shell.sidebar-compact .nav-chevron {
+          display: none;
+        }
+
+        .sidebar-actions {
+          margin: 0 10px;
+        }
+
+        .menu-group {
+          border-top: 0;
+          padding-top: 0;
+        }
+
+        .submenu {
+          background: #173c28;
+          border: 1px solid rgba(255, 255, 255, 0.16);
+          border-radius: 8px;
+          left: 0;
+          margin: 0;
+          min-width: 210px;
+          padding: 8px;
+          position: absolute;
+          top: calc(100% + 8px);
+          z-index: 5;
+        }
+
+        .submenu-title {
+          color: #ffffff;
+          display: block;
+          font-size: 0.75rem;
+          font-weight: 700;
+          letter-spacing: 0;
+          padding: 3px 8px 6px;
+          text-transform: uppercase;
+        }
+
+        .app-shell.sidebar-compact {
+          grid-template-columns: 72px minmax(0, 1fr);
+        }
+
+        .app-shell.sidebar-compact .sidebar {
+          align-items: center;
+          display: flex;
+          flex-direction: column;
+          min-height: 100vh;
+          overflow: visible;
+          padding: 12px 8px;
+          white-space: normal;
+        }
+
+        .app-shell.sidebar-compact .app-nav {
+          display: grid;
+          gap: 12px;
+          width: 100%;
+        }
+
+        .app-shell.sidebar-compact .menu-group {
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+          display: block;
+          padding-top: 12px;
+          width: 100%;
+        }
+
+        .app-shell.sidebar-compact .menu-list {
+          display: grid;
+        }
+
+        .app-shell.sidebar-compact .menu-node {
+          display: block;
+        }
+
+        .app-shell.sidebar-compact .menu-item {
+          display: flex;
+        }
+
+        .app-shell.sidebar-compact .submenu {
+          left: calc(100% + 10px);
+          top: 0;
+        }
+
+        .topbar {
+          align-items: stretch;
+          flex-direction: column;
+          padding: 14px;
+        }
+
+        .search-shell {
+          width: 100%;
+        }
+
+        .content-main {
+          padding: 18px 14px 28px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    
+    
+    
+    
+    
+    <svg aria-hidden="true" style="display: none">
+      <symbol id="icon-home" viewBox="0 0 24 24">
+        <path d="m3 11 9-8 9 8"></path>
+        <path d="M5 10v10h14V10"></path>
+        <path d="M10 20v-6h4v6"></path>
+      </symbol>
+      <symbol id="icon-wallet" viewBox="0 0 24 24">
+        <path d="M19 7V6a2 2 0 0 0-2-2H5a2 2 0 0 0 0 4h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6"></path>
+        <path d="M16 13h.01"></path>
+      </symbol>
+      <symbol id="icon-file-text" viewBox="0 0 24 24">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <path d="M14 2v6h6"></path>
+        <path d="M8 13h8"></path>
+        <path d="M8 17h5"></path>
+      </symbol>
+      <symbol id="icon-check-circle" viewBox="0 0 24 24">
+        <path d="M22 11.1V12a10 10 0 1 1-5.9-9.1"></path>
+        <path d="m9 11 3 3L22 4"></path>
+      </symbol>
+      <symbol id="icon-plus" viewBox="0 0 24 24">
+        <path d="M12 5v14"></path>
+        <path d="M5 12h14"></path>
+      </symbol>
+      <symbol id="icon-arrow-left" viewBox="0 0 24 24">
+        <path d="m12 19-7-7 7-7"></path>
+        <path d="M19 12H5"></path>
+      </symbol>
+      <symbol id="icon-landmark" viewBox="0 0 24 24">
+        <path d="m3 10 9-6 9 6"></path>
+        <path d="M4 10h16"></path>
+        <path d="M6 10v8"></path>
+        <path d="M10 10v8"></path>
+        <path d="M14 10v8"></path>
+        <path d="M18 10v8"></path>
+        <path d="M4 18h16"></path>
+      </symbol>
+      <symbol id="icon-repeat" viewBox="0 0 24 24">
+        <path d="m17 2 4 4-4 4"></path>
+        <path d="M3 11V9a3 3 0 0 1 3-3h15"></path>
+        <path d="m7 22-4-4 4-4"></path>
+        <path d="M21 13v2a3 3 0 0 1-3 3H3"></path>
+      </symbol>
+      <symbol id="icon-copy" viewBox="0 0 24 24">
+        <rect x="8" y="8" width="12" height="12" rx="2"></rect>
+        <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
+      </symbol>
+      <symbol id="icon-pencil" viewBox="0 0 24 24">
+        <path d="M17 3a2.8 2.8 0 0 1 4 4L8 20l-5 1 1-5Z"></path>
+        <path d="m15 5 4 4"></path>
+      </symbol>
+      <symbol id="icon-trash" viewBox="0 0 24 24">
+        <path d="M3 6h18"></path>
+        <path d="M8 6V4h8v2"></path>
+        <path d="M19 6l-1 14H6L5 6"></path>
+        <path d="M10 11v5"></path>
+        <path d="M14 11v5"></path>
+      </symbol>
+      <symbol id="icon-receipt" viewBox="0 0 24 24">
+        <path d="M4 2v20l3-2 3 2 3-2 3 2 3-2 1 .67V2z"></path>
+        <path d="M8 7h8"></path>
+        <path d="M8 11h8"></path>
+        <path d="M8 15h5"></path>
+      </symbol>
+      <symbol id="icon-chart" viewBox="0 0 24 24">
+        <path d="M3 3v18h18"></path>
+        <path d="m7 15 4-4 3 3 5-7"></path>
+      </symbol>
+      <symbol id="icon-user" viewBox="0 0 24 24">
+        <path d="M20 21a8 8 0 0 0-16 0"></path>
+        <circle cx="12" cy="7" r="4"></circle>
+      </symbol>
+      <symbol id="icon-list-tree" viewBox="0 0 24 24">
+        <path d="M6 6h.01"></path>
+        <path d="M10 6h8"></path>
+        <path d="M6 12h.01"></path>
+        <path d="M10 12h8"></path>
+        <path d="M6 18h.01"></path>
+        <path d="M10 18h8"></path>
+      </symbol>
+    </svg>
+
+    <div class="app-shell" id="appShell">
+      <aside class="sidebar" id="sidebar" aria-label="Menu lateral">
+        <a class="brand" href="/financeiro/">
+          <span class="brand-mark">PS</span>
+          <span class="brand-name">PSFINANCE</span>
+        </a>
+
+        <div class="sidebar-actions">
+          <button class="icon-button" id="toggleSidebar" title="Recolher menu lateral" aria-label="Recolher menu lateral" type="button">&lsaquo;</button>
+          <button class="icon-button" id="toggleGroups" title="Compactar grupos do menu" aria-label="Compactar grupos do menu" type="button">-</button>
+        </div>
+
+        <nav class="app-nav">
+          <div class="menu-group">
+            <div class="group-header">
+              <span class="group-icon"><svg class="icon"><use href="#icon-home"></use></svg></span>
+              <p class="group-title">HOME</p>
+            </div>
+            <div class="menu-list">
+              <a class="menu-item " href="/financeiro/" >
+                <span class="nav-icon"><svg class="icon"><use href="#icon-home"></use></svg></span>
+                <span class="nav-label">Home</span>
+                <span class="nav-chevron">›</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="menu-group">
+            <div class="group-header">
+              <span class="group-icon"><svg class="icon"><use href="#icon-wallet"></use></svg></span>
+              <p class="group-title">FINANCEIRO</p>
+            </div>
+            <div class="menu-list">
+              <div class="menu-node" data-menu-node="contas-pagar">
+                <button class="menu-item submenu-toggle active" type="button" aria-label="Expandir Contas a Pagar" aria-expanded="false">
+                  <span class="nav-icon"><svg class="icon"><use href="#icon-wallet"></use></svg></span>
+                  <span class="nav-label">Contas a Pagar</span>
+                  <span class="nav-chevron">›</span>
+                </button>
+                <div class="submenu" aria-label="Submenu Contas a Pagar">
+                  <a class="submenu-item " href="/financeiro/titulos">
+                    <span class="nav-icon"><svg class="icon"><use href="#icon-file-text"></use></svg></span><span>Título</span>
+                  </a>
+                  <a class="submenu-item active" href="/financeiro/titulos">
+                    <span class="nav-icon"><svg class="icon"><use href="#icon-check-circle"></use></svg></span><span>Baixa</span>
+                  </a>
+                </div>
+              </div>
+
+              <div class="menu-node" data-menu-node="caixas-bancos">
+                <button class="menu-item submenu-toggle " type="button" aria-label="Expandir Caixas e Bancos" aria-expanded="false">
+                  <span class="nav-icon"><svg class="icon"><use href="#icon-landmark"></use></svg></span>
+                  <span class="nav-label">Caixas e Bancos</span>
+                  <span class="nav-chevron">›</span>
+                </button>
+                <div class="submenu" aria-label="Submenu Caixas e Bancos">
+                  <a class="submenu-item " href="/financeiro/movimentacoes">
+                    <span class="nav-icon"><svg class="icon"><use href="#icon-repeat"></use></svg></span><span>Movimentações</span>
+                  </a>
+                  <a class="submenu-item " href="/financeiro/extrato">
+                    <span class="nav-icon"><svg class="icon"><use href="#icon-receipt"></use></svg></span><span>Extrato</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="menu-group">
+            <div class="group-header">
+              <span class="group-icon"><svg class="icon"><use href="#icon-chart"></use></svg></span>
+              <p class="group-title">GERENCIAL</p>
+            </div>
+            <div class="menu-list">
+              <div class="menu-node" data-menu-node="gerencial">
+                <button class="menu-item submenu-toggle " type="button" aria-label="Expandir Gerencial Financeiro" aria-expanded="false">
+                  <span class="nav-icon"><svg class="icon"><use href="#icon-chart"></use></svg></span>
+                  <span class="nav-label">Gerencial Financeiro</span>
+                  <span class="nav-chevron">›</span>
+                </button>
+                <div class="submenu" aria-label="Submenu Gerencial">
+                  <a class="submenu-item " href="/financeiro/analise">
+                    <span class="nav-icon"><svg class="icon"><use href="#icon-chart"></use></svg></span><span>Gerencial Financeiro</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="menu-group">
+            <div class="group-header">
+              <span class="group-icon"><svg class="icon"><use href="#icon-user"></use></svg></span>
+              <p class="group-title">APOIO</p>
+            </div>
+            <div class="menu-node compact-only" data-menu-node="cadastro-geral-compacto">
+              <button class="menu-item submenu-toggle " type="button" aria-label="Expandir Cadastro Geral" aria-expanded="false">
+                <span class="nav-icon"><svg class="icon"><use href="#icon-landmark"></use></svg></span>
+                <span class="nav-label">Cadastro Geral</span>
+                <span class="nav-chevron">›</span>
+              </button>
+              <div class="submenu" aria-label="Submenu Cadastro Geral">
+                <a class="submenu-item " href="/financeiro/credores"><span class="nav-icon"><svg class="icon"><use href="#icon-user"></use></svg></span><span>Credor</span></a>
+                <a class="submenu-item " href="/financeiro/plano"><span class="nav-icon"><svg class="icon"><use href="#icon-list-tree"></use></svg></span><span>Plano Financeiro</span></a>
+                <a class="submenu-item " href="/financeiro/empresas"><span class="nav-icon"><svg class="icon"><use href="#icon-landmark"></use></svg></span><span>Empresa</span></a>
+                <a class="submenu-item " href="/financeiro/centros-custo"><span class="nav-icon"><svg class="icon"><use href="#icon-list-tree"></use></svg></span><span>Centro de Custo</span></a>
+                <a class="submenu-item " href="/financeiro/contas"><span class="nav-icon"><svg class="icon"><use href="#icon-landmark"></use></svg></span><span>Conta</span></a>
+              </div>
+            </div>
+            <div class="menu-list open-only" aria-label="APOIO">
+              <div class="menu-node" data-menu-node="cadastro-geral">
+                <button class="menu-item submenu-toggle " type="button" aria-label="Expandir Cadastro Geral" aria-expanded="false">
+                  <span class="nav-icon"><svg class="icon"><use href="#icon-landmark"></use></svg></span>
+                  <span class="nav-label">Cadastro Geral</span>
+                  <span class="nav-chevron">›</span>
+                </button>
+                <div class="submenu" aria-label="Submenu Cadastro Geral">
+                  <a class="submenu-item " href="/financeiro/credores"><span class="nav-icon"><svg class="icon"><use href="#icon-user"></use></svg></span><span>Credor</span></a>
+                  <a class="submenu-item " href="/financeiro/plano"><span class="nav-icon"><svg class="icon"><use href="#icon-list-tree"></use></svg></span><span>Plano Financeiro</span></a>
+                  <a class="submenu-item " href="/financeiro/empresas"><span class="nav-icon"><svg class="icon"><use href="#icon-landmark"></use></svg></span><span>Empresa</span></a>
+                  <a class="submenu-item " href="/financeiro/centros-custo"><span class="nav-icon"><svg class="icon"><use href="#icon-list-tree"></use></svg></span><span>Centro de Custo</span></a>
+                  <a class="submenu-item " href="/financeiro/contas"><span class="nav-icon"><svg class="icon"><use href="#icon-landmark"></use></svg></span><span>Conta</span></a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </nav>
+      </aside>
+
+      <div class="content">
+        <header class="topbar">
+          <div class="search-shell">Buscar título, credor, contas ou movimentações</div>
+          <div class="user-pill">Staging PSFINANCE</div>
+        </header>
+
+        <main class="content-main">
+          
+            
+          
+
+          
+  <h1 class="h4 mb-3">Baixar Título #58 – Terreno 2/100</h1>
+
+  <div class="mb-3">
+    <dl class="row">
+      <dt class="col-sm-2">Credor</dt>
+      <dd class="col-sm-10">VP Imóveis</dd>
+
+      <dt class="col-sm-2">Empresa</dt>
+      <dd class="col-sm-10">1 - THIAGO</dd>
+
+      <dt class="col-sm-2">Plano</dt>
+      <dd class="col-sm-10">2.01.04 - Financiamento Habitacional</dd>
+
+      <dt class="col-sm-2">Valor</dt>
+      <dd class="col-sm-10">R$ 1200.00</dd>
+
+      <dt class="col-sm-2">Saldo em aberto</dt>
+      <dd class="col-sm-10 fw-bold">R$ 1200.00</dd>
+    </dl>
+  </div>
+
+  
+    <div class="table-responsive mb-3">
+      <table class="table table-sm table-striped align-middle">
+        <thead>
+          <tr>
+            <th>Parcela</th>
+            <th>Vencimento</th>
+            <th class="text-end">Valor</th>
+            <th class="text-end">Baixado</th>
+            <th class="text-end">Saldo</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+            <tr>
+              <td>1</td>
+              <td>10/08/2026</td>
+              <td class="text-end">R$ 1200.00</td>
+              <td class="text-end">R$ 0.00</td>
+              <td class="text-end fw-semibold">R$ 1200.00</td>
+            </tr>
+          
+        </tbody>
+      </table>
+    </div>
+  
+
+  <div class="card">
+    <div class="card-body">
+      <form method="post">
+        <div class="row g-2">
+          <div class="col-md-3">
+            <label class="form-label">Data</label>
+            <input
+              type="date"
+              name="data"
+              class="form-control"
+              value="2026-08-13"
+              required
+            >
+          </div>
+
+          <div class="col-md-5">
+            <label class="form-label">Conta</label>
+            <select name="id_conta" class="form-select" required>
+              <option value="">Selecione...</option>
+              
+                <option value="5">BB THIAGO</option>
+              
+                <option value="1">C6</option>
+              
+                <option value="2">CAIXA THIAGO</option>
+              
+                <option value="3">CRÉDITO C6</option>
+              
+                <option value="4">CRÉDITO RICO</option>
+              
+                <option value="9">PS-APLICAÇÃO</option>
+              
+                <option value="8">PS-C6-CORRENTE</option>
+              
+                <option value="7">PS-INTER-CORRENTE</option>
+              
+                <option value="6">PS-INTER-CRÉDITO</option>
+              
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Parcela</label>
+            <select name="id_parcela" id="id_parcela" class="form-select" required>
+              <option value="">Selecione...</option>
+              
+                <option
+                  value="61"
+                  data-saldo="1200.00"
+                  
+                >
+                  Parcela 1 - 10/08/2026 - saldo R$ 1200.00
+                </option>
+              
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Valor da baixa</label>
+            <input
+              type="text"
+              name="valor_baixa"
+              id="valor_baixa"
+              class="form-control js-money"
+              inputmode="decimal"
+              autocomplete="off"
+              placeholder="0,00"
+              required
+            >
+            <div class="form-text">
+              Máximo: saldo da parcela selecionada.
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-3 d-flex gap-2">
+          <button type="submit" class="btn btn-success" >
+            Salvar baixa
+          </button>
+
+          <a href="/financeiro/titulos" class="btn btn-secondary">
+            Cancelar
+          </a>
+
+          <a href="/financeiro/titulos/58/baixas" class="btn btn-outline-info">
+            Ver baixas
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script>
+  (function () {
+    const nf = new Intl.NumberFormat('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+
+    function parseBrazilianMoney(raw) {
+      let value = String(raw || '').trim().replace(/R\$/g, '').replace(/\s/g, '');
+      if (!value) return null;
+      if (value.includes(',')) {
+        value = value.replace(/\./g, '').replace(',', '.');
+      } else {
+        const parts = value.split('.');
+        if (parts.length > 2 || (parts.length === 2 && parts[1].length > 2)) {
+          value = value.replace(/\./g, '');
+        }
+      }
+      const number = Number(value);
+      return Number.isFinite(number) ? number : null;
+    }
+
+    function formatAsReais(raw) {
+      const value = parseBrazilianMoney(raw);
+      if (value === null) return '';
+      return nf.format(value);
+    }
+
+    function attachMoneyMask(input) {
+      input.addEventListener('input', function () {
+        input.value = input.value.replace(/[^\d.,]/g, '');
+      });
+
+      input.addEventListener('blur', function () {
+        input.value = formatAsReais(input.value);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const parcelaSelect = document.getElementById('id_parcela');
+      const valorInput = document.getElementById('valor_baixa');
+      if (!parcelaSelect || !valorInput) return;
+
+      attachMoneyMask(valorInput);
+
+      function sugerirSaldoParcela() {
+        const option = parcelaSelect.selectedOptions[0];
+        const saldo = option ? option.dataset.saldo : '';
+        valorInput.value = saldo ? formatAsReais(saldo) : '';
+      }
+
+      parcelaSelect.addEventListener('change', sugerirSaldoParcela);
+
+      const parcelasDisponiveis = Array.from(parcelaSelect.options).filter((option) => (
+        option.value && !option.disabled
+      ));
+      if (!parcelaSelect.value && parcelasDisponiveis.length === 1) {
+        parcelasDisponiveis[0].selected = true;
+      }
+      if (parcelaSelect.value) {
+        sugerirSaldoParcela();
+      }
+    });
+  })();
+  </script>
+
+        </main>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      const appShell = document.querySelector("#appShell");
+      const sidebar = document.querySelector("#sidebar");
+      const toggleSidebar = document.querySelector("#toggleSidebar");
+      const toggleGroups = document.querySelector("#toggleGroups");
+      const params = new URLSearchParams(window.location.search);
+      const savedSidebarCompact = localStorage.getItem("psfinanceSidebarCompact");
+
+      function closeSubmenus(exceptNodes = []) {
+        document.querySelectorAll(".menu-node").forEach((node) => {
+          if (exceptNodes.includes(node)) {
+            return;
+          }
+          node.classList.remove("submenu-open");
+          const button = node.querySelector(".submenu-toggle");
+          if (button) {
+            button.setAttribute("aria-expanded", "false");
+          }
+        });
+      }
+
+      function syncSidebarControls() {
+        const isCompact = appShell.classList.contains("sidebar-compact");
+        toggleSidebar.innerHTML = isCompact ? "&rsaquo;" : "&lsaquo;";
+        toggleSidebar.setAttribute("title", isCompact ? "Abrir menu lateral" : "Recolher menu lateral");
+        toggleSidebar.setAttribute("aria-label", isCompact ? "Abrir menu lateral" : "Recolher menu lateral");
+      }
+
+      function openSubmenu(menuId) {
+        const node = document.querySelector(`[data-menu-node="${menuId}"]`);
+        if (!node) {
+          return;
+        }
+        let parentNode = node.parentElement.closest(".menu-node");
+        while (parentNode) {
+          parentNode.classList.add("submenu-open");
+          const parentButton = parentNode.querySelector(".submenu-toggle");
+          if (parentButton) {
+            parentButton.setAttribute("aria-expanded", "true");
+          }
+          parentNode = parentNode.parentElement.closest(".menu-node");
+        }
+        node.classList.add("submenu-open");
+        const button = node.querySelector(".submenu-toggle");
+        if (button) {
+          button.setAttribute("aria-expanded", "true");
+        }
+      }
+
+      if (params.get("compact") === "1" || savedSidebarCompact === "1" || savedSidebarCompact === null) {
+        appShell.classList.add("sidebar-compact");
+        closeSubmenus();
+      }
+
+      if (params.has("open")) {
+        closeSubmenus();
+        openSubmenu(params.get("open"));
+      }
+
+      syncSidebarControls();
+
+      toggleSidebar.addEventListener("click", () => {
+        const isCompact = appShell.classList.toggle("sidebar-compact");
+        localStorage.setItem("psfinanceSidebarCompact", isCompact ? "1" : "0");
+        closeSubmenus();
+        syncSidebarControls();
+      });
+
+      toggleGroups.addEventListener("click", () => {
+        sidebar.classList.toggle("groups-compact");
+      });
+
+      document.querySelectorAll(".submenu-toggle").forEach((button) => {
+        button.addEventListener("click", () => {
+          const node = button.closest(".menu-node");
+          const wasOpen = node.classList.contains("submenu-open");
+          let parentNode = node.parentElement.closest(".menu-node");
+          const parentNodes = [];
+          while (parentNode) {
+            parentNodes.push(parentNode);
+            parentNode = parentNode.parentElement.closest(".menu-node");
+          }
+          closeSubmenus(parentNodes);
+          if (!wasOpen) {
+            node.classList.add("submenu-open");
+            button.setAttribute("aria-expanded", "true");
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
