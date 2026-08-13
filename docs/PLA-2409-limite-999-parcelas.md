@@ -51,6 +51,36 @@ depreciação já existente de `datetime.utcnow()` no SQLAlchemy, sem falha.
 
 - Risco baixo: gerar 999 registros exige mais processamento que o limite
   anterior, mas o teste focal concluiu a criação e validou a soma das parcelas.
-- Pendente antes da entrega: push da branch, PR com base `staging`, integração,
-  deploy de `staging` e validação do gate corporativo na porta `5001`.
 - Não requer banco, migration, nova variável de ambiente ou produção.
+
+## GitHub e staging
+
+- Branch: `fix/PLA-2409-limite-999-parcelas`.
+- Commit da tarefa: `9b9ebc7b6b79cc7a04d2a5978a13bc19fe4730aa`.
+- PR: `https://github.com/tmvargas/PSFINANCE/pull/70`, base `staging`.
+- Commit de integração inicial em `staging`:
+  `c52355f8d10131c617a61022afee1212123f3d0e`.
+- VPS: `/opt/plansmart/sistemas/psfinance/staging/repo`, branch `staging`,
+  diretório sem alterações locais e HEAD igual ao `origin/staging`.
+- Serviços `psfinance-staging` e `psfinance-staging-gate`: ativos.
+
+## Validação na porta 5001
+
+| Verificação | Resultado |
+| --- | --- |
+| `GET /health` | HTTP 200, `status=healthy`, branch `staging`, commit `c52355f` |
+| `GET /gate` | HTTP 200, aplicação interna em `127.0.0.1:5104` aprovada |
+| `GET /financeiro/titulos/novo` | HTTP 200, HTML com `max="999"` e `Math.min(999, ...)` |
+| `GET /financeiro/titulos` | HTTP 200 |
+| Logs após deploy | Sem entradas de nível warning ou superior |
+
+Na primeira chamada imediatamente após o restart, `/health` e `/gate`
+retornaram HTTP 502 enquanto os workers Gunicorn inicializavam. A inspeção
+confirmou os processos vinculados às portas internas e a repetição após a
+inicialização retornou HTTP 200 de forma consistente, sem erro nos logs.
+
+## Recomendação
+
+- Entrega apta para revisão do CEO em staging.
+- Produção não faz parte desta tarefa. Qualquer promoção exige Pacote de
+  Produção e autorização expressa de Thiago.
