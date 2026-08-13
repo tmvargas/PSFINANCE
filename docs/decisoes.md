@@ -675,3 +675,14 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   restringe titulos parcelados.
 - Limite: alteracao restrita a controller e documentacao. Nao altera template,
   banco, migration, `main`, producao ou dados produtivos.
+
+## 2026-08-13 - PLA-2407 - Bloqueio de exclusão de parcela com baixa
+
+- Decisão: uma parcela com ao menos uma baixa ativa vinculada não pode ser
+  excluída, nem pela interface nem por requisição manipulada diretamente.
+- Regra: a validação obrigatória ocorre no backend antes da exclusão lógica; a
+  tela desabilita a lixeira e identifica a parcela com o texto `Possui baixa`.
+- Motivo: preservar a integridade e a rastreabilidade entre `baixa.id_parcela`
+  e `titulo_parcela.id_parcela`.
+- Impacto: não há alteração de banco. Parcelas sem baixa continuam editáveis e
+  podem ser excluídas pelo fluxo existente.

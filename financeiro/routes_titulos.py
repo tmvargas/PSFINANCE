@@ -402,6 +402,22 @@ def _saldo_parcela(session, id_titulo: int, id_parcela: int) -> float:
     return max(0.0, float(parcela.valor or 0) - float(baixado or 0))
 
 
+def _ids_parcelas_com_baixa(session, id_titulo: int) -> set[int]:
+    return {
+        id_parcela
+        for (id_parcela,) in (
+            session.query(Baixa.id_parcela)
+            .filter(
+                Baixa.deleted.is_(False),
+                Baixa.id_titulo == id_titulo,
+                Baixa.id_parcela.isnot(None),
+            )
+            .distinct()
+            .all()
+        )
+    }
+
+
 def _resolver_filtro_empresa_memorizado(empresas_view):
     empresas_ativas = {empresa["id"] for empresa in empresas_view}
 
@@ -868,6 +884,7 @@ def editar_parcelas_titulo(id_titulo: int):
         }
         erros = []
         numeros_usados = set()
+        parcelas_com_baixa = _ids_parcelas_com_baixa(session, titulo.id_titulo)
 
         for indice, id_parcela in enumerate(parcela_ids):
             parcela = parcelas_por_id.get(id_parcela)
@@ -875,6 +892,12 @@ def editar_parcelas_titulo(id_titulo: int):
                 continue
 
             if id_parcela in excluir_ids:
+                if parcela.id_parcela in parcelas_com_baixa:
+                    erros.append(
+                        f"Não é possível excluir a parcela {parcela.numero_parcela} "
+                        "porque ela possui baixa."
+                    )
+                    continue
                 parcela.deleted = True
                 continue
 
@@ -962,6 +985,7 @@ def editar_parcelas_titulo(id_titulo: int):
         .all()
     )
     total_parcelas = 0.0
+    parcelas_com_baixa = _ids_parcelas_com_baixa(session, titulo.id_titulo)
     for parcela in parcelas:
         valor = float(parcela.valor or 0)
         total_parcelas += valor
@@ -971,6 +995,7 @@ def editar_parcelas_titulo(id_titulo: int):
                 "numero_parcela": parcela.numero_parcela,
                 "vencimento": parcela.vencimento.isoformat() if parcela.vencimento else "",
                 "valor": valor,
+                "tem_baixa": parcela.id_parcela in parcelas_com_baixa,
             }
         )
 

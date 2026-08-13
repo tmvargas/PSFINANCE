@@ -107,11 +107,15 @@
                 type="button"
                 class="btn btn-sm btn-outline-danger parcel-delete-button js-delete-parcel-button"
                 aria-label="Excluir parcela {{ parcela.numero_parcela }}"
-                title="Excluir parcela"
+                title="{% if parcela.tem_baixa %}Parcela com baixa não pode ser excluída{% else %}Excluir parcela{% endif %}"
                 aria-pressed="false"
+                {% if parcela.tem_baixa %}disabled{% endif %}
               >
                 <svg class="icon" aria-hidden="true"><use href="#icon-trash"></use></svg>
               </button>
+              {% if parcela.tem_baixa %}
+                <div class="form-text text-danger">Possui baixa</div>
+              {% endif %}
             </td>
           </tr>
         {% endfor %}
