@@ -159,6 +159,8 @@ def _garantir_parcela_unica(session, titulo: Titulo):
                 valor=float(titulo.valor or 0),
             )
         )
+        return True
+    return False
 
 
 def _sincronizar_parcela_unica_com_titulo(session, titulo: Titulo):
@@ -249,6 +251,50 @@ def _titulos_legados_periodo_sem_parcela(session, data_ini: date, data_fim: date
     }
 
 
+def _baixas_periodo_por_parcela(session, data_ini: date, data_fim: date, ids_titulos: list[int]):
+    if not ids_titulos:
+        return {}
+
+    baixas_por_parcela = dict(
+        session.query(
+            Baixa.id_titulo,
+            func.coalesce(func.sum(Baixa.valor_baixa), 0).label("soma"),
+        )
+        .join(TituloParcela, TituloParcela.id_parcela == Baixa.id_parcela)
+        .filter(
+            Baixa.deleted.is_(False),
+            Baixa.id_titulo.in_(ids_titulos),
+            TituloParcela.deleted.is_(False),
+            TituloParcela.vencimento >= data_ini,
+            TituloParcela.vencimento < data_fim,
+        )
+        .group_by(Baixa.id_titulo)
+        .all()
+    )
+
+    baixas_legadas = dict(
+        session.query(
+            Baixa.id_titulo,
+            func.coalesce(func.sum(Baixa.valor_baixa), 0).label("soma"),
+        )
+        .filter(
+            Baixa.deleted.is_(False),
+            Baixa.id_titulo.in_(ids_titulos),
+            Baixa.id_parcela.is_(None),
+            Baixa.data >= data_ini,
+            Baixa.data < data_fim,
+        )
+        .group_by(Baixa.id_titulo)
+        .all()
+    )
+
+    return {
+        id_titulo: float(baixas_por_parcela.get(id_titulo, 0) or 0)
+        + float(baixas_legadas.get(id_titulo, 0) or 0)
+        for id_titulo in ids_titulos
+    }
+
+
 
 def _uploads_dir() -> Path:
     # guarda dentro da pasta do app (não versionada)
@@ -278,6 +324,82 @@ def _titulo_saldo_aberto(session, id_titulo: int) -> float:
     total = float(titulo.valor or 0)
     baixado = float(baixado or 0)
     return max(0.0, total - baixado)
+
+
+def _parcelas_baixa_view(session, id_titulo: int):
+    parcelas = (
+        session.query(TituloParcela)
+        .filter(
+            TituloParcela.deleted.is_(False),
+            TituloParcela.id_titulo == id_titulo,
+        )
+        .order_by(TituloParcela.numero_parcela.asc(), TituloParcela.id_parcela.asc())
+        .all()
+    )
+
+    baixas_por_parcela = dict(
+        session.query(
+            Baixa.id_parcela,
+            func.coalesce(func.sum(Baixa.valor_baixa), 0).label("soma"),
+        )
+        .filter(
+            Baixa.deleted.is_(False),
+            Baixa.id_titulo == id_titulo,
+            Baixa.id_parcela.isnot(None),
+        )
+        .group_by(Baixa.id_parcela)
+        .all()
+    )
+
+    parcelas_view = []
+    for parcela in parcelas:
+        valor = float(parcela.valor or 0)
+        baixado = float(baixas_por_parcela.get(parcela.id_parcela, 0) or 0)
+        saldo = max(0.0, valor - baixado)
+        parcelas_view.append(
+            {
+                "id": parcela.id_parcela,
+                "numero": parcela.numero_parcela,
+                "vencimento": parcela.vencimento.strftime("%d/%m/%Y") if parcela.vencimento else "",
+                "valor": valor,
+                "baixado": baixado,
+                "saldo": saldo,
+            }
+        )
+
+    return parcelas_view
+
+
+def _buscar_parcela_baixa(session, id_titulo: int, id_parcela: int | None):
+    if id_parcela is None:
+        return None
+
+    return (
+        session.query(TituloParcela)
+        .filter(
+            TituloParcela.deleted.is_(False),
+            TituloParcela.id_titulo == id_titulo,
+            TituloParcela.id_parcela == id_parcela,
+        )
+        .first()
+    )
+
+
+def _saldo_parcela(session, id_titulo: int, id_parcela: int) -> float:
+    parcela = _buscar_parcela_baixa(session, id_titulo, id_parcela)
+    if not parcela:
+        return 0.0
+
+    baixado = (
+        session.query(func.coalesce(func.sum(Baixa.valor_baixa), 0))
+        .filter(
+            Baixa.deleted.is_(False),
+            Baixa.id_titulo == id_titulo,
+            Baixa.id_parcela == id_parcela,
+        )
+        .scalar()
+    )
+    return max(0.0, float(parcela.valor or 0) - float(baixado or 0))
 
 
 def _resolver_filtro_empresa_memorizado(empresas_view):
@@ -361,19 +483,11 @@ def listar_titulos():
         if id_titulo in titulos_por_id
     ]
 
-    baixas_soma = dict(
-        session.query(
-            Baixa.id_titulo,
-            func.coalesce(func.sum(Baixa.valor_baixa), 0).label("soma"),
-        )
-        .filter(
-            Baixa.deleted.is_(False),
-            Baixa.id_titulo.in_([t.id_titulo for t in titulos] or [-1]),
-            Baixa.data >= data_ini,
-            Baixa.data < data_fim,
-        )
-        .group_by(Baixa.id_titulo)
-        .all()
+    baixas_soma = _baixas_periodo_por_parcela(
+        session,
+        data_ini,
+        data_fim,
+        [t.id_titulo for t in titulos],
     )
 
     rows = []
@@ -939,7 +1053,12 @@ def baixar_titulo(id_titulo: int):
         flash("Título não encontrado.", "erro")
         return redirect(url_for("financeiro.listar_titulos"))
 
+    parcela_criada = _garantir_parcela_unica(session, titulo)
+    session.flush()
+    if parcela_criada:
+        session.commit()
     saldo_aberto = _titulo_saldo_aberto(session, id_titulo)
+    parcelas_view = _parcelas_baixa_view(session, id_titulo)
 
     contas = (
         session.query(Conta)
@@ -955,17 +1074,22 @@ def baixar_titulo(id_titulo: int):
     if request.method == "POST":
         data_baixa = _parse_date(request.form.get("data"))
         id_conta = request.form.get("id_conta", type=int)
+        id_parcela = request.form.get("id_parcela", type=int)
         valor_baixa = _parse_float(request.form.get("valor_baixa"))
+        parcela = _buscar_parcela_baixa(session, id_titulo, id_parcela)
+        saldo_parcela = _saldo_parcela(session, id_titulo, id_parcela) if parcela else 0.0
 
         erros = []
         if not titulo.id_empresa:
             erros.append("Título sem empresa vinculada não pode ser baixado.")
         if not data_baixa:
             erros.append("Data da baixa inválida.")
+        if not parcela:
+            erros.append("Parcela da baixa inválida.")
         if valor_baixa is None or valor_baixa <= 0:
             erros.append("Valor da baixa inválido.")
-        if valor_baixa is not None and valor_baixa > saldo_aberto + 0.0001:
-            erros.append(f"Valor da baixa não pode ser maior que o saldo em aberto (R$ {saldo_aberto:.2f}).")
+        if valor_baixa is not None and valor_baixa > saldo_parcela + 0.0001:
+            erros.append(f"Valor da baixa não pode ser maior que o saldo da parcela (R$ {saldo_parcela:.2f}).")
 
         erros_conta, conta = validar_conta_da_empresa(session, id_conta, titulo.id_empresa)
         erros.extend(erros_conta)
@@ -978,6 +1102,7 @@ def baixar_titulo(id_titulo: int):
                 data=data_baixa,
                 id_conta=conta.id_conta,
                 id_titulo=id_titulo,
+                id_parcela=parcela.id_parcela,
                 valor_baixa=valor_baixa,
             )
             session.add(bx)
@@ -1000,6 +1125,7 @@ def baixar_titulo(id_titulo: int):
         "titulo_baixa_form.html",
         titulo=titulo_view,
         contas=contas_view,
+        parcelas=parcelas_view,
         hoje=date.today().isoformat(),
     )
 
@@ -1024,7 +1150,7 @@ def listar_baixas_titulo(id_titulo: int):
 
     baixas = (
         session.query(Baixa)
-        .options(joinedload(Baixa.conta))
+        .options(joinedload(Baixa.conta), joinedload(Baixa.parcela))
         .filter(Baixa.deleted.is_(False), Baixa.id_titulo == id_titulo)
         .order_by(Baixa.data.desc(), Baixa.id_baixa.desc())
         .all()
@@ -1040,11 +1166,17 @@ def listar_baixas_titulo(id_titulo: int):
                 "id_baixa": b.id_baixa,
                 "data": b.data.strftime("%d/%m/%Y") if b.data else "",
                 "conta": b.conta.descricao if b.conta else "",
+                "parcela": (
+                    f"{b.parcela.numero_parcela} - {b.parcela.vencimento.strftime('%d/%m/%Y')}"
+                    if getattr(b, "parcela", None) and b.parcela.vencimento
+                    else "Legada sem parcela"
+                ),
                 "valor": v,
                 "conciliado": bool(getattr(b, "conciliado", False)),
             }
         )
 
+    saldo_aberto = _titulo_saldo_aberto(session, id_titulo)
     session.close()
     return render_template(
         "titulo_baixas_list.html",
@@ -1056,7 +1188,7 @@ def listar_baixas_titulo(id_titulo: int):
         },
         baixas=baixas_view,
         total_baixas=total,
-        saldo_aberto=_titulo_saldo_aberto(get_session(), id_titulo),
+        saldo_aberto=saldo_aberto,
     )
 
 

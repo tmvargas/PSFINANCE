@@ -43,6 +43,7 @@
           <tr>
             <th>Data</th>
             <th>Conta</th>
+            <th>Parcela</th>
             <th class="text-end">Valor</th>
             <th class="text-center">Conciliado</th>
             <th class="text-center">Ações</th>
@@ -55,6 +56,7 @@
             <tr>
               <td>{{ b.data }}</td>
               <td>{{ b.conta }}</td>
+              <td>{{ b.parcela }}</td>
               <td class="text-end">R$ {{ '%.2f'|format(b.valor or 0) }}</td>
               <td class="text-center">
                 {% if b.conciliado %}
@@ -84,7 +86,7 @@
         </tbody>
         <tfoot>
           <tr class="fw-bold">
-            <td colspan="2" class="text-end">Total baixado listado:</td>
+            <td colspan="3" class="text-end">Total baixado listado:</td>
             <td class="text-end">R$ {{ '%.2f'|format(ns.total) }}</td>
             <td colspan="2"></td>
           </tr>
