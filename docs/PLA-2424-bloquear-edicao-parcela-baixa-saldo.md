@@ -76,14 +76,21 @@ inconsistência de whitespace.
 | `GET /financeiro/titulos/1/parcelas` | HTTP 200, uma coluna `Saldo`, quatro atributos `readonly` e orientação de bloqueio |
 | Logs após deploy | Sem exceção da aplicação; dois `SIGTERM` esperados durante o restart dos workers |
 
-O HTML real da porta `5001` comprova a presença e o estado dos elementos, mas o
-workspace não possui navegador ou renderizador headless instalado para capturar
-o screenshot. O gate visual permanece pendente dessa evidência objetiva.
+Evidência visual:
+
+- `docs/evidencias/PLA-2424/parcela-com-baixa-bloqueada-saldo-5001.png` - Tela
+  real publicada na porta `5001`, com coluna `Saldo`, valor `R$ 0,00`, campos de
+  vencimento e valor protegidos, lixeira desabilitada e orientação para excluir
+  a baixa antes de editar ou excluir a parcela.
+
+Comparação objetiva: menu lateral, topo, card, botões existentes, ordem das
+parcelas e bloco `Nova parcela` foram preservados; a única coluna acrescentada
+foi `Saldo`, solicitada na demanda, posicionada ao lado de `Valor`.
 
 ## Riscos e pendências
 
 - Risco residual baixo: baixas legadas sem `id_parcela` não identificam uma
   parcela específica e, portanto, não bloqueiam individualmente sua edição.
-- Gate visual pendente: gerar screenshot da rota real na porta `5001`, mostrando
-  coluna `Saldo`, campos somente leitura e orientação da parcela com baixa.
+- Risco visual baixo: a orientação ocupa mais altura na célula `Excluir`, sem
+  alterar a estrutura ou ocultar ações existentes.
 - Produção não faz parte desta entrega.
