@@ -1,5 +1,22 @@
 # Decisoes - PSCONTROL
 
+## 2026-08-12 - PLA-2276 - Baixas por parcela do titulo
+
+Decisao: novas baixas de titulos passam a exigir vinculacao com uma parcela
+ativa de `titulo_parcela`, e a validacao de valor passa a usar o saldo da
+parcela selecionada, nao apenas o saldo total do titulo.
+
+Motivo: o fluxo de baixa precisa acompanhar o parcelamento operacional do
+titulo, permitindo baixa parcial ou total por parcela e evitando que uma baixa
+de uma parcela consuma indevidamente o saldo de outra.
+
+Impacto: a tabela `baixa` recebe a coluna opcional `id_parcela` para preservar
+historico. Baixas antigas sem parcela continuam legiveis como legadas; o script
+preparado vincula automaticamente apenas titulos com exatamente uma parcela
+ativa. A consulta mensal passa a somar primeiro baixas vinculadas as parcelas
+com vencimento no periodo e mantem fallback por data para baixas legadas sem
+`id_parcela`.
+
 ## 2026-08-12 - Consulta mensal separa valor total e caixa do mes
 
 Decisao: na consulta de titulos do PSFINANCE, a tela deve separar

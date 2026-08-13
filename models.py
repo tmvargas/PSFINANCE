@@ -291,6 +291,7 @@ class TituloParcela(Base, TimestampMixin):
     valor = Column(Numeric(15, 2), nullable=False)
 
     titulo = relationship("Titulo", back_populates="parcelas")
+    baixas = relationship("Baixa", back_populates="parcela")
 
     def __repr__(self):
         return f"<TituloParcela titulo={self.id_titulo} parcela={self.numero_parcela}>"
@@ -326,6 +327,7 @@ class Baixa(Base, TimestampMixin):
 
     id_conta = Column(Integer, ForeignKey("conta.id_conta"), nullable=False)
     id_titulo = Column(Integer, ForeignKey("titulo.id_titulo"), nullable=False)
+    id_parcela = Column(Integer, ForeignKey("titulo_parcela.id_parcela"), nullable=True)
 
     valor_baixa = Column(Numeric(15, 2), nullable=False)
 
@@ -333,6 +335,7 @@ class Baixa(Base, TimestampMixin):
 
     conta = relationship("Conta", back_populates="baixas")
     titulo = relationship("Titulo", back_populates="baixas")
+    parcela = relationship("TituloParcela", back_populates="baixas")
 
     def __repr__(self):
         return f"<Baixa {self.id_baixa} em {self.data} - R$ {float(self.valor_baixa or 0):.2f}>"

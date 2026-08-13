@@ -24,6 +24,33 @@
     </dl>
   </div>
 
+  {% if parcelas %}
+    <div class="table-responsive mb-3">
+      <table class="table table-sm table-striped align-middle">
+        <thead>
+          <tr>
+            <th>Parcela</th>
+            <th>Vencimento</th>
+            <th class="text-end">Valor</th>
+            <th class="text-end">Baixado</th>
+            <th class="text-end">Saldo</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in parcelas %}
+            <tr>
+              <td>{{ p.numero }}</td>
+              <td>{{ p.vencimento }}</td>
+              <td class="text-end">R$ {{ "%.2f"|format(p.valor or 0) }}</td>
+              <td class="text-end">R$ {{ "%.2f"|format(p.baixado or 0) }}</td>
+              <td class="text-end fw-semibold">R$ {{ "%.2f"|format(p.saldo or 0) }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+
   <div class="card">
     <div class="card-body">
       <form method="post">
@@ -50,6 +77,18 @@
           </div>
 
           <div class="col-md-4">
+            <label class="form-label">Parcela</label>
+            <select name="id_parcela" class="form-select" required>
+              <option value="">Selecione...</option>
+              {% for p in parcelas %}
+                <option value="{{ p.id }}" {% if (p.saldo or 0) <= 0 %}disabled{% endif %}>
+                  Parcela {{ p.numero }} - {{ p.vencimento }} - saldo R$ {{ "%.2f"|format(p.saldo or 0) }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-4">
             <label class="form-label">Valor da baixa</label>
             <input
               type="text"
@@ -59,7 +98,7 @@
               required
             >
             <div class="form-text">
-              Máximo: R$ {{ "%.2f"|format(titulo.saldo_aberto or 0) }}
+              Máximo: saldo da parcela selecionada.
             </div>
           </div>
         </div>
