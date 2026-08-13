@@ -9,9 +9,9 @@
   parcela selecionada; o usuario pode alterar o campo para registrar baixa
   parcial, mantendo a validacao backend que impede valor maior que o saldo da
   parcela.
-- Mascara: o campo de valor da baixa passa a usar mascara pt-BR em reais,
-  seguindo a regra vigente da PLA-2111, em que `200` vira `200,00` sem
-  interpretacao obrigatoria em centavos.
+- Mascara: o campo de valor da baixa deve replicar a experiencia da edicao de
+  parcelas, com digitacao corrida interpretada em centavos e duas casas
+  decimais; por exemplo, `120000` vira `1.200,00`.
 - Limite: alteracao restrita ao formulario de baixa. Nao altera banco,
   migration, `main`, producao ou dados produtivos.
 

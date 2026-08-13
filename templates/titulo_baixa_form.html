@@ -99,7 +99,7 @@
               name="valor_baixa"
               id="valor_baixa"
               class="form-control js-money"
-              inputmode="decimal"
+              inputmode="numeric"
               autocomplete="off"
               placeholder="0,00"
               required
@@ -133,34 +133,21 @@
       maximumFractionDigits: 2
     });
 
-    function parseBrazilianMoney(raw) {
-      let value = String(raw || '').trim().replace(/R\$/g, '').replace(/\s/g, '');
-      if (!value) return null;
-      if (value.includes(',')) {
-        value = value.replace(/\./g, '').replace(',', '.');
-      } else {
-        const parts = value.split('.');
-        if (parts.length > 2 || (parts.length === 2 && parts[1].length > 2)) {
-          value = value.replace(/\./g, '');
-        }
-      }
-      const number = Number(value);
-      return Number.isFinite(number) ? number : null;
-    }
-
-    function formatAsReais(raw) {
-      const value = parseBrazilianMoney(raw);
-      if (value === null) return '';
-      return nf.format(value);
+    function formatAsCents(raw) {
+      const digits = String(raw || '').replace(/\D/g, '');
+      if (!digits) return '';
+      const cents = parseInt(digits, 10);
+      return nf.format(cents / 100);
     }
 
     function attachMoneyMask(input) {
       input.addEventListener('input', function () {
-        input.value = input.value.replace(/[^\d.,]/g, '');
+        input.value = formatAsCents(input.value);
+        try { input.setSelectionRange(input.value.length, input.value.length); } catch (e) {}
       });
 
       input.addEventListener('blur', function () {
-        input.value = formatAsReais(input.value);
+        input.value = formatAsCents(input.value);
       });
     }
 
@@ -174,7 +161,7 @@
       function sugerirSaldoParcela() {
         const option = parcelaSelect.selectedOptions[0];
         const saldo = option ? option.dataset.saldo : '';
-        valorInput.value = saldo ? formatAsReais(saldo) : '';
+        valorInput.value = saldo ? formatAsCents(saldo) : '';
       }
 
       parcelaSelect.addEventListener('change', sugerirSaldoParcela);
