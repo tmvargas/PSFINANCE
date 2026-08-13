@@ -66,6 +66,19 @@ de whitespace encontrada.
 - Logs dos dois serviços após o deploy: sem entradas de nível warning ou
   superior relacionadas à validação.
 
+### Revalidação após revisão executiva
+
+- Commit da branch da tarefa: `664307ae1ed41121714681467be5540041dcc5b7`.
+- Commit de `staging` publicado: `22fa86f57db35a9d06de2e84f7f91a9b0ab8bec2`.
+- Cinco testes focais aprovados localmente e na VPS, incluindo a jornada de
+  exclusão da baixa não conciliada seguida da exclusão da parcela e a proteção
+  persistente de baixa conciliada.
+- `GET http://127.0.0.1:5001/health`: HTTP 200, PostgreSQL, branch `staging` e
+  commit `22fa86f57db35a9d06de2e84f7f91a9b0ab8bec2`.
+- `GET http://127.0.0.1:5001/gate`: HTTP 200 e aplicação interna saudável.
+- Serviços `psfinance-staging` e `psfinance-staging-gate`: ativos, sem warnings
+  nos logs após o restart.
+
 ## Gate visual
 
 | Item do pedido | Referência | Resultado |
@@ -79,6 +92,9 @@ Evidência:
 - `docs/evidencias/PLA-2407/parcela-com-baixa-bloqueada-5001.png` - Screenshot
   da tela real publicada na porta `5001`, mostrando a lixeira desabilitada e o
   texto `Possui baixa` sem alteração estrutural do layout.
+- `docs/evidencias/PLA-2407/parcela-com-baixa-orientacao-revisao-5001.png` -
+  Screenshot posterior à revisão executiva, comprovando na porta `5001` a
+  orientação explícita para excluir a baixa primeiro.
 
 ## Riscos e pendências
 
