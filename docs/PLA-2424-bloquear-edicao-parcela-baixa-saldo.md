@@ -55,13 +55,35 @@ inconsistência de whitespace.
 | Mostrar saldo | Regra de baixa por parcela da PLA-2276 | Nova coluna `Saldo`, ao lado de `Valor`, sem novos cards ou seções |
 | Orientar o usuário | Mensagem existente da PLA-2407 | Texto passa a informar liberação de edição ou exclusão após excluir a baixa |
 
-O screenshot da porta `5001` será anexado após integração e deploy da branch
-`staging`, pois evidência local não substitui o gate visual do ambiente oficial.
+## GitHub e staging
+
+- Branch da tarefa: `fix/PLA-2424-bloquear-edicao-parcela-baixa-saldo`.
+- Commit da tarefa: `11802bb85f142c544a42270455d56c93d4f812de`.
+- PR: `https://github.com/tmvargas/PSFINANCE/pull/75`, base `staging`.
+- Commit publicado inicialmente em `staging`:
+  `e4ee88b38d5a1fa2985d54d18cc909c0f42c83f3`.
+- VPS: `/opt/plansmart/sistemas/psfinance/staging/repo`, branch `staging`,
+  HEAD igual ao `origin/staging` e diretório sem alterações locais.
+- Serviços `psfinance-staging` e `psfinance-staging-gate`: ativos.
+- Oito testes focais aprovados também no runtime Python 3.12 da VPS.
+
+## Validação na porta 5001
+
+| Verificação | Resultado |
+| --- | --- |
+| `GET /health` | HTTP 200, PostgreSQL, branch `staging`, commit `e4ee88b` |
+| `GET /gate` | HTTP 200, aplicação interna em `127.0.0.1:5104` saudável |
+| `GET /financeiro/titulos/1/parcelas` | HTTP 200, uma coluna `Saldo`, quatro atributos `readonly` e orientação de bloqueio |
+| Logs após deploy | Sem exceção da aplicação; dois `SIGTERM` esperados durante o restart dos workers |
+
+O HTML real da porta `5001` comprova a presença e o estado dos elementos, mas o
+workspace não possui navegador ou renderizador headless instalado para capturar
+o screenshot. O gate visual permanece pendente dessa evidência objetiva.
 
 ## Riscos e pendências
 
 - Risco residual baixo: baixas legadas sem `id_parcela` não identificam uma
   parcela específica e, portanto, não bloqueiam individualmente sua edição.
-- A validação de staging, logs e porta `5001` depende da integração pelo fluxo
-  oficial e permanece obrigatória antes da revisão executiva.
+- Gate visual pendente: gerar screenshot da rota real na porta `5001`, mostrando
+  coluna `Saldo`, campos somente leitura e orientação da parcela com baixa.
 - Produção não faz parte desta entrega.
