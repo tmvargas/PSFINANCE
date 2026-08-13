@@ -1,5 +1,18 @@
 # Decisoes - PSCONTROL
 
+## 2026-08-13 - PLA-2407 - Prevenção de integração corretiva sem PR
+
+- Não conformidade: os commits corretivos `664307a` e `2da5c5f` foram
+  integrados em `staging` sem PR comprovado; os PRs #68 e #69 pertencem apenas
+  à implementação original.
+- Decisão: preservar o histórico compartilhado e registrar a regularização em
+  branch documental própria com PR para `staging`, sem atribuir efeito
+  retroativo de revisão ao novo PR.
+- Prevenção: todo novo conjunto de commits deve ter branch, head commit, link
+  do PR e base `staging` registrados antes do merge. A ausência de qualquer um
+  desses itens impede integração e deploy.
+- Escopo: nenhuma ação em `main`, produção ou banco produtivo.
+
 ## 2026-08-13 - PLA-2407 - Exclusao de parcela vinculada a baixa
 
 - Decisao: parcela com baixa ativa nao pode ser excluida; a interface deve

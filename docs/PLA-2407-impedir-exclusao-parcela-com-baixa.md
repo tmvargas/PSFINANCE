@@ -79,6 +79,26 @@ de whitespace encontrada.
 - Serviços `psfinance-staging` e `psfinance-staging-gate`: ativos, sem warnings
   nos logs após o restart.
 
+## Regularização de governança após devolução executiva
+
+- Não conformidade confirmada: os PRs #68 e #69 documentam a implementação
+  original, mas não abrangem os commits corretivos `664307a` e `2da5c5f`.
+- Os commits corretivos foram integrados em `staging` pelos merges `22fa86f` e
+  `d0233d3` sem PR comprovado. O histórico compartilhado foi preservado e não
+  será reescrito.
+- Causa: a revalidação funcional foi tratada como suficiente para concluir a
+  correção, sem repetir a trava obrigatória de existência de PR para cada novo
+  conjunto de commits antes do merge em `staging`.
+- Correção de fluxo: esta documentação de regularização segue em branch nova,
+  criada da `staging` atualizada, com PR próprio e base obrigatória `staging`.
+  O PR de regularização não substitui nem retroage a revisão ausente dos
+  commits corretivos; ele registra de forma auditável a falha e a prevenção.
+- Prevenção: antes de qualquer integração futura, registrar na issue o nome da
+  branch, o head commit, o link do PR e a confirmação de base `staging`; sem os
+  quatro itens, o merge e o deploy ficam impedidos.
+- Produção permaneceu fora do escopo: não houve alteração em `main`, deploy de
+  produção ou escrita no banco produtivo.
+
 ## Gate visual
 
 | Item do pedido | Referência | Resultado |
