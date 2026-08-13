@@ -33,8 +33,12 @@
 | Caso | Entrada | Resultado esperado | Resultado local |
 | --- | --- | --- | --- |
 | Formulário | `GET /financeiro/titulos/novo` | Campo com `max="999"` e prévia limitada a 999 | Aprovado |
+| Limite anterior | novo título, valor `999,00`, 120 parcelas | Um título e 120 parcelas, preservando o caso antes aceito | Aprovado |
+| Caso informado por Thiago | novo título, valor `999,00`, 180 parcelas | Um título e 180 parcelas; numeração 1 a 180; soma `999,00` | Aprovado |
 | Limite válido | novo título, valor `999,00`, 999 parcelas | Um título e 999 parcelas; numeração 1 a 999; soma `999,00` | Aprovado |
 | Acima do limite | novo título com 1000 parcelas | Mensagem de validação e nenhuma persistência | Aprovado |
+| Cópia | abrir e salvar cópia de título com 180 parcelas | Campo permanece editável com valor 180 e cópia gera 180 parcelas | Aprovado |
+| Edição | editar dados gerais de título com 180 parcelas | Campo mostra 180 desabilitado e as 180 parcelas permanecem ativas | Aprovado |
 | Regressão focal | exclusão de parcela com e sem baixa | Preservar o bloqueio de parcela baixada e a exclusão da parcela livre | Aprovado |
 
 ## Validação local
@@ -44,13 +48,22 @@
 .venv/bin/python -m unittest discover -s tests -p 'test_*.py'
 ```
 
-Resultado: compilação sem erros e 6 testes aprovados. O único aviso foi a
+Resultado após a correção solicitada na revisão: compilação sem erros e testes
+focais aprovados, incluindo casos explícitos de 120, 180, 999, 1000, cópia e
+edição. O único aviso foi a
 depreciação já existente de `datetime.utcnow()` no SQLAlchemy, sem falha.
+
+- Medição local da criação e consulta de 999 parcelas: `2,035 s`.
+- Evidência visual na porta `5001`: campo preenchido com `180`, atributo
+  `max="999"` confirmado pelo navegador e prévia exibindo `180 parcelas`.
+- Screenshot: `docs/evidencias/PLA-2409/campo-180-parcelas-staging-5001.png`.
 
 ## Riscos e pendências
 
 - Risco baixo: gerar 999 registros exige mais processamento que o limite
-  anterior, mas o teste focal concluiu a criação e validou a soma das parcelas.
+  anterior. A medição objetiva do teste focal e a medição no staging estão
+  registradas abaixo; a geração continua síncrona e deve ser observada se o
+  volume simultâneo crescer.
 - Não requer banco, migration, nova variável de ambiente ou produção.
 
 ## GitHub e staging

@@ -708,3 +708,12 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   ilimitada ou divergência entre frontend e backend.
 - Impacto: não há alteração de banco ou migration. A geração mensal, a divisão
   por centavos e a revisão das parcelas preservam o fluxo existente.
+# PLA-2409 — Evidências complementares do limite de parcelas
+
+- A revisão executiva solicitou comprovação explícita dos casos de 120 e 180
+  parcelas, medição objetiva de 999 parcelas e preservação dos fluxos de cópia
+  e edição.
+- A regra permanece de 1 a 999 parcelas, sem mudança adicional no código de
+  negócio. A cobertura focal passa a tratar esses cenários como regressões
+  obrigatórias e registra o tempo da geração síncrona de 999 parcelas.
+- Não há alteração de banco, `main` ou produção.
