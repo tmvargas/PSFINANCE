@@ -1,5 +1,6 @@
 import os
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
@@ -66,24 +67,94 @@ class LimiteParcelasTituloTest(unittest.TestCase):
         self.assertIn(b'max="999"', response.data)
         self.assertIn(b"Math.min(999,", response.data)
 
-    def test_aceita_999_parcelas(self):
+    def _criar_e_validar_quantidade(self, quantidade):
         response = app.test_client().post(
-            "/financeiro/titulos/novo", data=self._dados_titulo(999)
+            "/financeiro/titulos/novo", data=self._dados_titulo(quantidade)
         )
 
         self.assertEqual(response.status_code, 302)
         session = SessionLocal()
-        titulo = session.query(Titulo).filter_by(nr_documento="PLA-2409-999").one()
+        titulo = session.query(Titulo).filter_by(
+            nr_documento=f"PLA-2409-{quantidade}"
+        ).one()
         parcelas = (
             session.query(TituloParcela)
             .filter_by(id_titulo=titulo.id_titulo, deleted=False)
             .order_by(TituloParcela.numero_parcela)
             .all()
         )
-        self.assertEqual(len(parcelas), 999)
+        self.assertEqual(len(parcelas), quantidade)
         self.assertEqual(parcelas[0].numero_parcela, 1)
-        self.assertEqual(parcelas[-1].numero_parcela, 999)
+        self.assertEqual(parcelas[-1].numero_parcela, quantidade)
         self.assertEqual(sum(float(parcela.valor) for parcela in parcelas), 999.0)
+        session.close()
+        return titulo.id_titulo
+
+    def test_preserva_limite_anterior_de_120_parcelas(self):
+        self._criar_e_validar_quantidade(120)
+
+    def test_aceita_caso_real_de_180_parcelas(self):
+        self._criar_e_validar_quantidade(180)
+
+    def test_aceita_999_parcelas(self):
+        inicio = time.perf_counter()
+        self._criar_e_validar_quantidade(999)
+        duracao = time.perf_counter() - inicio
+
+        self.assertLess(duracao, 10.0)
+        print(f"DESEMPENHO_PLA_2409_999={duracao:.3f}s")
+
+    def test_copia_preserva_quantidade_e_permanece_editavel(self):
+        titulo_original_id = self._criar_e_validar_quantidade(180)
+        client = app.test_client()
+
+        copia_form = client.get(f"/financeiro/titulos/{titulo_original_id}/copiar")
+        self.assertEqual(copia_form.status_code, 200)
+        self.assertIn(b'value="180"', copia_form.data)
+        self.assertNotIn(b'name="quantidade_parcelas" disabled', copia_form.data)
+
+        dados_copia = self._dados_titulo(180)
+        dados_copia["nr_documento"] = "PLA-2409-COPIA-180"
+        copia_response = client.post(
+            f"/financeiro/titulos/{titulo_original_id}/copiar", data=dados_copia
+        )
+        self.assertEqual(copia_response.status_code, 302)
+
+        session = SessionLocal()
+        copia = session.query(Titulo).filter_by(
+            nr_documento="PLA-2409-COPIA-180"
+        ).one()
+        quantidade_copia = session.query(TituloParcela).filter_by(
+            id_titulo=copia.id_titulo, deleted=False
+        ).count()
+        self.assertEqual(quantidade_copia, 180)
+        session.close()
+
+    def test_edicao_preserva_as_180_parcelas_existentes(self):
+        titulo_id = self._criar_e_validar_quantidade(180)
+        client = app.test_client()
+
+        edicao_form = client.get(f"/financeiro/titulos/{titulo_id}/editar")
+        self.assertEqual(edicao_form.status_code, 200)
+        self.assertIn(b'value="180"', edicao_form.data)
+        self.assertIn(b'name="quantidade_parcelas"', edicao_form.data)
+        self.assertIn(b'disabled', edicao_form.data)
+
+        dados_edicao = self._dados_titulo(1)
+        dados_edicao["nr_documento"] = "PLA-2409-EDITADO-180"
+        dados_edicao["valor"] = "1099,00"
+        response = client.post(
+            f"/financeiro/titulos/{titulo_id}/editar", data=dados_edicao
+        )
+        self.assertEqual(response.status_code, 302)
+
+        session = SessionLocal()
+        titulo = session.get(Titulo, titulo_id)
+        quantidade = session.query(TituloParcela).filter_by(
+            id_titulo=titulo_id, deleted=False
+        ).count()
+        self.assertEqual(titulo.nr_documento, "PLA-2409-EDITADO-180")
+        self.assertEqual(quantidade, 180)
         session.close()
 
     def test_rejeita_1000_parcelas(self):
