@@ -78,6 +78,7 @@ class ExclusaoParcelaComBaixaTest(unittest.TestCase):
         self.titulo_id = titulo.id_titulo
         self.parcela_com_baixa_id = parcela_com_baixa.id_parcela
         self.parcela_sem_baixa_id = parcela_sem_baixa.id_parcela
+        self.baixa_id = baixa.id_baixa
         session.close()
 
     def _dados_post(self, excluir_id):
@@ -113,7 +114,10 @@ class ExclusaoParcelaComBaixaTest(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Parcela com baixa n\xc3\xa3o pode ser exclu\xc3\xadda", response.data)
-        self.assertIn(b"Possui baixa", response.data)
+        self.assertIn(
+            b"Possui baixa. Exclua a baixa primeiro para liberar a exclus\xc3\xa3o da parcela.",
+            response.data,
+        )
         html = response.get_data(as_text=True)
         inicio_botao = html.index('aria-label="Excluir parcela 1"')
         fim_botao = html.index("</button>", inicio_botao)
@@ -133,6 +137,54 @@ class ExclusaoParcelaComBaixaTest(unittest.TestCase):
         session = SessionLocal()
         parcela = session.get(TituloParcela, self.parcela_sem_baixa_id)
         self.assertTrue(parcela.deleted)
+        session.close()
+
+    def test_apos_excluir_baixa_nao_conciliada_libera_exclusao_da_parcela(self):
+        response = app.test_client().post(
+            f"/financeiro/baixas/{self.baixa_id}/excluir"
+        )
+        self.assertEqual(response.status_code, 302)
+
+        response = app.test_client().post(
+            f"/financeiro/titulos/{self.titulo_id}/parcelas",
+            data=self._dados_post(self.parcela_com_baixa_id),
+        )
+        self.assertEqual(response.status_code, 302)
+
+        session = SessionLocal()
+        baixa = session.get(Baixa, self.baixa_id)
+        parcela = session.get(TituloParcela, self.parcela_com_baixa_id)
+        self.assertTrue(baixa.deleted)
+        self.assertTrue(parcela.deleted)
+        session.close()
+
+    def test_baixa_conciliada_continua_protegida_e_mantem_parcela_bloqueada(self):
+        session = SessionLocal()
+        baixa = session.get(Baixa, self.baixa_id)
+        baixa.conciliado = True
+        session.commit()
+        session.close()
+
+        response = app.test_client().post(
+            f"/financeiro/baixas/{self.baixa_id}/excluir",
+            follow_redirects=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"baixa conciliada", response.data)
+
+        response = app.test_client().post(
+            f"/financeiro/titulos/{self.titulo_id}/parcelas",
+            data=self._dados_post(self.parcela_com_baixa_id),
+            follow_redirects=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"possui baixa", response.data)
+
+        session = SessionLocal()
+        baixa = session.get(Baixa, self.baixa_id)
+        parcela = session.get(TituloParcela, self.parcela_com_baixa_id)
+        self.assertFalse(baixa.deleted)
+        self.assertFalse(parcela.deleted)
         session.close()
 
 

@@ -1,5 +1,15 @@
 # Decisoes - PSCONTROL
 
+## 2026-08-13 - PLA-2407 - Exclusao de parcela vinculada a baixa
+
+- Decisao: parcela com baixa ativa nao pode ser excluida; a interface deve
+  orientar explicitamente o usuario a excluir a baixa primeiro.
+- Fluxo: a exclusao de uma baixa nao conciliada libera a exclusao da parcela;
+  baixa conciliada preserva a protecao existente e mantem a parcela bloqueada.
+- Integridade: o backend continua autoritativo mesmo diante de requisicao
+  manipulada, e baixas legadas sem vinculo com parcela permanecem preservadas.
+- Impacto: sem alteracao de banco ou migration.
+
 ## 2026-08-13 - PLA-2315 - Sugestao de valor na baixa por parcela
 
 - Projeto: PSFINANCE.
