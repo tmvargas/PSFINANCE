@@ -1,5 +1,20 @@
 # Decisoes - PSCONTROL
 
+## 2026-08-13 - PLA-2315 - Sugestao de valor na baixa por parcela
+
+- Projeto: PSFINANCE.
+- Decisao: na baixa de titulo por parcela, a selecao da parcela deve sugerir
+  automaticamente no campo `Valor da baixa` o saldo disponivel daquela parcela.
+- Regra: o valor sugerido e apenas preenchimento inicial para baixa total da
+  parcela selecionada; o usuario pode alterar o campo para registrar baixa
+  parcial, mantendo a validacao backend que impede valor maior que o saldo da
+  parcela.
+- Mascara: o campo de valor da baixa passa a usar mascara pt-BR em reais,
+  seguindo a regra vigente da PLA-2111, em que `200` vira `200,00` sem
+  interpretacao obrigatoria em centavos.
+- Limite: alteracao restrita ao formulario de baixa. Nao altera banco,
+  migration, `main`, producao ou dados produtivos.
+
 ## 2026-08-12 - PLA-2276 - Baixas por parcela do titulo
 
 Decisao: novas baixas de titulos passam a exigir vinculacao com uma parcela
