@@ -913,6 +913,18 @@ def editar_parcelas_titulo(id_titulo: int):
             vencimento = _parse_date(vencimentos[indice] if indice < len(vencimentos) else None)
             valor = _parse_float(valores[indice] if indice < len(valores) else None)
 
+            if parcela.id_parcela in parcelas_com_baixa and (
+                numero != parcela.numero_parcela
+                or vencimento != parcela.vencimento
+                or valor is None
+                or abs(valor - float(parcela.valor or 0)) > 0.0001
+            ):
+                erros.append(
+                    f"Não é possível editar a parcela {parcela.numero_parcela} "
+                    "porque ela possui baixa."
+                )
+                continue
+
             if numero is None or numero < 1:
                 erros.append("Número de parcela inválido.")
                 continue
@@ -994,8 +1006,22 @@ def editar_parcelas_titulo(id_titulo: int):
     )
     total_parcelas = 0.0
     parcelas_com_baixa = _ids_parcelas_com_baixa(session, titulo.id_titulo)
+    baixas_por_parcela = dict(
+        session.query(
+            Baixa.id_parcela,
+            func.coalesce(func.sum(Baixa.valor_baixa), 0),
+        )
+        .filter(
+            Baixa.deleted.is_(False),
+            Baixa.id_titulo == titulo.id_titulo,
+            Baixa.id_parcela.isnot(None),
+        )
+        .group_by(Baixa.id_parcela)
+        .all()
+    )
     for parcela in parcelas:
         valor = float(parcela.valor or 0)
+        valor_baixado = float(baixas_por_parcela.get(parcela.id_parcela, 0) or 0)
         total_parcelas += valor
         parcelas_view.append(
             {
@@ -1003,6 +1029,7 @@ def editar_parcelas_titulo(id_titulo: int):
                 "numero_parcela": parcela.numero_parcela,
                 "vencimento": parcela.vencimento.isoformat() if parcela.vencimento else "",
                 "valor": valor,
+                "saldo": max(0.0, valor - valor_baixado),
                 "tem_baixa": parcela.id_parcela in parcelas_com_baixa,
             }
         )

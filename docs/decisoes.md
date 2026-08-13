@@ -717,3 +717,15 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   negócio. A cobertura focal passa a tratar esses cenários como regressões
   obrigatórias e registra o tempo da geração síncrona de 999 parcelas.
 - Não há alteração de banco, `main` ou produção.
+
+## 2026-08-13 - PLA-2424 - Bloqueio de edição e saldo da parcela com baixa
+
+- Decisão: parcela com baixa ativa vinculada não pode ter número, vencimento ou
+  valor alterados; a validação ocorre também no backend para rejeitar requisição
+  manipulada.
+- Exibição: a guia de parcelas mostra o saldo individual, calculado pelo valor
+  da parcela menos a soma de suas baixas ativas, limitado a zero para exibição.
+- Fluxo: após excluir uma baixa não conciliada, a parcela volta a permitir
+  edição e exclusão; parcelas sem baixa permanecem editáveis.
+- Impacto: alteração focal em controller, template e testes, sem mudança de
+  banco ou migration.

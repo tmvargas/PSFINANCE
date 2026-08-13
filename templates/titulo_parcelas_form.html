@@ -64,6 +64,7 @@
           <th style="width: 140px;">Parcela</th>
           <th style="width: 220px;">Vencimento</th>
           <th style="width: 220px;">Valor</th>
+          <th style="width: 180px;">Saldo</th>
           <th style="width: 110px;">Excluir</th>
         </tr>
       </thead>
@@ -81,6 +82,7 @@
                 name="vencimento_parcela"
                 class="form-control"
                 value="{{ parcela.vencimento }}"
+                {% if parcela.tem_baixa %}readonly aria-readonly="true"{% endif %}
                 required
               >
             </td>
@@ -92,8 +94,12 @@
                 inputmode="numeric"
                 autocomplete="off"
                 value="{{ '%.2f'|format(parcela.valor or 0)|replace('.', ',') }}"
+                {% if parcela.tem_baixa %}readonly aria-readonly="true"{% endif %}
                 required
               >
+            </td>
+            <td class="fw-semibold text-nowrap">
+              R$ {{ '%.2f'|format(parcela.saldo or 0)|replace('.', ',') }}
             </td>
             <td>
               <input
@@ -115,7 +121,7 @@
               </button>
               {% if parcela.tem_baixa %}
                 <div class="form-text text-danger">
-                  Possui baixa. Exclua a baixa primeiro para liberar a exclusão da parcela.
+                  Possui baixa. Exclua a baixa primeiro para liberar a edição ou exclusão da parcela.
                 </div>
               {% endif %}
             </td>
