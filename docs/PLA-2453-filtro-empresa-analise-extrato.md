@@ -36,12 +36,30 @@
 - Commit funcional mais recente da branch: `a1f6a41`.
 - Commit integrado em `staging`: `2adc116e92a709c287cc5b6ed28f876c4a9b9fdb`.
 
-## Bloqueio do gate de ambiente
+## Validação final em staging
 
-Em 2026-08-14, a porta pública `5001` ainda retornava HTTP 200 com PostgreSQL e branch `staging`, porém no commit anterior `ce1c45c7722c1223aeb92e5c08650f1c186ded42`.
+Em 2026-08-14, após a validação do acesso SSH, a VPS foi atualizada exclusivamente pela branch `staging`, por fast-forward de `ce1c45c7722c1223aeb92e5c08650f1c186ded42` para `a8210d9bc03cf03f48ee930d7555717745b8d2a7`.
 
-O executor não possui arquivo de configuração SSH nem chave privada disponível. Tentativas em modo somente leitura e `BatchMode` para os usuários `root`, `ubuntu` e `plansmart` no host oficial retornaram `Permission denied (publickey,password)`.
+- Diretório: `/opt/plansmart/sistemas/psfinance/staging/repo`.
+- Branch da VPS: `staging`.
+- `HEAD` da VPS e `origin/staging`: `a8210d9bc03cf03f48ee930d7555717745b8d2a7`.
+- Árvore de trabalho da VPS: limpa.
+- Serviços `psfinance-staging` e `psfinance-staging-gate`: ativos.
+- `GET /health`, `/gate`, `/financeiro/analise` e `/financeiro/extrato` na porta `5001`: HTTP 200.
+- `/health`: `status=healthy`, `branch=staging`, commit `a8210d9`, banco PostgreSQL.
+- Logs dos serviços após a estabilização: sem entradas de nível warning ou superior.
+- O primeiro acesso imediatamente após o restart retornou HTTP 502 durante a subida do Gunicorn; a repetição após o serviço ficar pronto retornou HTTP 200 e não houve recorrência nos logs.
 
-Impacto: faltam deploy do commit atual da `staging`, validação de `/health`, `/gate`, `/financeiro/analise` e `/financeiro/extrato` na porta `5001`, consultas de controle no PostgreSQL real e screenshots das duas telas. Nenhuma ação em produção foi executada.
+Validação funcional no PostgreSQL real de staging:
 
-Desbloqueio: responsável com acesso operacional à VPS deve disponibilizar a identidade SSH ao executor ou executar o deploy exclusivamente da `staging` em `/opt/plansmart/sistemas/psfinance/staging/repo`; depois o GDSIS deve concluir os gates e encaminhar ao CEO pelo `executionPolicy` nativo já configurado.
+- Análise com `id_empresa=2`: empresa `PLANSMART` permaneceu selecionada.
+- Ao abrir o Extrato na mesma sessão, a preferência `PLANSMART` foi preservada.
+- O seletor de contas do Extrato ficou vazio para essa empresa, comprovando que contas de outras empresas não foram oferecidas.
+- Sem filtro, as duas telas continuaram apresentando a opção `Todas as empresas`.
+
+Evidências visuais:
+
+- `docs/evidencias/PLA-2453/analise-empresa-plansmart-staging-5001.png` - Análise de Resultado real na porta `5001`, filtrada pela empresa PLANSMART.
+- `docs/evidencias/PLA-2453/extrato-empresa-plansmart-staging-5001.png` - Extrato real na porta `5001`, com a mesma empresa selecionada e contas incompatíveis ausentes.
+
+Não houve merge na `main`, deploy em produção, migration ou escrita no banco de produção.
