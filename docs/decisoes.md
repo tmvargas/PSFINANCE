@@ -740,9 +740,10 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
 
 - Decisão: separar na prestação de contas o PR funcional, os commits
   complementares, o PR de evidências e o commit oficial publicado na VPS.
-- Regra: a evidência final de staging deve apontar para o commit vigente de
-  `origin/staging` e comprovar que o mesmo hash aparece no `HEAD` da VPS, em
-  `/health` e em `/gate`.
+- Regra: a evidência final registrada na issue deve apontar para o commit
+  vigente de `origin/staging` e comprovar que o mesmo hash aparece no `HEAD` da
+  VPS, em `/health` e em `/gate`. O documento versionado pode registrar o
+  commit-base da coleta, sem chamá-lo de atual após o próprio merge documental.
 - Motivo: impedir que um commit histórico válido seja apresentado como commit
   atual depois que novos merges documentais avançarem a branch `staging`.
 - Impacto: somente documentação e rastreabilidade; sem alteração funcional,
