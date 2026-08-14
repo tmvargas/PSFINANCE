@@ -108,6 +108,31 @@ class FiltroEmpresaAnaliseExtratoTest(unittest.TestCase):
         self.assertIn(b"Conta Alfa", response.data)
         self.assertIn(b"Saldo inicial", response.data)
 
+    def test_preferencia_e_compartilhada_e_todas_limpa_a_sessao(self):
+        client = app.test_client()
+        client.get(f"/financeiro/analise?mes=8&ano=2026&id_empresa={self.empresa_a_id}")
+
+        response_extrato = client.get("/financeiro/extrato")
+        self.assertIn(b'value="1" selected', response_extrato.data)
+        self.assertIn(b"Conta Alfa", response_extrato.data)
+        self.assertNotIn(b"Conta Beta", response_extrato.data)
+
+        client.get("/financeiro/extrato?id_empresa=")
+        response_sem_preferencia = client.get("/financeiro/extrato")
+        self.assertNotIn(b'value="1" selected', response_sem_preferencia.data)
+        self.assertIn(b"Conta Alfa", response_sem_preferencia.data)
+        self.assertIn(b"Conta Beta", response_sem_preferencia.data)
+
+    def test_empresa_invalida_limpa_preferencia_memorizada(self):
+        client = app.test_client()
+        client.get(f"/financeiro/analise?id_empresa={self.empresa_a_id}")
+        response = client.get("/financeiro/analise?id_empresa=999999")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(b'value="1" selected', response.data)
+        with client.session_transaction() as session_storage:
+            self.assertNotIn("titulos_filtro_id_empresa", session_storage)
+
 
 if __name__ == "__main__":
     unittest.main()

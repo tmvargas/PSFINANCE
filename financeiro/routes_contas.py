@@ -1,12 +1,13 @@
 # financeiro/routes_contas.py
 from datetime import date, datetime, timedelta
 from sqlalchemy import func, or_
-from flask import render_template, request, redirect, url_for, flash
+from flask import render_template, request, redirect, url_for, flash, session as flask_session
 from datetime import date
 
 from . import bp_financeiro
 from .regras_empresa_centro import (
     listar_empresas_centros_ativos,
+    resolver_filtro_empresa_memorizado,
     validar_conta_da_empresa,
     validar_empresa_ativa,
     validar_empresa_centro,
@@ -38,10 +39,9 @@ def _empresas_ativas_e_filtro(session):
         {"id": empresa.id_empresa, "label": f"{empresa.codigo} - {empresa.nome}"}
         for empresa in empresas
     ]
-    ids_ativos = {empresa["id"] for empresa in empresas_view}
-    id_empresa = request.args.get("id_empresa", type=int)
-    if id_empresa not in ids_ativos:
-        id_empresa = None
+    id_empresa = resolver_filtro_empresa_memorizado(
+        empresas_view, request.args, flask_session
+    )
     return empresas_view, id_empresa
 
 

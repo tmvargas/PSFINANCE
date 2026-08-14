@@ -21,6 +21,7 @@ from sqlalchemy import func
 from . import bp_financeiro
 from .regras_empresa_centro import (
     listar_empresas_centros_ativos,
+    resolver_filtro_empresa_memorizado,
     validar_conta_da_empresa,
     validar_empresa_centro,
 )
@@ -36,7 +37,6 @@ from models import (
     TituloParcela,
 )
 
-FILTRO_TITULOS_EMPRESA_SESSION_KEY = "titulos_filtro_id_empresa"
 LIMITE_PARCELAS_TITULO = 999
 
 
@@ -419,37 +419,6 @@ def _ids_parcelas_com_baixa(session, id_titulo: int) -> set[int]:
     }
 
 
-def _resolver_filtro_empresa_memorizado(empresas_view):
-    empresas_ativas = {empresa["id"] for empresa in empresas_view}
-
-    if "id_empresa" in request.args:
-        id_empresa_raw = (request.args.get("id_empresa") or "").strip()
-        if not id_empresa_raw:
-            flask_session.pop(FILTRO_TITULOS_EMPRESA_SESSION_KEY, None)
-            return None
-
-        id_empresa = request.args.get("id_empresa", type=int)
-        if id_empresa in empresas_ativas:
-            flask_session[FILTRO_TITULOS_EMPRESA_SESSION_KEY] = id_empresa
-            return id_empresa
-
-        flask_session.pop(FILTRO_TITULOS_EMPRESA_SESSION_KEY, None)
-        return None
-
-    id_empresa_memorizada = flask_session.get(FILTRO_TITULOS_EMPRESA_SESSION_KEY)
-    try:
-        id_empresa_memorizada = int(id_empresa_memorizada)
-    except (TypeError, ValueError):
-        flask_session.pop(FILTRO_TITULOS_EMPRESA_SESSION_KEY, None)
-        return None
-
-    if id_empresa_memorizada in empresas_ativas:
-        return id_empresa_memorizada
-
-    flask_session.pop(FILTRO_TITULOS_EMPRESA_SESSION_KEY, None)
-    return None
-
-
 # ----------------------------------------------------------------------
 # LISTAR TÍTULOS (filtro por mês/ano do VENCIMENTO)
 # ----------------------------------------------------------------------
@@ -467,7 +436,7 @@ def listar_titulos():
     data_ini = date(ano, mes, 1)
     data_fim = date(ano + 1, 1, 1) if mes == 12 else date(ano, mes + 1, 1)
     empresas_view, _centros_custo_view = listar_empresas_centros_ativos(session)
-    id_empresa = _resolver_filtro_empresa_memorizado(empresas_view)
+    id_empresa = resolver_filtro_empresa_memorizado(empresas_view, request.args, flask_session)
 
     titulos_periodo = _titulos_periodo_por_parcela(session, data_ini, data_fim, id_empresa)
     titulos_periodo.update(
