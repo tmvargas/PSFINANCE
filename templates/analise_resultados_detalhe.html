@@ -15,6 +15,15 @@
   </p>
 
   <form method="get" class="row g-2 mb-3">
+    <div class="col-md-4">
+      <label class="form-label">Empresa</label>
+      <select name="id_empresa" class="form-select form-select-sm">
+        <option value="">Todas as empresas</option>
+        {% for empresa in empresas %}
+          <option value="{{ empresa.id }}" {% if empresa.id == id_empresa %}selected{% endif %}>{{ empresa.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
     <div class="col-auto">
       <label class="form-label">Mês</label>
       <select name="mes" class="form-select form-select-sm">
@@ -31,7 +40,7 @@
       <button type="submit" class="btn btn-sm btn-primary">Filtrar</button>
     </div>
     <div class="col-auto d-flex align-items-end">
-      <a href="{{ url_for('financeiro.analise_resultados', mes=mes, ano=ano) }}"
+      <a href="{{ url_for('financeiro.analise_resultados', mes=mes, ano=ano, id_empresa=id_empresa or '') }}"
          class="btn btn-sm btn-secondary">
         Voltar à análise
       </a>

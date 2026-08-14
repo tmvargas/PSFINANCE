@@ -13,6 +13,15 @@
 </div>
 
 <form method="get" class="row g-2 align-items-end mb-4">
+  <div class="col-md-4">
+    <label class="form-label mb-1">Empresa</label>
+    <select name="id_empresa" class="form-select form-select-sm">
+      <option value="">Todas as empresas</option>
+      {% for empresa in empresas %}
+        <option value="{{ empresa.id }}" {% if empresa.id == id_empresa %}selected{% endif %}>{{ empresa.label }}</option>
+      {% endfor %}
+    </select>
+  </div>
   <div class="col-auto">
     <label class="form-label mb-1">Mês</label>
     <select name="mes" class="form-select form-select-sm">
@@ -78,7 +87,7 @@
                         {{ r.cod }}
                       {% else %}
                         <a
-                          href="{{ url_for('financeiro.detalhe_conta_resultado', id_plano=r.id_plano, mes=mes, ano=ano) }}"
+                          href="{{ url_for('financeiro.detalhe_conta_resultado', id_plano=r.id_plano, mes=mes, ano=ano, id_empresa=id_empresa or '') }}"
                           class="text-decoration-none"
                         >
                           {{ r.cod }}
@@ -143,7 +152,7 @@
                         {{ d.cod }}
                       {% else %}
                         <a
-                          href="{{ url_for('financeiro.detalhe_conta_resultado', id_plano=d.id_plano, mes=mes, ano=ano) }}"
+                          href="{{ url_for('financeiro.detalhe_conta_resultado', id_plano=d.id_plano, mes=mes, ano=ano, id_empresa=id_empresa or '') }}"
                           class="text-decoration-none"
                         >
                           {{ d.cod }}

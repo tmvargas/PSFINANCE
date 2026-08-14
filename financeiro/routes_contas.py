@@ -14,6 +14,7 @@ from .regras_empresa_centro import (
 from database import SessionLocal
 
 from models import (
+    Empresa,
     Conta,
     MovimentacaoConta,
     PlanoDeContas,
@@ -24,6 +25,24 @@ from models import (
 
 def get_session():
     return SessionLocal()
+
+
+def _empresas_ativas_e_filtro(session):
+    empresas = (
+        session.query(Empresa)
+        .filter(Empresa.deleted.is_(False))
+        .order_by(Empresa.codigo, Empresa.nome)
+        .all()
+    )
+    empresas_view = [
+        {"id": empresa.id_empresa, "label": f"{empresa.codigo} - {empresa.nome}"}
+        for empresa in empresas
+    ]
+    ids_ativos = {empresa["id"] for empresa in empresas_view}
+    id_empresa = request.args.get("id_empresa", type=int)
+    if id_empresa not in ids_ativos:
+        id_empresa = None
+    return empresas_view, id_empresa
 
 
 def parse_money_ptbr(valor_str: str) -> float:
@@ -946,6 +965,7 @@ def excluir_movimentacao(id_mov):
 @bp_financeiro.route("/analise", methods=["GET"])
 def analise_resultados():
     session = get_session()
+    empresas_view, id_empresa = _empresas_ativas_e_filtro(session)
 
     # --- Lê mês/ano da URL ou usa mês atual ---
     hoje = date.today()
@@ -977,7 +997,7 @@ def analise_resultados():
     # ---------------------------------------------------
 
     # Receitas por conta analítica (grupo 1, tipo 'E')
-    mov_receitas_rows = (
+    mov_receitas_query = (
         session.query(
             MovimentacaoConta.id_plano,
             func.sum(MovimentacaoConta.valor).label("valor"),
@@ -991,15 +1011,16 @@ def analise_resultados():
             MovimentacaoConta.data < data_fim,
             PlanoDeContas.cod_estrutural.like("1%"),  # grupo 1
         )
-        .group_by(MovimentacaoConta.id_plano)
-        .all()
     )
+    if id_empresa:
+        mov_receitas_query = mov_receitas_query.filter(MovimentacaoConta.id_empresa == id_empresa)
+    mov_receitas_rows = mov_receitas_query.group_by(MovimentacaoConta.id_plano).all()
     mov_receitas_por_plano = {
         row.id_plano: float(row.valor or 0) for row in mov_receitas_rows
     }
 
     # Despesas por conta analítica (grupo 2, tipo 'S')
-    mov_despesas_rows = (
+    mov_despesas_query = (
         session.query(
             MovimentacaoConta.id_plano,
             func.sum(MovimentacaoConta.valor).label("valor"),
@@ -1013,9 +1034,10 @@ def analise_resultados():
             MovimentacaoConta.data < data_fim,
             PlanoDeContas.cod_estrutural.like("2%"),  # grupo 2
         )
-        .group_by(MovimentacaoConta.id_plano)
-        .all()
     )
+    if id_empresa:
+        mov_despesas_query = mov_despesas_query.filter(MovimentacaoConta.id_empresa == id_empresa)
+    mov_despesas_rows = mov_despesas_query.group_by(MovimentacaoConta.id_plano).all()
     mov_despesas_por_plano = {
         row.id_plano: float(row.valor or 0) for row in mov_despesas_rows
     }
@@ -1026,7 +1048,7 @@ def analise_resultados():
     # ---------------------------------------------------
 
     # Receitas via BAIXAS (títulos de grupo 1)
-    baixas_receitas_rows = (
+    baixas_receitas_query = (
         session.query(
             Titulo.id_plano.label("id_plano"),
             func.sum(Baixa.valor_baixa).label("valor"),
@@ -1041,15 +1063,16 @@ def analise_resultados():
             Baixa.data < data_fim,
             PlanoDeContas.cod_estrutural.like("1%"),  # grupo 1
         )
-        .group_by(Titulo.id_plano)
-        .all()
     )
+    if id_empresa:
+        baixas_receitas_query = baixas_receitas_query.filter(Titulo.id_empresa == id_empresa)
+    baixas_receitas_rows = baixas_receitas_query.group_by(Titulo.id_plano).all()
     baixas_receitas_por_plano = {
         row.id_plano: float(row.valor or 0) for row in baixas_receitas_rows
     }
 
     # Despesas via BAIXAS (títulos de grupo 2)
-    baixas_despesas_rows = (
+    baixas_despesas_query = (
         session.query(
             Titulo.id_plano.label("id_plano"),
             func.sum(Baixa.valor_baixa).label("valor"),
@@ -1064,9 +1087,10 @@ def analise_resultados():
             Baixa.data < data_fim,
             PlanoDeContas.cod_estrutural.like("2%"),  # grupo 2
         )
-        .group_by(Titulo.id_plano)
-        .all()
     )
+    if id_empresa:
+        baixas_despesas_query = baixas_despesas_query.filter(Titulo.id_empresa == id_empresa)
+    baixas_despesas_rows = baixas_despesas_query.group_by(Titulo.id_plano).all()
     baixas_despesas_por_plano = {
         row.id_plano: float(row.valor or 0) for row in baixas_despesas_rows
     }
@@ -1192,6 +1216,8 @@ def analise_resultados():
         total_despesas=total_despesas,
         resultado=resultado,
         timedelta=timedelta,  
+        empresas=empresas_view,
+        id_empresa=id_empresa,
     )
 
 
@@ -1201,6 +1227,7 @@ def analise_resultados():
 @bp_financeiro.route("/analise/conta/<int:id_plano>", methods=["GET"])
 def detalhe_conta_resultado(id_plano):
     session = get_session()
+    empresas_view, id_empresa = _empresas_ativas_e_filtro(session)
 
     hoje = date.today()
     mes_str = request.args.get("mes")
@@ -1240,7 +1267,7 @@ def detalhe_conta_resultado(id_plano):
         return redirect(url_for("financeiro.analise_resultados"))
 
     # Movimentações E/S dessa conta
-    movs = (
+    movs_query = (
         session.query(MovimentacaoConta, Conta)
         .outerjoin(Conta, MovimentacaoConta.id_conta_destino == Conta.id_conta)
         .filter(
@@ -1250,9 +1277,10 @@ def detalhe_conta_resultado(id_plano):
             MovimentacaoConta.data >= data_ini,
             MovimentacaoConta.data < data_fim,
         )
-        .order_by(MovimentacaoConta.data, MovimentacaoConta.id_movimentacao)
-        .all()
     )
+    if id_empresa:
+        movs_query = movs_query.filter(MovimentacaoConta.id_empresa == id_empresa)
+    movs = movs_query.order_by(MovimentacaoConta.data, MovimentacaoConta.id_movimentacao).all()
 
     movs_view = []
     total_movs = 0.0
@@ -1272,7 +1300,7 @@ def detalhe_conta_resultado(id_plano):
         )
 
     # Baixas de títulos dessa conta de plano
-    baixas = (
+    baixas_query = (
         session.query(Baixa, Titulo, Conta)
         .join(Titulo, Baixa.id_titulo == Titulo.id_titulo)
         .join(Conta, Baixa.id_conta == Conta.id_conta)
@@ -1283,9 +1311,10 @@ def detalhe_conta_resultado(id_plano):
             Baixa.data >= data_ini,
             Baixa.data < data_fim,
         )
-        .order_by(Baixa.data, Baixa.id_baixa)
-        .all()
     )
+    if id_empresa:
+        baixas_query = baixas_query.filter(Titulo.id_empresa == id_empresa)
+    baixas = baixas_query.order_by(Baixa.data, Baixa.id_baixa).all()
 
     baixas_view = []
     total_baixas = 0.0
@@ -1326,6 +1355,8 @@ def detalhe_conta_resultado(id_plano):
         total_movs=total_movs,
         total_baixas=total_baixas,
         total_geral=total_geral,
+        empresas=empresas_view,
+        id_empresa=id_empresa,
     )
 
 
@@ -1380,6 +1411,7 @@ def detalhe_conta_resultado(id_plano):
 @bp_financeiro.route("/extrato", methods=["GET", "POST"])
 def extrato_conta():
     session = get_session()
+    empresas_view, id_empresa = _empresas_ativas_e_filtro(session)
 
     hoje = date.today()
 
@@ -1405,12 +1437,13 @@ def extrato_conta():
         d_fim = hoje
 
     # lista de contas para o select
-    contas = (
+    contas_query = (
         session.query(Conta)
         .filter(Conta.deleted.is_(False))
-        .order_by(Conta.descricao)
-        .all()
     )
+    if id_empresa:
+        contas_query = contas_query.filter(Conta.id_empresa == id_empresa)
+    contas = contas_query.order_by(Conta.descricao).all()
 
     conta_sel = None
 
@@ -1423,7 +1456,11 @@ def extrato_conta():
         if id_conta:
             conta_sel = (
                 session.query(Conta)
-                .filter(Conta.id_conta == id_conta, Conta.deleted.is_(False))
+                .filter(
+                    Conta.id_conta == id_conta,
+                    Conta.deleted.is_(False),
+                    *([Conta.id_empresa == id_empresa] if id_empresa else []),
+                )
                 .first()
             )
 
@@ -1687,6 +1724,8 @@ def extrato_conta():
         saldo_final=saldo_final,
         total_entradas=total_entradas,
         total_saidas=total_saidas,
+        empresas=empresas_view,
+        id_empresa=id_empresa,
     )
 
 

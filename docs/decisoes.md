@@ -1,5 +1,11 @@
 # Decisoes - PSCONTROL
 
+## 2026-08-14 - PLA-2453 - Filtro de empresa em analise e extrato
+
+- Decisao: `Análise de Resultado` e `Extrato de Conta` passam a aceitar empresa opcional; sem seleção, preservam a visão consolidada de todas as empresas.
+- Regra: na análise, o filtro restringe movimentações pelo `id_empresa` da movimentação e baixas pelo `id_empresa` do título, inclusive no detalhamento. No extrato, restringe as contas disponíveis e rejeita a seleção de conta pertencente a outra empresa.
+- Impacto: alteração focal de consultas e templates, sem banco, migration, produção ou mudança na regra de conciliação.
+
 ## 2026-08-13 - PLA-2407 - Exclusao de parcela vinculada a baixa
 
 - Decisao: parcela com baixa ativa nao pode ser excluida; a interface deve
