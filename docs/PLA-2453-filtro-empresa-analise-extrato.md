@@ -65,6 +65,49 @@ Evidências visuais:
 - `docs/evidencias/PLA-2453/analise-empresa-plansmart-staging-5001.png` - Análise de Resultado real na porta `5001`, filtrada pela empresa PLANSMART.
 - `docs/evidencias/PLA-2453/extrato-empresa-plansmart-staging-5001.png` - Extrato real na porta `5001`, com a mesma empresa selecionada e contas incompatíveis ausentes.
 
+### Comprovação complementar solicitada na revisão executiva
+
+Em 2026-08-14, a validação foi repetida no PostgreSQL real de staging para o
+período de agosto/2026, usando duas empresas com dados financeiros no período e
+a opção `Todas`. Os identificadores abaixo são técnicos e os nomes das empresas,
+contas e documentos não foram expostos.
+
+Os valores foram apurados de duas formas independentes:
+
+1. consultas somente de leitura pelo SQLAlchemy, reproduzindo os critérios das
+   rotas (`deleted = false`, período, natureza, plano financeiro e empresa);
+2. leitura dos totais renderizados por `/financeiro/analise` e
+   `/financeiro/extrato` diretamente na porta `5001`.
+
+As duas formas retornaram os mesmos valores, centavo a centavo.
+
+| Análise de Resultado | Receitas | Despesas | Resultado |
+| --- | ---: | ---: | ---: |
+| Empresa técnica `1` | R$ 0,00 | R$ 2.863,25 | R$ -2.863,25 |
+| Empresa técnica `4` | R$ 0,00 | R$ 1.148,52 | R$ -1.148,52 |
+| `Todas` | R$ 0,00 | R$ 4.011,77 | R$ -4.011,77 |
+
+A visão `Todas` é exatamente a soma das duas empresas que possuem valores
+classificados no período: `R$ 2.863,25 + R$ 1.148,52 = R$ 4.011,77`. Não houve
+valor de uma empresa na visualização isolada da outra.
+
+| Extrato | Conta técnica | Saldo inicial | Entradas | Saídas | Saldo final |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Empresa técnica `1` | `1` | R$ -14.148,16 | R$ 8.800,00 | R$ 15.407,66 | R$ -20.755,82 |
+| Empresa técnica `4` | `13` | R$ 0,00 | R$ 0,00 | R$ 1.148,52 | R$ -1.148,52 |
+| `Todas`, conta técnica `13` | `13` | R$ 0,00 | R$ 0,00 | R$ 1.148,52 | R$ -1.148,52 |
+
+O seletor apresentou `10` contas para a empresa técnica `1`, `2` contas para a
+empresa técnica `4` e `14` contas em `Todas`. Assim, cada empresa recebeu apenas
+suas contas autorizadas, enquanto `Todas` restaurou o conjunto consolidado. A
+conta técnica `13` manteve o mesmo saldo quando consultada pela empresa correta
+e por `Todas`, demonstrando que a limpeza da preferência não altera o cálculo.
+
+No momento desta coleta, VPS, GitHub, `/health` e `/gate` estavam alinhados ao
+commit `2d454521a1752ef035835b9ec336658baa3ae905` da branch `staging`; a árvore da
+VPS estava limpa e os serviços `psfinance-staging` e
+`psfinance-staging-gate` estavam ativos. Nenhuma escrita foi realizada no banco.
+
 Não houve merge na `main`, deploy em produção, migration ou escrita no banco de produção.
 
 ## Correção de recorrência da PLA-2479
