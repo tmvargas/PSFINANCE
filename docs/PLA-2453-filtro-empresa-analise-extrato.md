@@ -36,7 +36,7 @@
 - Complemento de memória compartilhada: commit `a1f6a41b8f25539163ea25e5927f612ed4dff541`, integrado pelo merge `2adc116e92a709c287cc5b6ed28f876c4a9b9fdb`.
 - Evidência funcional/documental da branch: commit `13bcedc256a1df1561d6376dc34efbf2454627cb`, integrado pelo merge `a8210d9bc03cf03f48ee930d7555717745b8d2a7`.
 - PR de deploy/evidências `#77`: `https://github.com/tmvargas/PSFINANCE/pull/77`, base `staging`, head `d294eb1402fa21213ff5ffe6a6a452ea393f1157` e merge `c196e2aa4fddd43b6b3ce4019b8b0f47aec3002d`.
-- Commit oficial atual da `staging`: `c196e2aa4fddd43b6b3ce4019b8b0f47aec3002d`.
+- Commit da `staging` usado na coleta anterior ao PR corretivo `#78`: `c196e2aa4fddd43b6b3ce4019b8b0f47aec3002d`. O hash final, posterior ao merge da própria correção documental, deve ser registrado na issue técnica junto com a leitura simultânea de GitHub, VPS, `/health` e `/gate`.
 
 ## Validação final em staging
 
@@ -72,5 +72,5 @@ Não houve merge na `main`, deploy em produção, migration ou escrita no banco 
 - Erro devolvido pelo CEO: a prestação de contas misturava o PR funcional `#76`, commits complementares e o commit efetivamente publicado na VPS.
 - Causa: a documentação permaneceu com o commit `a8210d9` depois que o PR de evidências `#77` avançou a `staging` para `c196e2a`.
 - Correção: PRs, heads, merges, commits complementares, `origin/staging` e commit da VPS foram separados explicitamente nesta evidência.
-- Não recorrência: GitHub, workspace e VPS foram consultados novamente; `origin/staging`, `HEAD` local da VPS, metadados de `/health` e `/gate` convergem para `c196e2aa4fddd43b6b3ce4019b8b0f47aec3002d`.
+- Não recorrência: GitHub, workspace e VPS foram consultados novamente; `origin/staging`, `HEAD` local da VPS, metadados de `/health` e `/gate` convergiram para o mesmo hash. O valor final fica na issue técnica porque o merge deste próprio documento avança novamente a `staging`.
 - Risco residual: baixo e restrito à rastreabilidade histórica; código funcional, banco, `main` e produção não foram alterados nesta correção.
