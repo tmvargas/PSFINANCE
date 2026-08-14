@@ -2,7 +2,7 @@
 
 ## 2026-08-14 - PLA-2453 - Filtro de empresa em analise e extrato
 
-- Decisao: `Análise de Resultado` e `Extrato de Conta` passam a aceitar empresa opcional; sem seleção, preservam a visão consolidada de todas as empresas.
+- Decisao: `Análise de Resultado` e `Extrato de Conta` passam a aceitar empresa opcional e compartilhar a preferência de sessão já adotada em Títulos; a opção `Todas` limpa a preferência e preserva a visão consolidada.
 - Regra: na análise, o filtro restringe movimentações pelo `id_empresa` da movimentação e baixas pelo `id_empresa` do título, inclusive no detalhamento. No extrato, restringe as contas disponíveis e rejeita a seleção de conta pertencente a outra empresa.
 - Impacto: alteração focal de consultas e templates, sem banco, migration, produção ou mudança na regra de conciliação.
 
