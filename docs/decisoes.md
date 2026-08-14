@@ -735,3 +735,15 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   edição e exclusão; parcelas sem baixa permanecem editáveis.
 - Impacto: alteração focal em controller, template e testes, sem mudança de
   banco ou migration.
+
+## 2026-08-14 - PLA-2479 - Rastreabilidade do deploy da PLA-2453
+
+- Decisão: separar na prestação de contas o PR funcional, os commits
+  complementares, o PR de evidências e o commit oficial publicado na VPS.
+- Regra: a evidência final de staging deve apontar para o commit vigente de
+  `origin/staging` e comprovar que o mesmo hash aparece no `HEAD` da VPS, em
+  `/health` e em `/gate`.
+- Motivo: impedir que um commit histórico válido seja apresentado como commit
+  atual depois que novos merges documentais avançarem a branch `staging`.
+- Impacto: somente documentação e rastreabilidade; sem alteração funcional,
+  banco, `main` ou produção.
