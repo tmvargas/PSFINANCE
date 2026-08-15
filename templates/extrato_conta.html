@@ -12,10 +12,10 @@
   </a>
 </div>
 
-<form method="get" class="row g-2 align-items-end mb-4">
+<form method="get" id="filtro-extrato" class="row g-2 align-items-end mb-4">
   <div class="col-md-3">
     <label class="form-label mb-1">Empresa</label>
-    <select name="id_empresa" class="form-select form-select-sm">
+    <select name="id_empresa" id="id_empresa_extrato" class="form-select form-select-sm">
       <option value="">Todas as empresas</option>
       {% for empresa in empresas %}
         <option value="{{ empresa.id }}" {% if empresa.id == id_empresa %}selected{% endif %}>{{ empresa.label }}</option>
@@ -25,7 +25,7 @@
 
   <div class="col-md-3">
     <label class="form-label mb-1">Conta</label>
-    <select name="id_conta" class="form-select form-select-sm" required>
+    <select name="id_conta" id="id_conta_extrato" class="form-select form-select-sm" required>
       <option value="">Selecione...</option>
       {% for c in contas %}
         <option value="{{ c.id_conta }}"
@@ -58,6 +58,19 @@
     </button>
   </div>
 </form>
+
+<script>
+  (() => {
+    const empresa = document.getElementById("id_empresa_extrato");
+    const conta = document.getElementById("id_conta_extrato");
+
+    empresa?.addEventListener("change", () => {
+      conta.value = "";
+      conta.required = false;
+      empresa.form.submit();
+    });
+  })();
+</script>
 
 {% if conta_selecionada %}
   <div class="card mb-3 shadow-sm">

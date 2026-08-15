@@ -108,6 +108,17 @@ class FiltroEmpresaAnaliseExtratoTest(unittest.TestCase):
         self.assertIn(b"Conta Alfa", response.data)
         self.assertIn(b"Saldo inicial", response.data)
 
+    def test_extrato_recarrega_contas_ao_trocar_empresa_e_limpa_conta_anterior(self):
+        response = app.test_client().get(
+            f"/financeiro/extrato?id_empresa={self.empresa_a_id}&id_conta={self.conta_a_id}"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'id="id_empresa_extrato"', response.data)
+        self.assertIn(b'id="id_conta_extrato"', response.data)
+        self.assertIn(b'conta.value = ""', response.data)
+        self.assertIn(b'empresa.form.submit()', response.data)
+
     def test_preferencia_e_compartilhada_e_todas_limpa_a_sessao(self):
         client = app.test_client()
         client.get(f"/financeiro/analise?mes=8&ano=2026&id_empresa={self.empresa_a_id}")

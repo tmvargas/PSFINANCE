@@ -748,3 +748,16 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   atual depois que novos merges documentais avançarem a branch `staging`.
 - Impacto: somente documentação e rastreabilidade; sem alteração funcional,
   banco, `main` ou produção.
+
+## 2026-08-15 - PLA-2577 - Encadeamento dos filtros do Extrato
+
+- Decisão: ao trocar a empresa no Extrato, a conta anteriormente selecionada
+  deve ser limpa e o formulário deve ser reenviado imediatamente para que o
+  backend devolva somente as contas da nova empresa.
+- Regra preservada: o backend continua sendo a validação obrigatória e rejeita
+  combinações manipuladas de empresa e conta; o comportamento sem empresa
+  mantém a visão consolidada de todas as contas.
+- Motivo: impedir que o seletor apresente temporariamente contas cruzadas e que
+  uma conta da empresa anterior permaneça associada ao novo filtro visual.
+- Impacto: alteração focal no template e no teste de regressão, sem mudança de
+  banco, migration, `main` ou produção.
