@@ -24,3 +24,38 @@
 - Skills consultadas: `plansmart-governanca-desenvolvimento`,
   `plansmart-projeto-psfinance` e `plansmart-projeto-vps-sistemas`.
 - Sem alteração de banco, migration, variável de ambiente, `main` ou produção.
+
+## Validação automatizada e em staging
+
+- Sete testes focais de `tests/test_filtro_empresa_analise_extrato.py`:
+  aprovados.
+- Compilação de `financeiro` e do teste focal: aprovada.
+- Empresa técnica `1`: `10` contas retornadas no seletor.
+- Empresa técnica `3`: `2` contas retornadas no seletor.
+- A troca entre as empresas limpou a conta anterior antes da navegação; os
+  conjuntos foram renderizados novamente pelo backend e sem conta cruzada.
+- A combinação manipulada entre a empresa A e a conta da empresa B continuou
+  sem selecionar a conta e sem renderizar saldos ou resultados.
+- `Todas as empresas` continuou restaurando a visão consolidada e limpando a
+  preferência compartilhada, conforme teste de regressão existente.
+
+Evidências visuais reais da porta `5001`:
+
+- `docs/evidencias/PLA-2577/extrato-empresa-1-staging-5001.png` - Extrato com a
+  empresa técnica `1` selecionada e conta anterior limpa.
+- `docs/evidencias/PLA-2577/extrato-empresa-2-staging-5001.png` - Extrato com a
+  empresa técnica `3` selecionada e conta anterior limpa.
+
+## Gate de staging
+
+- Branch da VPS: `staging`.
+- Commit funcional publicado: `50aaed2302c0f71c284dad5b96957a3186683af6`.
+- `HEAD` da VPS e `origin/staging`: iguais ao commit funcional.
+- Serviços `psfinance-staging` e `psfinance-staging-gate`: ativos.
+- `/health`, `/gate` e `/financeiro/extrato` na porta `5001`: HTTP 200.
+- `/health` e `/gate`: `status=healthy`, branch `staging`, commit funcional e
+  banco PostgreSQL.
+- O metadado `GIT_COMMIT` do arquivo operacional de staging foi atualizado após
+  o deploy; um backup recuperável foi preservado. Nenhum segredo foi exposto.
+- Logs após o restart: inicialização normal do Gunicorn; mensagens SIGTERM
+  correspondem ao encerramento controlado dos processos anteriores.
