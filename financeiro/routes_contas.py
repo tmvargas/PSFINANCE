@@ -400,7 +400,13 @@ def nova_movimentacao():
 
         if tipo not in ("E", "S", "T"):
             erros.append("Selecione um tipo de movimentação válido.")
-        erros_empresa_centro, _empresa, _centro = validar_empresa_centro(session, id_empresa, id_centro_custo)
+        if tipo == "T":
+            erros_empresa_centro, _empresa = validar_empresa_ativa(session, id_empresa)
+            id_centro_custo = None
+        else:
+            erros_empresa_centro, _empresa, _centro = validar_empresa_centro(
+                session, id_empresa, id_centro_custo
+            )
         erros.extend(erros_empresa_centro)
 
         doc_obj = None
@@ -512,8 +518,7 @@ def nova_movimentacao():
                 erros.append("Conta de origem e destino não podem ser a mesma na transferência.")
 
             # plano não pode ser usado em transferência
-            if id_plano:
-                erros.append("Transferência não deve apropriar plano financeiro.")
+            id_plano = None
 
         # Se houver erros, mostra e volta para o form
         if erros:
@@ -706,7 +711,13 @@ def editar_movimentacao(id_mov):
 
         if tipo not in ("E", "S", "T"):
             erros.append("Selecione um tipo de movimentação válido.")
-        erros_empresa_centro, _empresa, _centro = validar_empresa_centro(session, id_empresa, id_centro_custo)
+        if tipo == "T":
+            erros_empresa_centro, _empresa = validar_empresa_ativa(session, id_empresa)
+            id_centro_custo = None
+        else:
+            erros_empresa_centro, _empresa, _centro = validar_empresa_centro(
+                session, id_empresa, id_centro_custo
+            )
         erros.extend(erros_empresa_centro)
 
         # data
@@ -802,8 +813,7 @@ def editar_movimentacao(id_mov):
             if conta_origem and conta_destino and conta_origem.id_conta == conta_destino.id_conta:
                 erros.append("Conta de origem e destino não podem ser a mesma na transferência.")
 
-            if id_plano:
-                erros.append("Transferência não deve apropriar plano financeiro.")
+            id_plano = None
 
         if erros:
             for e in erros:

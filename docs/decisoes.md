@@ -761,3 +761,15 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   uma conta da empresa anterior permaneça associada ao novo filtro visual.
 - Impacto: alteração focal no template e no teste de regressão, sem mudança de
   banco, migration, `main` ou produção.
+
+## 2026-08-15 - PLA-2581 - Transferências sem apropriação e centro de custo
+
+- Decisão: movimentações do tipo Transferência exigem Empresa para validar as
+  contas de origem e destino, mas não possuem Centro de Custo nem apropriação
+  em Plano Financeiro.
+- Regra: criação e edição limpam `id_centro_custo` e `id_plano` no backend,
+  inclusive quando uma requisição manipulada enviar esses campos. Os dois
+  campos ficam ocultos e sem obrigatoriedade no formulário de transferência.
+- Preservação: Entrada e Saída continuam exigindo Empresa, Centro de Custo e
+  Plano Financeiro conforme as regras existentes.
+- Impacto: não há alteração de banco, migration, `main` ou produção.
