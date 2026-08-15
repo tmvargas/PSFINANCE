@@ -38,7 +38,28 @@ class TransferenciaSemApropriacaoTest(unittest.TestCase):
         plano = PlanoDeContas(
             cod_estrutural="1.1", nome_conta="Receita", tipo="analitica"
         )
-        session.add_all([empresa, centro, origem, destino, documento, plano])
+        plano_saida = PlanoDeContas(
+            cod_estrutural="2.1", nome_conta="Despesa", tipo="analitica"
+        )
+        outra_empresa = Empresa(
+            codigo="2", nome="Outra empresa", tipo_empresa="MATRIZ"
+        )
+        conta_outra_empresa = Conta(
+            descricao="Conta externa", empresa=outra_empresa, tipo="corrente"
+        )
+        session.add_all(
+            [
+                empresa,
+                centro,
+                origem,
+                destino,
+                documento,
+                plano,
+                plano_saida,
+                outra_empresa,
+                conta_outra_empresa,
+            ]
+        )
         session.commit()
         self.ids = {
             "id_empresa": empresa.id_empresa,
@@ -46,6 +67,8 @@ class TransferenciaSemApropriacaoTest(unittest.TestCase):
             "id_conta_origem": origem.id_conta,
             "id_conta_destino": destino.id_conta,
             "id_plano": plano.id_plano,
+            "id_plano_saida": plano_saida.id_plano,
+            "id_conta_outra_empresa": conta_outra_empresa.id_conta,
         }
         session.close()
 
@@ -71,6 +94,66 @@ class TransferenciaSemApropriacaoTest(unittest.TestCase):
         self.assertEqual(movimento.tipo, "T")
         self.assertIsNone(movimento.id_centro_custo)
         self.assertIsNone(movimento.id_plano)
+        session.close()
+
+    def test_transferencia_cria_um_unico_movimento_com_origem_e_destino(self):
+        response = app.test_client().post(
+            "/financeiro/movimentacoes/nova", data=self._dados_transferencia()
+        )
+
+        self.assertEqual(response.status_code, 302)
+        session = SessionLocal()
+        movimentos = session.query(MovimentacaoConta).all()
+        self.assertEqual(len(movimentos), 1)
+        self.assertEqual(movimentos[0].id_conta_origem, self.ids["id_conta_origem"])
+        self.assertEqual(movimentos[0].id_conta_destino, self.ids["id_conta_destino"])
+        session.close()
+
+    def test_transferencia_rejeita_origem_igual_ao_destino(self):
+        dados = self._dados_transferencia()
+        dados["id_conta_destino"] = dados["id_conta_origem"]
+
+        response = app.test_client().post(
+            "/financeiro/movimentacoes/nova", data=dados
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Conta de origem e destino n\xc3\xa3o podem ser a mesma", response.data)
+        session = SessionLocal()
+        self.assertEqual(session.query(MovimentacaoConta).count(), 0)
+        session.close()
+
+    def test_transferencia_rejeita_conta_de_outra_empresa(self):
+        dados = self._dados_transferencia()
+        dados["id_conta_destino"] = str(self.ids["id_conta_outra_empresa"])
+
+        response = app.test_client().post(
+            "/financeiro/movimentacoes/nova", data=dados
+        )
+
+        self.assertEqual(response.status_code, 200)
+        session = SessionLocal()
+        self.assertEqual(session.query(MovimentacaoConta).count(), 0)
+        session.close()
+
+    def test_entrada_e_saida_continuam_exigindo_centro_e_plano(self):
+        base = self._dados_transferencia()
+        base["id_conta"] = str(self.ids["id_conta_origem"])
+        base["id_centro_custo"] = ""
+        base["id_plano"] = ""
+
+        for tipo in ("E", "S"):
+            with self.subTest(tipo=tipo):
+                dados = {**base, "tipo": tipo}
+                response = app.test_client().post(
+                    "/financeiro/movimentacoes/nova", data=dados
+                )
+                self.assertEqual(response.status_code, 200)
+                self.assertIn(b"Centro de custo \xc3\xa9 obrigat\xc3\xb3rio", response.data)
+                self.assertIn(b"Selecione o plano financeiro", response.data)
+
+        session = SessionLocal()
+        self.assertEqual(session.query(MovimentacaoConta).count(), 0)
         session.close()
 
     def test_edicao_remove_apropriacoes_antigas_da_transferencia(self):
