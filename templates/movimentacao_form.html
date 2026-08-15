@@ -126,7 +126,7 @@
       </select>
     </div>
 
-    <div class="col-md-6">
+    <div class="col-md-6" id="col_centro_custo">
       <label class="form-label">Centro de Custo</label>
       <select name="id_centro_custo" id="id_centro_custo" class="form-select" required>
         <option value="">Selecione...</option>
@@ -221,6 +221,8 @@
   const colOrigem = document.getElementById("col_conta_origem");
   const colDestino = document.getElementById("col_conta_destino");
   const colPlano = document.getElementById("col_plano");
+  const colCentroCusto = document.getElementById("col_centro_custo");
+  const centroCusto = document.getElementById("id_centro_custo");
   const labelConta = document.getElementById("label_conta");
 
   function ajustar() {
@@ -232,6 +234,9 @@
       colDestino.style.display = "";
       colPlano.style.display = "none";
       plano.value = "";
+      colCentroCusto.style.display = "none";
+      centroCusto.value = "";
+      centroCusto.removeAttribute("required");
       return;
     }
 
@@ -239,6 +244,8 @@
     colDestino.style.display = "none";
     colContaUnica.style.display = "";
     colPlano.style.display = "";
+    colCentroCusto.style.display = "";
+    centroCusto.setAttribute("required", "required");
 
     if (t === "E") {
       grp1.style.display = "";

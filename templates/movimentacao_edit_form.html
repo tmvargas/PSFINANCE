@@ -164,7 +164,7 @@
       </select>
     </div>
 
-    <div class="col-md-6">
+    <div class="col-md-6" id="col_centro_custo">
       <label class="form-label">Centro de Custo</label>
       <select name="id_centro_custo" id="id_centro_custo" class="form-select" required>
         <option value="">Selecione...</option>
@@ -264,6 +264,8 @@
   const selDestino = document.getElementById("id_conta_destino");
 
   const colPlano = document.getElementById("col_plano");
+  const colCentroCusto = document.getElementById("col_centro_custo");
+  const centroCusto = document.getElementById("id_centro_custo");
   const plano = document.getElementById("id_plano");
   const grp1 = document.getElementById("grp_1");
   const grp2 = document.getElementById("grp_2");
@@ -293,6 +295,9 @@
 
       // plano zera
       if (plano) plano.value = "";
+      colCentroCusto.style.display = "none";
+      centroCusto.value = "";
+      setRequired(centroCusto, false);
 
       // esconde grupos
       if (grp1) grp1.style.display = "none";
@@ -305,6 +310,8 @@
     colDestino.style.display = "none";
     colContaUnica.style.display = "";
     colPlano.style.display = "";
+    colCentroCusto.style.display = "";
+    setRequired(centroCusto, true);
 
     setRequired(selOrigem, false);
     setRequired(selDestino, false);
