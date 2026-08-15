@@ -773,3 +773,17 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
 - Preservação: Entrada e Saída continuam exigindo Empresa, Centro de Custo e
   Plano Financeiro conforme as regras existentes.
 - Impacto: não há alteração de banco, migration, `main` ou produção.
+# 2026-08-15 - PLA-2585 - Pacote de Produção não recomenda promoção
+
+- O Pacote de Produção foi atualizado com `staging` em `45edca5` e `main` em
+  `23821c7`.
+- O staging foi alinhado ao GitHub e validado na porta `5001`, com PostgreSQL,
+  serviços ativos, rotas críticas em HTTP 200 e logs sem alertas persistentes.
+- A promoção não é recomendada porque o ambiente produtivo do PSFINANCE não
+  existe na VPS, a comparação do banco produtivo é impossível no estado atual,
+  o escopo contém 219 commits e cinco migrations com backfills, e o modelo
+  multicliente permanece pendente.
+- Dados operacionais de produção devem ser preservados por padrão. Não copiar
+  o banco de staging para produção.
+- Nenhum merge em `main`, deploy produtivo ou escrita no banco de produção foi
+  autorizado ou executado.
