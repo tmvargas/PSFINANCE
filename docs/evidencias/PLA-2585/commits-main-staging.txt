@@ -1,0 +1,225 @@
+PLA-2585 - Lista completa de commits de origin/main..origin/staging
+Baseline analisada: origin/main=23821c7786e98c5c489c60c2ac60760e3cdc17c1
+Baseline analisada: origin/staging=87c6bd22946179717e26c73461ef79e2f573e768
+
+87c6bd22946179717e26c73461ef79e2f573e768 merge: atualiza pacote de producao PLA-2585
+5b1b9d94391713254256c26ab764e7197914ce95 docs: atualiza pacote de producao PLA-2585
+45edca507b5b7038d647f663b25059ede26d32d2 merge: completa evidencias da PLA-2581
+df0ab68d6e6edde9cc925ac78d71626bcf2df367 docs: completa evidencias da PLA-2581
+8288040ab1a325337c5ffc64cf0189a2bfc66f11 merge: remove apropriacao de transferencias PLA-2581
+89fe904450645f663b65ee90a2c819c39769ed87 fix: remove apropriacao de transferencias PLA-2581
+8f526a03146619df044f4a25d4c43b4e21efb6f8 merge: completa evidencias da PLA-2577
+2c767f7f21efb4b5ddab80f4caa876888dd32b5f docs: completa evidencias da PLA-2577
+43192c9bdaeabf17c86bcc0b8ba850281d0220da merge: registra evidencias de staging PLA-2577
+dbb583cd6bb9c93675c9408b0b82c635a0608784 docs: registra evidencias de staging PLA-2577
+50aaed2302c0f71c284dad5b96957a3186683af6 merge: corrige contas cruzadas no Extrato PLA-2577
+8c467b32936ce8643b290900f25cee9b71400d0d fix: corrige contas cruzadas no extrato PLA-2577
+28ec78ebb6b0d5d2501382764689d28b241558f6 merge: comprova totais e saldos da PLA-2453
+28b4aee6c331e3a9c81b860d284b6b7317254bd6 docs: comprova totais e saldos da PLA-2453
+2d454521a1752ef035835b9ec336658baa3ae905 merge: elimina ambiguidade de hash PLA-2479
+e63533506bd6b5e8c5a1624350d24b2b2f2cceb8 docs: elimina ambiguidade de hash da PLA-2479
+dc48912fad396e92c975caf4bda3b205eaab4d0c merge: corrige rastreabilidade PLA-2479
+4040d1fb9e7d0a267e5cc7e61815de2b70250bf9 docs: corrige rastreabilidade da PLA-2479
+c196e2aa4fddd43b6b3ce4019b8b0f47aec3002d merge: registra deploy e gate PLA-2479
+d294eb1402fa21213ff5ffe6a6a452ea393f1157 docs: registra deploy e gate da PLA-2453
+a8210d9bc03cf03f48ee930d7555717745b8d2a7 merge: registra evidencias PLA-2453
+13bcedc256a1df1561d6376dc34efbf2454627cb docs: registra matriz e bloqueio de staging PLA-2453
+2adc116e92a709c287cc5b6ed28f876c4a9b9fdb merge: completa memoria do filtro PLA-2453
+a1f6a41b8f25539163ea25e5927f612ed4dff541 fix: compartilha preferencia de empresa entre consultas
+434de396fb5955254bc845f350398cb4ef09bee8 merge: integra filtro por empresa PLA-2453
+3d331e56db7940b9e4d41da1baf452ea7872bf3e feat: filtra analise e extrato por empresa
+ce1c45c7722c1223aeb92e5c08650f1c186ded42 merge: integra evidencia visual PLA-2424
+dc5ccb0e7af9dbf49d199b719ba8c9ddce43e576 docs: adiciona evidencia visual de staging PLA-2424
+d7da6c0e60030c533349dee1211c5a90c16aa480 merge: registra evidencias de staging PLA-2424
+e1a14466863c9f3cd643e729d75d1de1e7793818 docs: registra evidencias de staging PLA-2424
+e4ee88b38d5a1fa2985d54d18cc909c0f42c83f3 merge: integra bloqueio de edicao e saldo PLA-2424
+11802bb788bcfad4af6a33e8f67eed9e0962fa18 fix: bloqueia edicao de parcela com baixa e exibe saldo
+3e2d963f101d1c51f52e220c78e0c5542ed878ba merge: integra evidencias finais PLA-2409
+a3a1b3a2488ff99a63e66cda530353d872b658e9 docs: registra desempenho de staging PLA-2409
+e03d5b523c10d915441fedb8a6ddaa5e7ee78980 merge: completa evidencias de revisao PLA-2409
+b08a63efbca75aa542a8f16984fe3f89bea60aee test: completa evidencias de revisao PLA-2409
+d0233d34b41b0a2cb91abdd5c88a7444b343b886 merge: integra evidencias de revisao PLA-2407
+2da5c5ff7d440b8bcfb38a672e35311ba4011994 docs: registra revalidacao executiva PLA-2407
+22fa86f57db35a9d06de2e84f7f91a9b0ab8bec2 merge: integra ajustes de revisao PLA-2407
+664307ae1ed41121714681467be5540041dcc5b7 fix: completa revisao do fluxo de baixa PLA-2407
+79d69543ec8f5b8a6eae241508ea680f210b996d merge: integra evidencias PLA-2409
+56caa8c549de8c3bcdcc08a8538304159e0a2f35 docs: registra evidencias de staging PLA-2409
+c52355f8d10131c617a61022afee1212123f3d0e merge: integra PLA-2409 limite de 999 parcelas
+9b9ebc7b6b79cc7a04d2a5978a13bc19fe4730aa fix: permite ate 999 parcelas por titulo
+e9f6e015573956e7df0060f97ca9c0ad28df3d8f merge: integra evidências PLA-2407
+9673fad8cf6c936d112f7924a91baf263229778a docs: registra evidências PLA-2407
+4e14c01cc956cdbf3697b387ecb52620fd590c68 merge: integra PLA-2407 bloqueio de exclusão de parcela
+20bb668859da3041d7d227ecced3246c5e007f18 fix: impede excluir parcela com baixa
+afddae2b4f022b935a5552f60ff8ba17579689de merge: integra PLA-2315 mascara baixa parcela
+643a36a1b448cc6e956e4f78f91b6f2df9a91204 fix: corrige mascara da baixa por parcela
+4dbf65df755170bac3bdd11c52bf91856fa2a02b merge: integra evidencias PLA-2315
+9aa657d5f10a8f4694624765b9997887a3c20f9f docs: registra evidencias da baixa por parcela
+f7e605d119ae67505405d96c7d2eb0b98a9d69b8 merge: integra PLA-2315 baixa por parcela
+494d6e44265624f16bd1b932e81b0d4f813c2508 fix: sugere valor na baixa por parcela
+6e7de9c7b9d2a926316d9b1956650d3b63431827 merge: integra PLA-2276 baixas por parcela
+4605383506fa1548e593778ee1d033ade42f25c3 fix: vincula baixas a parcelas
+e6e6509df5fc4e6214a9e4d5dafa56fbfe15f90b Merge pull request #63 from tmvargas/docs/PLA-2272-evidencia-caixa-mensal
+1baa5ce9eaf230394e1ce488d784c33133c11fc9 docs: registra evidencia caixa mensal PLA-2272
+8901c988f9e867cf1f1a09f762797050ee4f6381 Merge pull request #62 from tmvargas/fix/PLA-2272-status-caixa-mensal
+e63bc264ea4eee50030b390c37e842a43ae789cb fix: ajusta status mensal de titulos
+8479798ca0dcfc3413fa56f8d51146e077444269 Merge pull request #61 from tmvargas/fix/PLA-2272-rotulos-caixa-mensal
+a2c3bc0b55469c2539b6c9740b7e209548e8be42 fix: explicita caixa mensal em titulos
+a3c4ab7be27e7146ef5a1971c913fd4355e64c74 Merge pull request #60 from tmvargas/docs/PLA-2272-evidencias-staging
+496c2c5a8908c6c7872683bee92b1ae4c1a665c3 docs: registra evidencias PLA-2272
+c30d9856fed132a63528b4d3afd5e63c55d2d6e1 Merge pull request #59 from tmvargas/fix/PLA-2272-valor-parcela-mes
+f2b28650cab48dac4688c884a156a37ee053803a PLA-2272 exibe valor da parcela no mes
+6de23ecd14a1fa10d6005b9ba7c1a37457a0c629 docs: registra evidencias PLA-2264
+02d6f33e5993c2950f9ec8455abcd90e3a2112c4 PLA-2264 ajusta totais mensais de titulos parcelados
+d9983a4f70afe0081427cb787225b60d79519913 PLA-2264 corrige consulta mensal de titulos parcelados
+5375bbc39519e10f9bdb3dbe2c2d06b6cd138de5 docs: registra evidencias PLA-2171
+d40b03d873af721836d3c1377048daef99ee3fe9 PLA-2171 memoriza filtro de empresa em titulos
+1005214240e5335003ec351e65804802563eb8ba PLA-2171 adiciona filtro por empresa em titulos
+e7b737e1b83a99531aef6fb0ca954fd04541e4f1 docs: anexar evidencia vps PLA-2148
+554e203694e5deb1a61ac64d727904c2a2e46cec docs: ajustar referencia de validacao PLA-2148
+e6c7df5c7ca1a6c3837e21bdb6a3abb05a5bfd67 docs: registrar commit staging PLA-2148
+86ef9042c3bc5f73539721ef18b83ba297606233 Merge branch 'fix/PLA-2155-remover-texto-edicao-titulo' into staging
+cddcc1649c7b3a6743ab425fcb00a3af8815b51b docs: registrar evidencia PLA-2148
+fc51501863cabaab57a18cdea339f2aaa7a84e84 Merge pull request #57 from tmvargas/fix/PLA-2155-remover-texto-edicao-titulo
+aca20be1e22b5f8742d02c3bf7f554be9741856e fix: remover texto indevido da edicao de titulo
+0743bf0632a0c67f785aab327766e1241c6ddebc Merge branch 'pla-2148-corrigir-quantidade-real-parcelas-titulo' into staging
+d4e4eb0f3ef4fefbea5dc23c0a25e79df5b8d677 fix: exibir quantidade real de parcelas no titulo
+b3ed91a14b73552615502246489f3ff8ab1c6c65 docs: registrar validacao real PLA-2117
+0ae81cd1606c47fef77f9049d5c7256d227a06fb Merge branch 'fix/PLA-2117-ui-parcelas-sienge' into staging
+1ecbcba4bc3b95a1d469eb1ee4950a6da9f76661 fix: ajustar aba parcelas conforme sienge
+3c2f169140359e226527e33d18d9992ab6a3f409 docs: registrar validacao staging PLA-2117
+10d7fc6163032401a610db88446834f02878d79f Merge branch 'fix/PLA-2117-parcelas-conforme-sienge' into staging
+1896b1a478fed42a7eea68a31aef063eb0ff229e fix: sincronizar parcela unica do titulo
+b1c2426496ff5008bf99e30b245d45bc0495a079 Merge PLA-2111 validação staging
+aafb92aad2a58d3422ac29eae2e1c80f7b391328 docs: registrar validacao staging PLA-2111
+569fadd54816e806872825df3e49a6433155c5ff Merge PLA-2111 UX cadastro novo titulo
+50f128b6e9d2bb02480f53395da0200265fde87e fix: corrigir UX do cadastro de novo titulo
+8eb5a576442abf85210bfd237f09d79f6900fe73 Merge ajuste commit final PLA-2106
+911b1cb5ef489c47308470efc5ab6ddeebe6a583 docs: ajusta commit final PLA-2106
+9745b5e7cb4991c4429078b7046aa23a1cf09c63 Merge evidencias PLA-2106 em staging
+f2f16a11d36e1f5ef3ca3cf5850dbcb08ffbe794 docs: complementa evidencias PLA-2106
+89d6d4d6b7325589a67bf54864036590d2f07627 Merge PLA-2106 staging real parcelas
+ed82af6a26d305c1348acb659e86f3460d5688bb docs: registra correcao staging parcelas PLA-2106
+b7d10c1a18574aff8186573829aba2786c1df80c Merge evidencias PLA-2073 em staging
+077ccd03cc2cdb9d2796c20ba2d7ab1809c2d165 docs: complementa evidencias PLA-2073
+f2659ef60755f32d94e62a8e20f7b16a5c3b4223 Merge complemento PLA-2073 em staging
+3a2fdb7094056b46785bcb2e69dd7816934cefa9 PLA-2073 Ajusta rotulos na edicao do titulo
+48548b77f7c2b73e833c6c4c0610ab6261ac6c48 Merge PLA-2073 em staging
+a6b4bdc9d1a422f8cf4923c10c46243deb6ee6b0 PLA-2073 Corrige visibilidade da guia de parcelas
+2167bd759d600d13aa54e623a07a0661bb5cd1c7 Merge PLA-1816 multi parcela titulo
+e0d19effdbab07be9e8bd7f11b29fe8256527962 PLA-1816 documenta validacao staging 5001
+9b8efbc22c84b84376b2b4761e72ebb0efb8887e PLA-1816 completa parcelas relacionais de titulo
+e5d873fa8734ffa5db92dcb68499d3e6ab02eb8d PLA-1816 implementar multi parcela em titulo
+e17896e7838cdea30f6deea9f8aecd003cc3b0f0 Merge PR #49 PLA-1655 evidencia menu Cadastro Geral
+9649b10a2c55e2aabc3c438c3f7aa526ffea3e49 Corrige evidencias do menu Cadastro Geral
+d887413aa544958ae60fbc4a77ef5096175cc371 Merge PR #48 PLA-1655 corrige titulo compacto Cadastro Geral
+9dc677cabdcb5e9fbf40cb23952fc89de770b667 Corrige titulo compacto de Cadastro Geral
+141b7efa16de5cf890ae0b30d5f4c3c846db0114 Merge PR #47 PLA-1655 documenta evidencia VPS
+a7db17adbaf57d34c57a8244f92cb9c49db17730 Documenta evidencia VPS do icone compacto
+8078f3630154d0e1ef1f1f24d85a68f7b4361c35 Merge PR #46 PLA-1655 corrige icone compacto Cadastro Geral
+ae3e3781f4f38bb17bedab7c6f3e6516e5930dae Corrige icone compacto de Cadastro Geral
+7aed211e14335bd86a2f40acd3e15680d0e336b5 Merge PR #45 PLA-1655 ajusta menu compacto Apoio
+1e0fb060b435ede9c64a68e932aaad95285c418c Corrige comportamento compacto do menu Apoio
+f3fb53e1b4c0d4260a9313ccc056f66de48434f4 Merge PR #44 PLA-1655 alinha evidencias de revisao
+730267a15567bc8903c167123fa8db38f8966036 docs: alinha evidencias da revisao PLA-1655
+99c7a7fb210969b94bf91c19d00cefd5d71c2816 Adiciona evidencias VPS da recorrencia PLA-1655
+df0110c2fd93bcf73e583b883dff569feffaa06d Merge PLA-1655 correcao Apoio unico
+450545f928442e51112f31934fbbc7173b399992 Corrige duplicidade visual do menu Apoio
+f7fd73eb11c6827402e1044edd3bb003d784c907 Merge PLA-1655 evidencia vps
+6d0f1d9ef83ba5d9013f929766cf251ed4425511 docs: registra validacao vps pla1655
+9481df3e3f21dd7f434a271086249bc78fc33797 Merge PLA-1655 cadastro geral dentro de apoio
+49ee3745ee8e651eb446be879f6bda98296006d7 fix: coloca cadastro geral dentro de apoio
+ac14ecb01fc40b117b53a151e8dec0e809990b5a Merge PLA-1655 preserva primeiro Apoio
+43843519c547d11c39013750165e44a028a86fc8 fix: preserva primeiro apoio no menu
+f08cd7c9ab87d763db2ff30a151e582cf85c56f3 Merge PLA-1655 atualiza evidencias visuais
+265a753ed643462de7c13182e459df3b76fa5255 docs: atualiza evidencias visuais PLA-1655
+c1d03c857a2b58cce0ff2f34a22db573c79bc63d Merge PLA-1655 corrige grupo cadastro geral
+a5fad6bb58a2b64af5c34fc5a072139a0f5eacee fix: corrige grupo cadastro geral no menu
+67ecc0cbdb094b97759494701f7b59721af6218e Merge PLA-1655 cadastro geral menu
+951b1e535ac4546f8f824ce01bd47dc8d952c0e9 fix: renomeia apoio para cadastro geral
+f069d7c32bbcabf4fd5c49c1686e4c52e708c259 Merge PLA-1618 padroniza layout consultas
+214c8047422f7f1277e4c3b714a544294ffe2954 PLA-1618 complementa evidencias de layout
+323c23eb22db9ca8bbe2ecd2d7c2bcbc432c0095 PLA-1618 padroniza layout das consultas
+9502730df2c760e0e596033295fd4b3aa1e73a04 Corrige menu Apoio compacto
+0e88ab7b8a0451b5fc025e9e0f4e1898385284cf merge: PLA-1480 menu apoio fechado
+a41464134d3133ef1f3439e79614ea00c4b641cb fix: ajustar menu apoio fechado
+161108aab1354a98e1836ab49653193fb49e5ae1 merge: PLA-1376 validar contas por empresa
+b208b09ec1f1cdaa41b2dfa50b4efd3c1edb4e88 fix: validar contas por empresa nas movimentacoes
+d028bcac0e9cfece93dba552fcd7c3051d8341fa merge: PLA-1376 vincular contas a empresa
+f01472d9667c99bfce4d8ecf3bf8655ef9be30b3 feat: vincular contas a empresa
+f8bb3e569d321f20b77bb9e5c3684f3d860fb31b merge: PLA-1370 evidencia sem hash
+17a59b8024938b018ece487e05390c2bed7eb56d docs: atualizar evidencia visual PLA-1370
+e7ae32b2b576c32e38fcef969aea02b05547e25e merge: PLA-1370 remover hash coluna titulo
+0b06906119eae5ed671f64432fb2305d8c4af083 fix: remover prefixo hash da coluna titulo
+ee2e7ed6e1657e16070c0a823dde0c96a78e2ea5 merge: PLA-1370 evidencia visual
+55e46600a9f4eba6ee16867b9f4e787cf92ce91b docs: registrar evidencia visual PLA-1370
+792d3dc7994439b2f1a5ee466362566cec6c3c86 merge: PLA-1370 coluna titulo consulta
+8f2674f1652416540577e784a9926d2fa954cb52 fix: ajustar coluna titulo na consulta
+c11635f1ae00fdedf909d386c97900c161d4cee8 merge: PLA-1359 registro final
+c26901aa698abc965252cdd100891806f3d31720 docs: atualizar registro final PLA-1359
+3347d18936aabac5c8212be8c754272361650483 merge: PLA-1359 icones nas acoes de titulos
+98b0f23e6364807437a41818d814288d0aae857b fix: usar icones nas acoes de titulos
+d4b8868c761b163e5bf4acedbffb2c13b83bb202 docs: registrar entrega PLA-1359
+fdbe81a67f17c30c3aaaa88d8e599b05db67c5dd merge: PLA-1359 layout consulta titulos
+9f174fb5f3afeb01edfc212322c22b95367fff43 feat: melhorar consulta de titulos a pagar
+168e9996b2635b11e399ed323779c66643d91d7a merge: PLA-1290 evidencias backfill
+097ac960e0b4b9c1df74b3910df8827151c5ec46 docs: registrar evidencias backfill PLA-1290
+caed622c4d0b206590a69b36597e8fdcc69e24a8 merge: PLA-1290 backfill empresa centro
+30e86f6051a72fdc7b425a7b12b63d3364d08830 feat: preparar backfill empresa centro lancamentos
+2a5e71110d410bc18dcd8c9c188d84607aa15baf merge: PLA-1235 cadastros empresa centro custo
+dee9ed16c38d2a979ddce4b3c4f8564b3ff0c375 feat: vincular empresa centro custo aos lancamentos
+01eb98c2d51be05f2cb89ad430c5f777391b1235 docs: preparar script staging cadastros PLA-1235
+8b584633c9df087019bf93399bd37d2044b32892 docs: registrar evidencias visuais PLA-1235
+ecc97bb0536a3a338569c617d0da4a733ffa7043 feat: implementar cadastros empresa centro custo
+e0c434bbfb8573daba3ff9d0fdfc730afb65a971 merge: PLA-1043 remover contas do apoio
+583d9351b5c89adcc536b2e891c1320fbd9914e2 fix: remover contas do apoio PLA-1043
+85d771899c0546297be00b7e06c033aaa229622d merge: PLA-1043 registrar deploy staging
+a79b8e7938987417f19e0526cadbf9a516911818 docs: registrar deploy staging PLA-1043
+677a05dda5cf3891112927d5486593ae9bc3a146 merge: PLA-1043 aplicar layout aprovado
+39a6811414c8da33816bb4da9854647280ca780f feat: aplicar layout aprovado nas rotinas PLA-1043
+fda1a0d17bc6b01b23eeb8c2dc004a19813ccd33 merge: PLA-1036 completar flyouts compactos
+56605229b673483e168a2fee7c2ec46b419460b8 fix: completar flyouts do menu compacto PLA-1036
+41e08cf10ca39da52dbeccd532cc52b7f8a60322 merge: PLA-1036 menu compacto com flyout
+2b39c5428f590d0f7d9b9de414eea7d52cf26360 fix: ajustar menu compacto com flyout PLA-1036
+db4ec1d618f342d2c6cd914893c76f1cb1158c8d merge: PLA-1031 limpar estado fechado menu mockup
+c375842510a9a7403d8038c58109445e07bf552f docs: limpar menu fechado do mockup PLA-1031
+8be8468c639961423c27b21a760ce14dc6aaf1ab merge: PLA-1031 registrar validacao 5001
+3a4b7e6754065937df48e0d43abe756b05724adf docs: registrar validacao 5001 da PLA-1031
+172e629264e598caa43c31f6ef9ec2da82fc970a merge: PLA-1031 registrar staging e pendencia 5001
+d713c9129572af100be0799e10e58dd537fc1534 docs: registrar staging da PLA-1031
+29ec18056fb710cb5f7d01cdc4038aaa08f51f04 merge: PLA-1031 corrigir estado fechado menu mockup
+698e1ff20264fedea10d0b2070fc2790027dafef docs: corrigir estado fechado do menu PLA-1031
+19341f930bb5daf5d6216bfb55b00324e214c4df docs: corrigir icones reais do mockup PLA-1027
+48b9e48a5a7b7a7f6df9a22c436295d7cd28d1f6 docs: refazer mockup menu PLA-1022
+e6f9505d07a13565d39615d26e23f23c70acfd66 docs: adicionar evidencias visuais PLA-1019
+0c03708fc7405d874dc210a180777d43542c41d1 docs: corrigir hierarquia do menu PLA-1019
+2055d7f8bd0cf692422651232518be3f10442074 docs: ajustar mockup menu inicial PLA-1019
+4d39e38c1278164946cffd92a0bc29179a7d80d2 docs: registrar screenshots mockup PLA-1016
+bdec28dbf002e2804a1c1bcf986e6e50385f48b0 docs: adicionar mockup layout inicial PLA-1016
+f15c82f9477c4af2bb2906a1441b4f140e3bff56 Revert "feat: mockup layout inicial PLA-1016"
+0482e373dfc4a87c8285734e25a250abb488d383 feat: mockup layout inicial PLA-1016
+2976a64ea07e09b53a97dfcb8d6879edae4fe042 merge: PLA-1005 evidenciar PostgreSQL staging
+6d4f2443e7b2ef726c2023ff05a8055a46e4f279 fix: evidenciar postgresql staging PLA-1005
+a346e3faa8da5bb3a2dadbbb9d93d23d43a19f34 merge: PLA-988 migrar staging PSFINANCE para PostgreSQL
+5861b43596a6bfc1dd803119cdfa731ec016040a infra: preparar migracao staging para postgresql
+500f2f93ef68b4d9768a9d5a8545a5f570ef54e4 merge: PLA-981 URL base funcional em staging
+ed931d2608818b32d2531eb40eac73fe4fb24ffc fix: retornar dashboard na base do staging PSFINANCE
+5c73b138de8ab133ec67a034d9889ddb9cde917a merge: PLA-985 retomar PSFINANCE funcional do ZIP
+5e34516b54277916071e790770da166189394105 feat: retomar PSFINANCE funcional do ZIP
+f67b1e163f6464239e09d8a24671bbc12189f161 docs: registrar bloqueio de artefatos da PLA-981
+fb2b9dea247ba34ea91150cb10c20680c9c49a05 merge: PLA-836 localizar base real do PSFINANCE
+334e3471dbefa4964109d91777cf1632af4ed2ae docs: registrar base real do PSFINANCE
+e7c1b1ed566dc9f715d676bc3b94d6cd632a6376 merge: PLA-831 corrigir URL de homologacao
+66f93207137c48e5249882ce09c2a6f3bbd4dc33 fix: ajustar homologacao HTML do PSFINANCE
+3d9e86ae666ca04ae398a38ef788b7bf6a626c5b docs: registrar URL sem porta do staging PSFINANCE
+7c029d28c0c803190ecf54fdc2ae8bca144fee3c docs: registrar validacao da URL de staging PSFINANCE
+c2982b916d58503c34c552cf3ecb8e2ed49941ce PLA-825 configura URL de staging do PSFINANCE
+ca3ddced20c9b002d0c5e3331140432aaca2be4f merge: PLA-815 confirmar URL publica de homologacao
+26c58f5c15d1badbbd70d97d7243e663b78235e0 docs: confirmar URL publica do staging PSFINANCE
+b01f8048b3083beba1ff4e782d05ce9649ebc3aa merge: PLA-814 registrar evidencia final
+960e560e2d85d7557a12777a931642b445366fdc docs: registrar validacao final do gate PSFINANCE
+3ef9a1b566c47ffb269c473cb7c932a9c4262c79 merge: PLA-814 liberar acesso ao staging
+1f11b4667ff74a92c8abe82a4be556deab11d909 docs: registrar liberacao do staging PSFINANCE
+ecf26919b9aaa8a8fd75a52a9011d509ea727259 merge: PLA-747 registrar evidencia do staging
+b619fdb1866eace1c9882e741a85044e5c8f8787 docs: registrar evidencia do staging PSFINANCE
+6a3eb0c82c7168d45a01f51d8aa5700abd2abc66 merge: PLA-747 preparar staging do PSFINANCE
+0e0f3ed59e07eea40a8d1b3598370f4d9f6b3b45 infra: preparar staging do PSFINANCE

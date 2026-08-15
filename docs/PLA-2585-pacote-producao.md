@@ -6,19 +6,35 @@
 - Projeto: PSFINANCE, no projeto guarda-chuva `VPS - SISTEMAS`.
 - Skills consultadas: `plansmart-governanca-desenvolvimento`,
   `plansmart-projeto-psfinance` e `plansmart-projeto-vps-sistemas`.
-- Commit de `staging`: `45edca507b5b7038d647f663b25059ede26d32d2`.
+- Commit de `staging` analisado: `87c6bd22946179717e26c73461ef79e2f573e768`.
 - Commit atual de `main`: `23821c7786e98c5c489c60c2ac60760e3cdc17c1`.
+- Branch documental desta correção:
+  `docs/PLA-2585-corrigir-pacote-87c6bd2`, criada de `origin/staging` sem
+  alterar novamente a baseline analisada.
 - Recomendação do GDSIS: **não recomenda a promoção neste estado**.
 - Nenhuma ação foi executada em `main`, banco de produção ou ambiente de
   produção.
 
 ## Escopo identificado entre `main` e `staging`
 
-A diferença contém `219` commits e `214` arquivos. O merge sintático de Git
+A diferença contém `221` commits e `215` arquivos. O merge sintático de Git
 (`git merge-tree --write-tree origin/main origin/staging`) concluiu sem conflito
 textual e produziu a árvore temporária
-`719d4cd094a6dc8bc1c25095c4850a6eaeab6a57`. Isso comprova apenas a ausência
+`1a63dca86e08d69e7181262037b9a96b30cfb0be`. Isso comprova apenas a ausência
 de conflito textual; não substitui a homologação funcional nem autoriza o merge.
+
+Listagens completas e reproduzíveis da baseline:
+
+- `docs/evidencias/PLA-2585/commits-main-staging.txt` - os `221` commits, com
+  hash completo e mensagem;
+- `docs/evidencias/PLA-2585/arquivos-main-staging.txt` - os `215` arquivos,
+  com estado adicionado, modificado ou removido.
+
+Os dois commits adicionais em relação à versão anterior do pacote são
+`5b1b9d9` (documentação da própria PLA-2585) e `87c6bd2` (merge dessa
+documentação em `staging`). O arquivo adicional é
+`docs/PLA-2585-pacote-producao.md`; não houve nova alteração funcional, de
+banco, dependência ou infraestrutura nesse delta.
 
 Tarefas rastreadas nas mensagens dos commits:
 
@@ -43,17 +59,19 @@ Validação executada na VPS `vps69143.publiccloud.com.br`:
 
 - diretório: `/opt/plansmart/sistemas/psfinance/staging/repo`;
 - branch: `staging`;
-- `HEAD` da VPS = `origin/staging` =
-  `45edca507b5b7038d647f663b25059ede26d32d2`;
+- `HEAD` da VPS = `origin/staging` = `/health` = `/gate` =
+  `87c6bd22946179717e26c73461ef79e2f573e768`;
 - árvore de trabalho da VPS: limpa;
 - serviços `psfinance-staging` e `psfinance-staging-gate`: ativos;
 - `/health` interno em `5104`: HTTP 200, PostgreSQL e commit correto;
 - `/health`, `/gate`, `/financeiro/`, `/financeiro/titulos`,
   `/financeiro/extrato` e `/financeiro/analise` na porta `5001`: HTTP 200;
-- logs dos dois serviços sem entradas de nível warning ou superior após a
-  estabilização;
-- houve HTTP 502 transitório durante o restart controlado; as repetições após
-  a subida do Gunicorn retornaram HTTP 200 e o erro não persistiu.
+- logs dos dois serviços sem novas entradas desde a inicialização validada às
+  `15:09 UTC`; não foi necessário executar novo restart ou deploy porque o
+  runtime já estava alinhado à baseline;
+- validação repetida em 15/08/2026 após a devolução executiva: `/health`,
+  `/gate`, `/financeiro/`, `/financeiro/titulos`, `/financeiro/extrato` e
+  `/financeiro/analise` retornaram HTTP 200 na porta `5001`.
 
 O metadado operacional `GIT_COMMIT` foi alinhado ao commit publicado. Foram
 preservados backups recuperáveis dos arquivos operacionais alterados. Nenhum
@@ -68,7 +86,7 @@ segredo foi exposto.
   tarefas listadas, inclusive PLA-2453, PLA-2577 e PLA-2581.
 
 Limitação: o conjunto automatizado atual cobre quatro módulos de teste e não
-constitui homologação integral dos `219` commits. Antes de produção, cada
+constitui homologação integral dos `221` commits. Antes de produção, cada
 funcionalidade incluída precisa ter aceite executivo consolidado.
 
 ## Banco de dados
@@ -132,7 +150,7 @@ Classificação geral: **alto**.
 | Risco | Probabilidade | Impacto | Mitigação obrigatória |
 | --- | --- | --- | --- |
 | Produção inexistente | Confirmado | Crítico | Implantar e validar ambiente isolado antes do deploy |
-| `main` legada e escopo de 219 commits | Alta | Alto | Homologação consolidada e janela controlada |
+| `main` legada e escopo de 221 commits | Alta | Alto | Homologação consolidada e janela controlada |
 | Backfills sobre dados reais | Média | Alto | Leitura prévia, backup, contagens, transação e validação |
 | Modelo multicliente pendente | Confirmado | Alto | Decisão formal de isolamento antes de uso produtivo |
 | HTTPS/domínio produtivo pendentes | Confirmado | Alto | Configurar Nginx, DNS e certificado antes da liberação |
@@ -179,6 +197,19 @@ infraestrutura produtiva, homologação integral e rollback mensurável estão
 incompletos. Portanto, este documento é um Pacote de Produção atualizado para
 revisão executiva, mas **não está pronto para solicitação de autorização de
 produção**.
+
+Gate de recorrência desta revisão:
+
+- erro anterior: pacote apontava `45edca5`, 219 commits e 214 arquivos quando
+  a `staging` já estava em `87c6bd2`, 221 commits e 215 arquivos;
+- causa: integração do próprio pacote documental em `staging` após a coleta,
+  criando uma referência circular e invalidando os totais anteriores;
+- correção: baseline congelada em `87c6bd2`, listas completas anexadas e
+  correção mantida em branch documental separada até a decisão do CEO;
+- não recorrência: `origin/staging`, VPS, `/health` e `/gate` foram conferidos
+  iguais a `87c6bd2`; a branch desta correção não altera a baseline;
+- prevenção: futuras atualizações do pacote devem declarar uma baseline
+  congelada e permanecer fora de `staging` durante a revisão executiva.
 
 Próxima decisão solicitada ao CEO: confirmar a reprovação temporária da
 promoção e organizar, por fluxo nativo de tarefas, o saneamento da

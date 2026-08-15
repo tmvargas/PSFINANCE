@@ -787,3 +787,16 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   o banco de staging para produção.
 - Nenhum merge em `main`, deploy produtivo ou escrita no banco de produção foi
   autorizado ou executado.
+
+## 2026-08-15 - PLA-2585 - Baseline congelada após revisão executiva
+
+- A revisão executiva detectou que o pacote anterior analisava `45edca5`, mas
+  a integração do próprio documento moveu a `staging` para `87c6bd2`.
+- Decisão: congelar `87c6bd2` como baseline do Pacote de Produção corrigido e
+  manter a correção na branch `docs/PLA-2585-corrigir-pacote-87c6bd2` durante
+  a revisão, evitando nova referência circular.
+- O escopo atualizado possui 221 commits e 215 arquivos em `main..staging`;
+  ambos foram registrados integralmente em anexos versionados.
+- A VPS, a porta `5001`, `/health` e `/gate` estão alinhados a `87c6bd2`.
+- A recomendação permanece **não promover**. Nenhuma ação em `main`, produção
+  ou banco produtivo foi autorizada ou executada.
