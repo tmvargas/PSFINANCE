@@ -76,6 +76,7 @@ class ExclusaoParcelaComBaixaTest(unittest.TestCase):
         session.add_all([titulo, parcela_com_baixa, parcela_sem_baixa, baixa])
         session.commit()
         self.titulo_id = titulo.id_titulo
+        self.conta_id = conta.id_conta
         self.parcela_com_baixa_id = parcela_com_baixa.id_parcela
         self.parcela_sem_baixa_id = parcela_sem_baixa.id_parcela
         self.baixa_id = baixa.id_baixa
@@ -194,7 +195,7 @@ class ExclusaoParcelaComBaixaTest(unittest.TestCase):
 
     def test_apos_excluir_baixa_nao_conciliada_libera_exclusao_da_parcela(self):
         response = app.test_client().post(
-            f"/financeiro/baixas/{self.baixa_id}/excluir"
+            f"/financeiro/titulos/{self.titulo_id}/baixas/{self.baixa_id}/excluir"
         )
         self.assertEqual(response.status_code, 302)
 
@@ -219,7 +220,7 @@ class ExclusaoParcelaComBaixaTest(unittest.TestCase):
         session.close()
 
         response = app.test_client().post(
-            f"/financeiro/baixas/{self.baixa_id}/excluir",
+            f"/financeiro/titulos/{self.titulo_id}/baixas/{self.baixa_id}/excluir",
             follow_redirects=True,
         )
         self.assertEqual(response.status_code, 200)
@@ -239,6 +240,65 @@ class ExclusaoParcelaComBaixaTest(unittest.TestCase):
         self.assertFalse(baixa.deleted)
         self.assertFalse(parcela.deleted)
         session.close()
+
+    def test_rejeita_exclusao_com_titulo_manipulado(self):
+        response = app.test_client().post(
+            f"/financeiro/titulos/{self.titulo_id + 999}/baixas/{self.baixa_id}/excluir",
+            follow_redirects=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Baixa n\xc3\xa3o encontrada para o t\xc3\xadtulo informado", response.data)
+        session = SessionLocal()
+        baixa = session.get(Baixa, self.baixa_id)
+        self.assertFalse(baixa.deleted)
+        session.close()
+
+    def test_extrato_identifica_titulo_parcela_e_abre_baixa_destacada(self):
+        response = app.test_client().get(
+            f"/financeiro/extrato?id_conta={self.conta_id}"
+            "&data_ini=2026-08-01&data_fim=2026-08-31"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(f"T\xc3\xadtulo #{self.titulo_id}".encode(), response.data)
+        self.assertIn(
+            f"Parcela 1 (ID #{self.parcela_com_baixa_id})".encode(),
+            response.data,
+        )
+        destino = (
+            f"/financeiro/titulos/{self.titulo_id}/baixas?baixa={self.baixa_id}"
+            f"#baixa-{self.baixa_id}"
+        )
+        self.assertIn(destino.encode(), response.data)
+
+        response = app.test_client().get(destino)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(f'id="baixa-{self.baixa_id}"'.encode(), response.data)
+        self.assertIn(b'class="table-warning"', response.data)
+
+    def test_extrato_identifica_baixa_legada_sem_parcela(self):
+        session = SessionLocal()
+        titulo = session.get(Titulo, self.titulo_id)
+        conta = session.get(Conta, self.conta_id)
+        session.add(
+            Baixa(
+                titulo=titulo,
+                conta=conta,
+                data=date(2026, 8, 6),
+                valor_baixa=10,
+            )
+        )
+        session.commit()
+        session.close()
+
+        response = app.test_client().get(
+            f"/financeiro/extrato?id_conta={self.conta_id}"
+            "&data_ini=2026-08-01&data_fim=2026-08-31"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Baixa legada sem parcela", response.data)
 
 
 if __name__ == "__main__":

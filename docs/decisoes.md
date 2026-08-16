@@ -797,3 +797,14 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   para baixas de titulo, apresenta a observacao original do titulo.
 - Motivo: separar identificacao documental da contraparte e tornar o extrato
   legivel para uso operacional, sem alterar persistencia ou estrutura de banco.
+
+## 2026-08-16 - PLA-2612 - Rastreabilidade da baixa a partir do Extrato
+
+- Decisao: cada baixa exibida no Extrato deve oferecer acesso direto a lista
+  de baixas do titulo, identificando titulo, parcela e baixa sem depender do
+  filtro mensal da consulta de titulos.
+- Regra: baixa vinculada mostra numero e ID da parcela; baixa legada permanece
+  localizavel e e identificada como sem parcela. A exclusao exige que o ID da
+  baixa pertença ao titulo informado e continua proibida quando conciliada.
+- Impacto: a exclusao logica existente recalcula os saldos pelas consultas
+  atuais; nenhuma estrutura ou migration de banco e alterada.
