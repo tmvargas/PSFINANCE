@@ -1165,6 +1165,7 @@ def baixar_titulo(id_titulo: int):
 @bp_financeiro.route("/titulos/<int:id_titulo>/baixas")
 def listar_baixas_titulo(id_titulo: int):
     session = get_session()
+    id_baixa_destacada = request.args.get("baixa", type=int)
 
     titulo = (
         session.query(Titulo)
@@ -1218,34 +1219,41 @@ def listar_baixas_titulo(id_titulo: int):
         baixas=baixas_view,
         total_baixas=total,
         saldo_aberto=saldo_aberto,
+        id_baixa_destacada=id_baixa_destacada,
     )
 
 
 # ----------------------------------------------------------------------
 # EXCLUIR BAIXA (somente se NÃO conciliada)
 # ----------------------------------------------------------------------
-@bp_financeiro.route("/baixas/<int:id_baixa>/excluir", methods=["POST"])
-def excluir_baixa(id_baixa: int):
+@bp_financeiro.route(
+    "/titulos/<int:id_titulo>/baixas/<int:id_baixa>/excluir",
+    methods=["POST"],
+)
+def excluir_baixa(id_titulo: int, id_baixa: int):
     session = get_session()
 
     bx = (
         session.query(Baixa)
-        .filter(Baixa.id_baixa == id_baixa, Baixa.deleted.is_(False))
+        .filter(
+            Baixa.id_baixa == id_baixa,
+            Baixa.id_titulo == id_titulo,
+            Baixa.deleted.is_(False),
+        )
         .first()
     )
     if not bx:
         session.close()
-        flash("Baixa não encontrada.", "erro")
-        return redirect(url_for("financeiro.listar_titulos"))
+        flash("Baixa não encontrada para o título informado.", "erro")
+        return redirect(url_for("financeiro.listar_baixas_titulo", id_titulo=id_titulo))
 
     if bool(getattr(bx, "conciliado", False)):
         session.close()
         flash("Não é possível excluir uma baixa conciliada.", "erro")
-        return redirect(url_for("financeiro.listar_baixas_titulo", id_titulo=bx.id_titulo))
+        return redirect(url_for("financeiro.listar_baixas_titulo", id_titulo=id_titulo))
 
     bx.deleted = True
     session.commit()
-    id_titulo = bx.id_titulo
     session.close()
 
     flash("Baixa excluída com sucesso.", "sucesso")

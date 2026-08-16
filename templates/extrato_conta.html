@@ -127,6 +127,7 @@
                   <th class="text-end">Entrada</th>
                   <th class="text-end">Saída</th>
                   <th class="text-end">Saldo</th>
+                  <th class="text-center">Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -167,6 +168,23 @@
                     </td>
                     <td class="text-end">
                       R$ {{ "%.2f"|format(lin.saldo) }}
+                    </td>
+                    <td class="text-center">
+                      {% if lin.origem_tipo == 'bx' %}
+                        <a
+                          href="{{ url_for('financeiro.listar_baixas_titulo', id_titulo=lin.id_titulo, baixa=lin.id) }}#baixa-{{ lin.id }}"
+                          class="btn btn-sm btn-outline-primary"
+                          title="Abrir título #{{ lin.id_titulo }}, parcela e baixa"
+                          aria-label="Abrir título {{ lin.id_titulo }} e baixa {{ lin.id }}"
+                        >
+                          Título #{{ lin.id_titulo }} ·
+                          {% if lin.id_parcela %}
+                            Parcela {{ lin.numero_parcela }} (ID #{{ lin.id_parcela }})
+                          {% else %}
+                            Baixa legada sem parcela
+                          {% endif %}
+                        </a>
+                      {% endif %}
                     </td>
                   </tr>
                 {% endfor %}
