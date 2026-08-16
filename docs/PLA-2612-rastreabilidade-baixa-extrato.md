@@ -56,11 +56,30 @@ ja excluida logicamente.
 
 - Compilacao Python: concluida sem erro.
 - `git diff --check`: concluido sem erro.
-- Templates: validacao sintatica pelo runtime da VPS pendente de registro.
+- PR funcional: `https://github.com/tmvargas/PSFINANCE/pull/93`, base
+  `staging`, head `086f3e6280a8417324ca7afb3d69c9ea5965fec8`.
+- Integracao em `staging`: `b960aa5cbb2c0d2678e135b3b1ee2d2582c0b4d0`.
+- VPS de teste: branch `staging`, `HEAD` igual a `origin/staging`, diretorio
+  sem alteracoes locais e servicos `psfinance-staging` e
+  `psfinance-staging-gate` ativos.
+- Porta `5001`: `/health`, `/gate`, `/financeiro/extrato`,
+  `/financeiro/titulos/60/baixas` e `/financeiro/analise` retornaram HTTP 200.
+- `/health` e `/gate` confirmaram `db_dialect=postgresql`, branch `staging` e
+  commit `b960aa5cbb2c0d2678e135b3b1ee2d2582c0b4d0`.
+- Consulta PostgreSQL repetida em transacao `READ ONLY`: baixa `41`, titulo
+  `60`, parcela `20`, conta `1`, data `13/08/2026`, valor `R$ 1,00`, baixa
+  ativa e nao conciliada, parcela numero `1` excluida logicamente.
+- Jornada somente leitura: o Extrato exibiu `Titulo #60 - Parcela 1 (ID #20)`;
+  o destino abriu a baixa `41` destacada, com botao `Excluir` disponivel.
+- Logs apos estabilizacao dos servicos: sem `error`, `traceback` ou `failed`.
+- Evidencias visuais reais:
+  `docs/evidencias/PLA-2612/extrato-baixa-41-staging-5001.png` e
+  `docs/evidencias/PLA-2612/baixa-41-destacada-staging-5001.png`.
 - Testes focais persistentes: preparados, nao executados porque criam e
-  alteram banco SQLite local; a governanca exige autorizacao expressa de
-  Thiago para qualquer escrita em banco.
+  alteram dados. A execucao solicitada em PostgreSQL exige autorizacao expressa
+  e especifica de Thiago para escrita em banco de teste isolado.
 - Exclusao real da baixa `41`: nao executada; depende de autorizacao expressa
-  e especifica de Thiago.
-- Deploy de staging, screenshot e porta `5001`: dependem de branch revisada e
-  merge em `staging`; ainda nao executados nesta etapa.
+  e especifica de Thiago e nao e recomendada como teste automatizado, pois e
+  dado operacional de staging. A recomendacao e preservar a baixa `41` ate a
+  decisao de Thiago e executar a matriz persistente em banco PostgreSQL isolado,
+  com transacao/rollback ou descarte integral do banco de teste autorizado.
