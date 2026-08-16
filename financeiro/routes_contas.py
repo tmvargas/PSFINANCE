@@ -28,6 +28,20 @@ def get_session():
     return SessionLocal()
 
 
+def _compor_documento_extrato(documento, descricao):
+    componentes = [
+        getattr(documento, "tipo_doc", None),
+        getattr(documento, "nome_doc", None),
+        descricao,
+    ]
+    componentes_normalizados = []
+    for componente in componentes:
+        texto = str(componente or "").strip().strip("-").strip()
+        if texto:
+            componentes_normalizados.append(texto)
+    return " - ".join(componentes_normalizados)
+
+
 def _empresas_ativas_e_filtro(session):
     empresas = (
         session.query(Empresa)
@@ -1642,8 +1656,8 @@ def extrato_conta():
                     "data": m.data,
                     "tipo": natureza,
                     "origem": "Movimentação",
-                    "documento": m.documento.tipo_doc if m.documento else "",
-                    "nr_documento": m.nr_documento or "",
+                    "documento": _compor_documento_extrato(m.documento, m.nr_documento),
+                    "nr_documento": "",
                     "descricao": m.descricao or "",
                     "entrada": entrada,
                     "saida": saida,
@@ -1661,9 +1675,9 @@ def extrato_conta():
                     "data": b.data,
                     "tipo": "Baixa de título",
                     "origem": "Baixa",
-                    "documento": t.documento.tipo_doc if t.documento else "",
-                    "nr_documento": t.nr_documento or "",
-                    "descricao": t.credor.nome if t.credor else "",
+                    "documento": _compor_documento_extrato(t.documento, t.nr_documento),
+                    "nr_documento": "",
+                    "descricao": t.observacao or "",
                     "entrada": 0.0,
                     "saida": valor,
                 }

@@ -790,9 +790,10 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
 
 ## 2026-08-16 - PLA-2587 - Documento e descricao no extrato
 
-- Regra: a coluna Documento do extrato apresenta somente a sigla do tipo e o
-  numero do documento, sem expor a representacao tecnica do model SQLAlchemy.
+- Regra: a coluna Documento do extrato apresenta codigo, nome do tipo e numero
+  no formato `CT - Contrato - ADS 2 SEMESTRE`, omitindo componentes vazios sem
+  hifens sobrando e sem expor a representacao tecnica do model SQLAlchemy.
 - Regra: a coluna Descricao preserva o texto informado nas movimentacoes e,
-  para baixas de titulo, identifica o credor relacionado.
+  para baixas de titulo, apresenta a observacao original do titulo.
 - Motivo: separar identificacao documental da contraparte e tornar o extrato
   legivel para uso operacional, sem alterar persistencia ou estrutura de banco.

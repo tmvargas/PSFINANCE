@@ -22,6 +22,7 @@ from models import (  # noqa: E402
     Titulo,
 )
 from src.app import app  # noqa: E402
+from financeiro.routes_contas import _compor_documento_extrato  # noqa: E402
 
 
 class FiltroEmpresaAnaliseExtratoTest(unittest.TestCase):
@@ -54,6 +55,7 @@ class FiltroEmpresaAnaliseExtratoTest(unittest.TestCase):
         titulo_a = Titulo(
             documento=documento, nr_documento="TA", credor=credor, empresa=empresa_a,
             plano=despesa, valor=30, emissao=date(2026, 8, 1), vencimento=date(2026, 8, 10),
+            observacao="Pagamento identificado",
         )
         titulo_b = Titulo(
             documento=documento, nr_documento="TB", credor=credor, empresa=empresa_b,
@@ -116,12 +118,42 @@ class FiltroEmpresaAnaliseExtratoTest(unittest.TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertRegex(response.data, rb"NF\s+A1")
+        self.assertIn(b"NF - Nota fiscal - A1", response.data)
         self.assertIn(b"Recebimento identificado", response.data)
-        self.assertRegex(response.data, rb"NF\s+TA")
-        self.assertIn(b"Credor teste", response.data)
+        self.assertIn(b"NF - Nota fiscal - TA", response.data)
+        self.assertIn(b"Pagamento identificado", response.data)
         self.assertNotIn(b"&lt;Documento", response.data)
         self.assertNotIn(b"Baixa &lt;Documento", response.data)
+
+    def test_composicao_documento_trata_componentes_parciais_e_nulos(self):
+        documento = Documento(tipo_doc="CT", nome_doc="Contrato")
+
+        self.assertEqual(
+            _compor_documento_extrato(documento, "ADS 2 SEMESTRE"),
+            "CT - Contrato - ADS 2 SEMESTRE",
+        )
+        self.assertEqual(_compor_documento_extrato(documento, None), "CT - Contrato")
+        self.assertEqual(_compor_documento_extrato(None, "Descrição avulsa"), "Descrição avulsa")
+        self.assertEqual(_compor_documento_extrato(None, None), "")
+
+    def test_composicao_documento_e_escapada_pelo_template(self):
+        session = SessionLocal()
+        movimento = (
+            session.query(MovimentacaoConta)
+            .filter(MovimentacaoConta.id_conta_destino == self.conta_a_id)
+            .one()
+        )
+        movimento.nr_documento = "<script>alert(1)</script>"
+        session.commit()
+        session.close()
+
+        response = app.test_client().get(
+            f"/financeiro/extrato?id_conta={self.conta_a_id}"
+            "&data_ini=2026-08-01&data_fim=2026-08-31"
+        )
+
+        self.assertNotIn(b"<script>alert(1)</script>", response.data)
+        self.assertIn(b"&lt;script&gt;alert(1)&lt;/script&gt;", response.data)
 
     def test_extrato_recarrega_contas_ao_trocar_empresa_e_limpa_conta_anterior(self):
         response = app.test_client().get(
