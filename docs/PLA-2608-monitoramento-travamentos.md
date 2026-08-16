@@ -39,7 +39,7 @@ SQLite.
 - `pg_stat_statements` nao esta instalado, portanto nao existe historico
   agregado de duracao de consultas para recuperar retroativamente.
 
-## Monitoramento sintetico
+## Monitoramento sintetico inicial
 
 Foram executadas cinco passagens consecutivas, somente leitura, pela porta
 `5001`. Todos os 30 requests retornaram HTTP 200:
@@ -53,9 +53,25 @@ Foram executadas cinco passagens consecutivas, somente leitura, pela porta
 | Titulos | 13,95 ms | 59,15 ms |
 | Analise | 11,81 ms | 35,67 ms |
 
-As rotas funcionais sem sessao autenticada medem a resposta da jornada publica
-e podem retornar a tela de autenticacao; ainda assim comprovam Nginx, Gunicorn,
-Flask e PostgreSQL responsivos durante a coleta.
+Essa coleta inicial nao comprovou o processamento completo do Extrato com uma
+conta selecionada e, portanto, nao pode ser usada isoladamente para atribuir ou
+descartar a causa do travamento percebido.
+
+## Correcao exigida na revisao executiva
+
+Em 2026-08-16, a rota real do Extrato foi verificada pela porta `5001` com uma
+conta existente selecionada, sem gravacao de dados. A resposta apresentou o
+titulo `Extrato de Conta`, os marcadores da tela, linhas da tabela e nenhum
+marcador de login. O retorno foi HTTP 200, com 39.526 bytes e 12,44 ms no
+servidor. Isso comprova que a coleta exercitou a renderizacao filtrada do
+Extrato naquele instante; nao comprova a causa da ocorrencia anterior.
+
+Foi iniciado o monitor `scripts/monitor_pla2608_readonly.sh`, em intervalo de
+120 segundos. Cada amostra registra estado e reinicios dos servicos, PID,
+memoria, CPU, disco, listeners, estado agregado de conexoes e locks do
+PostgreSQL, tempo do Extrato filtrado, journal e linhas sanitizadas dos logs do
+Nginx. O monitor nao grava no servidor nem no banco; a evidencia local e
+acumulada em `docs/evidencias/PLA-2608-monitor-live.log`.
 
 ## Causa tecnica
 
@@ -64,24 +80,23 @@ Flask e PostgreSQL responsivos durante a coleta.
 1. Nao houve queda do servidor, restart automatico de worker, OOM, timeout de
    proxy, HTTP 5xx, lock de banco ou requisicao lenta registrada no horario
    informado.
-2. Nao chegou requisicao ao Extrato pelo Nginx na janela da ocorrencia. Logo, o
-   travamento percebido nao foi produzido por uma requisicao que ficou presa no
-   backend naquele momento.
+2. Nao chegou requisicao ao Extrato pelo Nginx na janela informada. Esse fato
+   impede correlacionar o relato com uma requisicao de backend, mas nao permite
+   concluir onde ocorreu o travamento.
 3. A versao publicada na VPS era `staging` no commit
    `f0e7bef57f5207e7ef0464611ced3e6e88df2516`, anterior a correcao da PLA-2597.
 4. O PR #90, commit `ca976a912430e1db4286fe39351cc46e7d8a5c23`, remove a
    dependencia de Bootstrap no `cdn.jsdelivr.net`, agrega o saldo anterior no
    PostgreSQL e elimina consultas N+1 dos documentos do Extrato.
 
-### Conclusao
+### Conclusao corrigida
 
-A evidencia do horario relatado descarta queda do backend e aponta o navegador
-como origem imediata do estado de carregamento: os assets Bootstrap externos
-podiam ficar lentos ou bloqueados antes de uma nova requisicao chegar ao
-PSFINANCE. O Extrato publicado ainda tinha, adicionalmente, risco de lentidao
-por carregar o historico anterior em memoria e consultar documentos em N+1.
-As duas causas ja estao tratadas no PR #90, ainda nao publicado conforme o
-limite desta tarefa.
+A causa da ocorrencia das 14:20 UTC permanece **indeterminada**. A janela
+historica nao apresenta evidencia de queda ou erro do backend, mas tambem nao
+capturou uma requisicao do Extrato que permita reproduzir e atribuir a causa.
+A dependencia externa de Bootstrap e as consultas custosas do Extrato sao
+riscos tecnicos conhecidos, tratados no PR #90, mas nao foram comprovados como
+causa do relato. A atribuicao anterior ao navegador/CDN foi retirada.
 
 Os acessos SSH automatizados e malsucedidos observados na mesma faixa nao
 geraram carga relevante, evento de servico ou indisponibilidade correlacionada;
@@ -93,8 +108,10 @@ nao ha evidencia de que tenham causado o relato.
   nao e possivel recuperar duracao historica precisa de requests.
 - Sem `pg_stat_statements`, nao ha historico retroativo de consultas lentas.
 - A correcao do PR #90 exige merge/deploy/restart, proibidos no escopo da
-  PLA-2608. A decisao executiva e autorizar ou nao o fluxo ja preparado na
-  PLA-2597, com rollback para o commit de staging anterior.
+  PLA-2608. O PR permanece apenas como contexto ate decisao separada.
+- O monitor precisa capturar uma nova ocorrencia informada com horario e rota
+  para que os dados de aplicacao, proxy, sistema operacional e banco sejam
+  correlacionados na mesma janela.
 
 ## Arquivos e ambientes
 
@@ -104,4 +121,3 @@ nao ha evidencia de que tenham causado o relato.
 - Correcao pronta: PR #90, commit
   `ca976a912430e1db4286fe39351cc46e7d8a5c23`.
 - Banco: nenhuma escrita e nenhuma alteracao estrutural.
-

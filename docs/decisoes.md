@@ -805,7 +805,10 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
 - Evidencia: na janela de 14:15 a 14:30 UTC nao houve requisicao ao Extrato,
   erro Nginx/Gunicorn/PostgreSQL, restart automatico, HTTP 5xx, OOM ou lock nao
   concedido. O monitor sintetico posterior respondeu HTTP 200 em todas as rotas.
-- Conclusao: a ocorrencia e compativel com carregamento preso no navegador pela
-  dependencia externa de Bootstrap, enquanto a versao publicada ainda possui
-  a consulta custosa do Extrato. As duas causas estao tratadas no PR #90 e sua
-  publicacao permanece fora do escopo da PLA-2608.
+- Correcao apos revisao executiva: a causa permanece indeterminada. A ausencia
+  de requisicao do Extrato na janela impede correlacao com o backend, mas nao
+  prova falha de navegador ou CDN. Bootstrap externo e consultas custosas sao
+  riscos tratados no PR #90, nao causas comprovadas para o relato.
+- Continuidade: monitor somente leitura em intervalo de 120 segundos registra
+  servicos, recursos, PostgreSQL, jornada filtrada do Extrato e logs
+  sanitizados para correlacionar a proxima ocorrencia.
