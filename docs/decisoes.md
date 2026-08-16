@@ -797,3 +797,15 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   para baixas de titulo, apresenta a observacao original do titulo.
 - Motivo: separar identificacao documental da contraparte e tornar o extrato
   legivel para uso operacional, sem alterar persistencia ou estrutura de banco.
+## 2026-08-16 - PLA-2609 - Monitor contínuo limitado e auditável
+
+- Projeto: PSFINANCE.
+- Decisão técnica: executar em staging um monitor somente leitura a cada 120
+  segundos, por no máximo 24 horas, com seis rotas funcionais, métricas
+  agregadas do sistema e PostgreSQL, logs sanitizados, estado verificável e
+  rotação limitada a 10 MiB mais uma geração anterior.
+- Motivo: o processo iniciado na PLA-2608 encerrou junto com o heartbeat e não
+  deixou continuidade auditável para capturar uma nova ocorrência.
+- Impacto: a PLA-2609 passa a possuir PID, deadline, amostras e arquivo de log
+  verificáveis sem escrever no banco, reiniciar a aplicação ou alterar
+  produção.
