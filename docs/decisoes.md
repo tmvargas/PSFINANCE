@@ -787,3 +787,12 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   o banco de staging para produção.
 - Nenhum merge em `main`, deploy produtivo ou escrita no banco de produção foi
   autorizado ou executado.
+
+## 2026-08-16 - PLA-2587 - Documento e descricao no extrato
+
+- Regra: a coluna Documento do extrato apresenta somente a sigla do tipo e o
+  numero do documento, sem expor a representacao tecnica do model SQLAlchemy.
+- Regra: a coluna Descricao preserva o texto informado nas movimentacoes e,
+  para baixas de titulo, identifica o credor relacionado.
+- Motivo: separar identificacao documental da contraparte e tornar o extrato
+  legivel para uso operacional, sem alterar persistencia ou estrutura de banco.

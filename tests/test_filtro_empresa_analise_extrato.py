@@ -44,7 +44,8 @@ class FiltroEmpresaAnaliseExtratoTest(unittest.TestCase):
         despesa = PlanoDeContas(cod_estrutural="2.01", nome_conta="Despesa teste", tipo="analitica")
         mov_a = MovimentacaoConta(
             data=date(2026, 8, 5), tipo="E", documento=documento, nr_documento="A1",
-            valor=100, conta_destino=conta_a, empresa=empresa_a, plano=receita,
+            descricao="Recebimento identificado", valor=100, conta_destino=conta_a,
+            empresa=empresa_a, plano=receita,
         )
         mov_b = MovimentacaoConta(
             data=date(2026, 8, 5), tipo="E", documento=documento, nr_documento="B1",
@@ -107,6 +108,20 @@ class FiltroEmpresaAnaliseExtratoTest(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Conta Alfa", response.data)
         self.assertIn(b"Saldo inicial", response.data)
+
+    def test_extrato_exibe_documento_e_descricao_sem_representacao_tecnica(self):
+        response = app.test_client().get(
+            f"/financeiro/extrato?id_empresa={self.empresa_a_id}&id_conta={self.conta_a_id}"
+            "&data_ini=2026-08-01&data_fim=2026-08-31"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertRegex(response.data, rb"NF\s+A1")
+        self.assertIn(b"Recebimento identificado", response.data)
+        self.assertRegex(response.data, rb"NF\s+TA")
+        self.assertIn(b"Credor teste", response.data)
+        self.assertNotIn(b"&lt;Documento", response.data)
+        self.assertNotIn(b"Baixa &lt;Documento", response.data)
 
     def test_extrato_recarrega_contas_ao_trocar_empresa_e_limpa_conta_anterior(self):
         response = app.test_client().get(
