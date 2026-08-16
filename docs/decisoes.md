@@ -797,3 +797,18 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   para baixas de titulo, apresenta a observacao original do titulo.
 - Motivo: separar identificacao documental da contraparte e tornar o extrato
   legivel para uso operacional, sem alterar persistencia ou estrutura de banco.
+## 2026-08-16 - PLA-2608 - Diagnostico somente leitura dos travamentos
+
+- Decisao: preservar o ambiente enquanto o diagnostico correlaciona a janela
+  informada por Thiago; nao executar deploy, restart ou escrita em banco nesta
+  tarefa.
+- Evidencia: na janela de 14:15 a 14:30 UTC nao houve requisicao ao Extrato,
+  erro Nginx/Gunicorn/PostgreSQL, restart automatico, HTTP 5xx, OOM ou lock nao
+  concedido. O monitor sintetico posterior respondeu HTTP 200 em todas as rotas.
+- Correcao apos revisao executiva: a causa permanece indeterminada. A ausencia
+  de requisicao do Extrato na janela impede correlacao com o backend, mas nao
+  prova falha de navegador ou CDN. Bootstrap externo e consultas custosas sao
+  riscos tratados no PR #90, nao causas comprovadas para o relato.
+- Continuidade: monitor somente leitura em intervalo de 120 segundos registra
+  servicos, recursos, PostgreSQL, jornada filtrada do Extrato e logs
+  sanitizados para correlacionar a proxima ocorrencia.
