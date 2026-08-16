@@ -125,6 +125,44 @@ class FiltroEmpresaAnaliseExtratoTest(unittest.TestCase):
         self.assertNotIn(b"&lt;Documento", response.data)
         self.assertNotIn(b"Baixa &lt;Documento", response.data)
 
+    def test_layout_usa_assets_locais_sem_dependencia_de_cdn(self):
+        response = app.test_client().get("/staging/psfinance/financeiro/extrato")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(b"cdn.jsdelivr.net", response.data)
+        self.assertIn(
+            b"/staging/psfinance/static/vendor/bootstrap-5.3.3/bootstrap.min.css",
+            response.data,
+        )
+        self.assertIn(
+            b"/staging/psfinance/static/vendor/bootstrap-5.3.3/bootstrap.bundle.min.js",
+            response.data,
+        )
+
+    def test_saldo_inicial_agregado_preserva_movimentos_e_baixas_anteriores(self):
+        session = SessionLocal()
+        conta = session.get(Conta, self.conta_a_id)
+        documento = session.query(Documento).first()
+        empresa = session.get(Empresa, self.empresa_a_id)
+        receita = session.query(PlanoDeContas).filter(PlanoDeContas.cod_estrutural.like("1%")).first()
+        session.add(
+            MovimentacaoConta(
+                data=date(2026, 7, 20), tipo="E", documento=documento,
+                nr_documento="ANT", valor=50, conta_destino=conta,
+                empresa=empresa, plano=receita,
+            )
+        )
+        session.commit()
+        session.close()
+
+        response = app.test_client().get(
+            f"/financeiro/extrato?id_empresa={self.empresa_a_id}&id_conta={self.conta_a_id}"
+            "&data_ini=2026-08-01&data_fim=2026-08-31"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"R$ 60.00", response.data)
+
     def test_composicao_documento_trata_componentes_parciais_e_nulos(self):
         documento = Documento(tipo_doc="CT", nome_doc="Contrato")
 
