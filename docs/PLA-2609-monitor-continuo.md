@@ -36,3 +36,21 @@ mantendo somente o arquivo atual e uma geração anterior.
 3. Duas amostras consecutivas separadas pelo intervalo configurado.
 4. Seis rotas com código HTTP e tempos registrados.
 5. Log e estado sem IP, usuário, User-Agent, credencial ou valor de banco.
+
+## Execução em staging — 2026-08-16
+
+- Serviço: `psfinance-staging-monitor-pla2609.service`, `active/running`, PID
+  `1145514`, `NRestarts=0` e `Restart=on-failure`.
+- Início: `2026-08-16T19:31:10Z`.
+- Encerramento automático previsto: `2026-08-17T19:31:10Z`.
+- SHA-256 local e remoto do script:
+  `cf6edeecc1f8580fbcd45937f47ac291e16eb5a03c218185efd202074db1c718`.
+- Amostras confirmadas: `2026-08-16T19:31:10Z` e
+  `2026-08-16T19:33:10Z`.
+- Nas duas amostras, `/health`, `/gate`, Home, Extrato filtrado, Títulos e
+  Análise responderam HTTP 200.
+- Na segunda amostra, os tempos totais variaram de 1,61 ms (`/health`) a
+  43,48 ms (Home); Extrato respondeu em 11,78 ms.
+- O log atual não contém endereço IP e mede menos que o limite de rotação.
+- Banco de staging acessado somente para métricas agregadas de leitura; nenhuma
+  escrita foi executada.
