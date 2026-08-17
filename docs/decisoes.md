@@ -1,6 +1,6 @@
 # Decisoes - PSCONTROL
 
-## 2026-08-17 - PLA-2628 - Filtro de situacao na consulta de titulos
+## 2026-08-17 - PLA-2629 - Filtro de situacao na consulta de titulos
 
 - Decisao: a consulta mensal de titulos passa a oferecer as situacoes `Todas`,
   `Em aberto` e `Baixada`, mantendo `Todas` como estado padrao.
