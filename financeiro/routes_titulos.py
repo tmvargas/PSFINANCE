@@ -319,6 +319,15 @@ def _saldos_titulos_ativos(session, titulos: list[Titulo]) -> dict[int, float]:
     if not ids_titulos:
         return {}
 
+    ids_titulos_com_parcelas = {
+        id_titulo
+        for (id_titulo,) in (
+            session.query(TituloParcela.id_titulo)
+            .filter(TituloParcela.id_titulo.in_(ids_titulos))
+            .distinct()
+            .all()
+        )
+    }
     totais_parcelas = dict(
         session.query(
             TituloParcela.id_titulo,
@@ -361,7 +370,11 @@ def _saldos_titulos_ativos(session, titulos: list[Titulo]) -> dict[int, float]:
 
     return {
         titulo.id_titulo: _calcular_saldo_titulo(
-            totais_parcelas.get(titulo.id_titulo, titulo.valor),
+            (
+                totais_parcelas.get(titulo.id_titulo, 0)
+                if titulo.id_titulo in ids_titulos_com_parcelas
+                else titulo.valor
+            ),
             float(baixas_parcelas.get(titulo.id_titulo, 0) or 0)
             + float(baixas_legadas.get(titulo.id_titulo, 0) or 0),
         )
