@@ -1,40 +1,33 @@
-# PLA-2641 - Correção da recorrência dos filtros da Consulta de Títulos
+# PLA-2641 - Recorrência dos filtros da Consulta de Títulos
 
-## Decisão aplicada
+## Diagnóstico
 
-A situação é aplicada explicitamente sobre o conjunto que a consulta já
-restringiu por mês, ano e empresa. `Todas` preserva o conjunto; `Em aberto`
-mantém somente saldo global ativo maior que zero; `Baixada` mantém somente
-saldo global ativo igual a zero. O filtro não pode reintroduzir títulos de
-outro período ou de outra empresa.
+O `staging` atual já contém a correção funcional da PLA-2639: o filtro de
+situação é aplicado sobre o conjunto previamente limitado por mês, ano e
+empresa, antes da montagem das linhas e dos totais. A recorrência foi tratada
+pela revalidação dessa integração e pela manutenção do teste que impede
+registros eliminados por filtros anteriores de serem reintroduzidos.
 
-O cálculo de saldo ativo e as regras de exclusão lógica permanecem os mesmos
-validados na PLA-2629. Não há escrita, migration ou mudança de estrutura de
-banco.
+## Matriz focal revalidada
 
-## Matriz de comprovação focal
+| Situação | Deve aparecer | Não deve aparecer |
+| --- | --- | --- |
+| Todas | títulos aberto e baixado do período/empresa | títulos externos ao período/empresa |
+| Em aberto | somente título com saldo global ativo | baixado e títulos externos |
+| Baixada | somente título com saldo global zerado | aberto e títulos externos |
 
-| Conjunto após período/empresa | Situação | Deve aparecer | Não deve aparecer |
-| --- | --- | --- | --- |
-| título 1 aberto; título 2 baixado | Todas | 1 e 2 | títulos externos 3 e 4 |
-| título 1 aberto; título 2 baixado | Em aberto | 1 | 2, 3 e 4 |
-| título 1 aberto; título 2 baixado | Baixada | 2 | 1, 3 e 4 |
-| título legado de R$ 80 sem saldo agregado | Em aberto | título legado | nenhum |
-| título legado de R$ 80 sem saldo agregado | Baixada | nenhum | título legado |
+O caso defensivo de título legado sem saldo agregado também foi revalidado:
+ele usa o valor do título como fallback e não interrompe a consulta.
 
-## Arquitetura e prevenção
+## Evidência técnica
 
-- `financeiro/routes_titulos.py`: a rota obtém o conjunto mensal/empresarial,
-  calcula os saldos globais e aplica a situação em uma etapa explícita antes
-  da montagem das linhas e dos totais.
-- `tests/test_filtro_situacao_titulos.py`: a matriz valida as três situações,
-  a combinação com filtros anteriores e o fallback defensivo de título legado.
-- Prevenção: a seleção por situação deixa de ficar embutida no laço de
-  apresentação, permitindo comprovar separadamente que linhas e totais usam o
-  mesmo conjunto filtrado.
+- `financeiro/routes_titulos.py`: `_filtrar_titulos_por_situacao()` concentra a
+  seleção antes da criação das linhas e dos totais.
+- `tests/test_filtro_situacao_titulos.py`: cobre as três situações, combinação
+  com filtros anteriores, saldos ativos, exclusões lógicas e fallback legado.
+- Validação local: 16 testes focais aprovados; compilação e `git diff --check`
+  aprovados.
 
-## Escopo e risco
-
-Alteração focal no controller, teste e documentação. Sem template, variável de
-ambiente, banco, migration, `main` ou produção. Risco residual baixo, limitado
-à validação posterior no staging e na porta corporativa `5001`.
+Não há alteração de banco, migration, variável de ambiente, `main` ou
+produção. A validação final de staging exige alinhamento da VPS e porta
+corporativa `5001`.
