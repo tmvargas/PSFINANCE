@@ -15,6 +15,9 @@
   sobre o conjunto já limitado por mês, ano e empresa, antes da montagem das
   linhas e dos totais. Assim, `Todas`, `Em aberto` e `Baixada` compartilham a
   mesma base e não reintroduzem registros eliminados pelos filtros anteriores.
+- Recorrência PLA-2641: a correção da PLA-2639 foi revalidada sobre o `staging`
+  atual com a matriz combinada de período, empresa e situação. A prevenção
+  permanece coberta por teste focal e não exige nova regra de negócio.
 - Correcao de revisao: titulo que possui parcelas, mas teve todas elas excluidas,
   tem total ativo zero e portanto nao permanece artificialmente em aberto. O
   fallback para `titulo.valor` vale apenas para titulo simples, sem qualquer
