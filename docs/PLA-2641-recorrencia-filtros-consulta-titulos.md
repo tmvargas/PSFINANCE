@@ -1,4 +1,4 @@
-# PLA-2639 - Correção e comprovação dos filtros de situação
+# PLA-2641 - Correção da recorrência dos filtros da Consulta de Títulos
 
 ## Decisão aplicada
 

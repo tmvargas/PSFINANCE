@@ -11,7 +11,7 @@
   quantidade refletem somente as linhas exibidas.
 - Impacto: alteracao focal na rota e no template da consulta, sem banco,
   migration, variavel de ambiente ou mudanca em producao.
-- Comprovação PLA-2639: a situação passa a ser aplicada em etapa explícita
+- Comprovação PLA-2641: a situação passa a ser aplicada em etapa explícita
   sobre o conjunto já limitado por mês, ano e empresa, antes da montagem das
   linhas e dos totais. Assim, `Todas`, `Em aberto` e `Baixada` compartilham a
   mesma base e não reintroduzem registros eliminados pelos filtros anteriores.
