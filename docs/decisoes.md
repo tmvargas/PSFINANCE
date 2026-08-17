@@ -15,6 +15,9 @@
   sobre o conjunto já limitado por mês, ano e empresa, antes da montagem das
   linhas e dos totais. Assim, `Todas`, `Em aberto` e `Baixada` compartilham a
   mesma base e não reintroduzem registros eliminados pelos filtros anteriores.
+- Correção após revisão da PLA-2639: como a consulta e seus indicadores são
+  mensais, a situação considera o saldo das parcelas exibidas no mês. Saldo de
+  parcelas futuras não mantém uma parcela mensal já quitada em `Em aberto`.
 - Recorrência PLA-2641: a correção da PLA-2639 foi revalidada sobre o `staging`
   atual com a matriz combinada de período, empresa e situação. A prevenção
   permanece coberta por teste focal e não exige nova regra de negócio.
