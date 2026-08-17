@@ -1,0 +1,149 @@
+[
+  {
+    "id": "todas",
+    "month": "8",
+    "year": "2026",
+    "requestedSituation": "todas",
+    "selectedSituation": "Todas",
+    "company": {
+      "value": "1",
+      "label": "1 - THIAGO"
+    },
+    "url": "http://127.0.0.1:15104/financeiro/titulos?mes=8&ano=2026&id_empresa=1&situacao=todas",
+    "elapsedMs": 139,
+    "rows": 9,
+    "metrics": {
+      "Títulos filtrados": "9",
+      "Valor total dos títulos": "R$ 88924.81",
+      "Valor da parcela no mês": "R$ 4875.89",
+      "Pago no mês": "R$ 2892.25",
+      "Não pago no mês": "R$ 1983.64"
+    }
+  },
+  {
+    "id": "em-aberto",
+    "month": "8",
+    "year": "2026",
+    "requestedSituation": "em_aberto",
+    "selectedSituation": "Em aberto",
+    "company": {
+      "value": "1",
+      "label": "1 - THIAGO"
+    },
+    "url": "http://127.0.0.1:15104/financeiro/titulos?mes=8&ano=2026&id_empresa=1&situacao=em_aberto",
+    "elapsedMs": 110,
+    "rows": 6,
+    "metrics": {
+      "Títulos filtrados": "6",
+      "Valor total dos títulos": "R$ 74305.55",
+      "Valor da parcela no mês": "R$ 1983.64",
+      "Pago no mês": "R$ 0.00",
+      "Não pago no mês": "R$ 1983.64"
+    }
+  },
+  {
+    "id": "baixada",
+    "month": "8",
+    "year": "2026",
+    "requestedSituation": "baixada",
+    "selectedSituation": "Baixada",
+    "company": {
+      "value": "1",
+      "label": "1 - THIAGO"
+    },
+    "url": "http://127.0.0.1:15104/financeiro/titulos?mes=8&ano=2026&id_empresa=1&situacao=baixada",
+    "elapsedMs": 96,
+    "rows": 3,
+    "metrics": {
+      "Títulos filtrados": "3",
+      "Valor total dos títulos": "R$ 14619.26",
+      "Valor da parcela no mês": "R$ 2892.25",
+      "Pago no mês": "R$ 2892.25",
+      "Não pago no mês": "R$ 0.00"
+    }
+  },
+  {
+    "id": "invalida",
+    "month": "8",
+    "year": "2026",
+    "requestedSituation": "invalida",
+    "selectedSituation": "Todas",
+    "company": {
+      "value": "1",
+      "label": "1 - THIAGO"
+    },
+    "url": "http://127.0.0.1:15104/financeiro/titulos?mes=8&ano=2026&id_empresa=1&situacao=invalida",
+    "elapsedMs": 83,
+    "rows": 9,
+    "metrics": {
+      "Títulos filtrados": "9",
+      "Valor total dos títulos": "R$ 88924.81",
+      "Valor da parcela no mês": "R$ 4875.89",
+      "Pago no mês": "R$ 2892.25",
+      "Não pago no mês": "R$ 1983.64"
+    }
+  },
+  {
+    "id": "todas-empresas",
+    "month": "8",
+    "year": "2026",
+    "requestedSituation": "todas",
+    "selectedSituation": "Todas",
+    "company": {
+      "value": "",
+      "label": "Todas"
+    },
+    "url": "http://127.0.0.1:15104/financeiro/titulos?mes=8&ano=2026&id_empresa=&situacao=todas",
+    "elapsedMs": 100,
+    "rows": 10,
+    "metrics": {
+      "Títulos filtrados": "10",
+      "Valor total dos títulos": "R$ 295361.27",
+      "Valor da parcela no mês": "R$ 6024.41",
+      "Pago no mês": "R$ 4040.77",
+      "Não pago no mês": "R$ 1983.64"
+    }
+  },
+  {
+    "id": "julho-empresa-1",
+    "month": "7",
+    "year": "2026",
+    "requestedSituation": "todas",
+    "selectedSituation": "Todas",
+    "company": {
+      "value": "1",
+      "label": "1 - THIAGO"
+    },
+    "url": "http://127.0.0.1:15104/financeiro/titulos?mes=7&ano=2026&id_empresa=1&situacao=todas",
+    "elapsedMs": 98,
+    "rows": 3,
+    "metrics": {
+      "Títulos filtrados": "3",
+      "Valor total dos títulos": "R$ 75797.50",
+      "Valor da parcela no mês": "R$ 2696.54",
+      "Pago no mês": "R$ 0.00",
+      "Não pago no mês": "R$ 2696.54"
+    }
+  },
+  {
+    "id": "agosto-2025-empresa-1",
+    "month": "8",
+    "year": "2025",
+    "requestedSituation": "todas",
+    "selectedSituation": "Todas",
+    "company": {
+      "value": "1",
+      "label": "1 - THIAGO"
+    },
+    "url": "http://127.0.0.1:15104/financeiro/titulos?mes=8&ano=2025&id_empresa=1&situacao=todas",
+    "elapsedMs": 88,
+    "rows": 0,
+    "metrics": {
+      "Títulos filtrados": "0",
+      "Valor total dos títulos": "R$ 0.00",
+      "Valor da parcela no mês": "R$ 0.00",
+      "Pago no mês": "R$ 0.00",
+      "Não pago no mês": "R$ 0.00"
+    }
+  }
+]
