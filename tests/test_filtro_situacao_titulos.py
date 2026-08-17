@@ -1,10 +1,40 @@
 import unittest
+from types import SimpleNamespace
 
 from financeiro.routes_titulos import (
     _calcular_saldo_titulo,
     _normalizar_situacao_titulo,
+    _saldos_titulos_ativos,
     _titulo_atende_situacao,
 )
+
+
+class ConsultaLeituraFake:
+    def __init__(self, resultados):
+        self._resultados = iter(resultados)
+
+    def query(self, *_args):
+        return QueryLeituraFake(next(self._resultados))
+
+
+class QueryLeituraFake:
+    def __init__(self, resultado):
+        self._resultado = resultado
+
+    def filter(self, *_args):
+        return self
+
+    def distinct(self):
+        return self
+
+    def group_by(self, *_args):
+        return self
+
+    def join(self, *_args):
+        return self
+
+    def all(self):
+        return self._resultado
 
 
 class FiltroSituacaoTitulosTest(unittest.TestCase):
@@ -42,12 +72,39 @@ class FiltroSituacaoTitulosTest(unittest.TestCase):
                     saldo_esperado == 0,
                 )
 
-    def test_exclusoes_sao_representadas_fora_dos_totais_ativos(self):
-        saldo_sem_baixa_excluida = _calcular_saldo_titulo(100, 40)
-        saldo_sem_parcela_excluida = _calcular_saldo_titulo(100, 100)
+    def test_consultas_agregadas_ignoram_baixa_e_parcela_excluidas(self):
+        titulos = [
+            SimpleNamespace(id_titulo=1, valor=100),
+            SimpleNamespace(id_titulo=2, valor=250),
+            SimpleNamespace(id_titulo=3, valor=80),
+        ]
+        session = ConsultaLeituraFake(
+            [
+                [(1,), (2,)],  # títulos 1 e 2 possuem parcelas, inclusive excluídas
+                [(1, 100)],  # somente a parcela ativa do título 1
+                [(1, 40)],  # somente a baixa ativa vinculada à parcela ativa
+                [],  # nenhuma baixa legada ativa
+            ]
+        )
 
-        self.assertEqual(saldo_sem_baixa_excluida, 60)
-        self.assertEqual(saldo_sem_parcela_excluida, 0)
+        saldos = _saldos_titulos_ativos(session, titulos)
+
+        self.assertEqual(saldos[1], 60)  # baixa excluída não reduz o saldo
+        self.assertEqual(saldos[2], 0)  # todas as parcelas excluídas
+        self.assertEqual(saldos[3], 80)  # título simples, sem parcelas
+
+    def test_consultas_agregadas_somam_multiplas_baixas_ativas_e_legadas(self):
+        titulos = [SimpleNamespace(id_titulo=4, valor=300)]
+        session = ConsultaLeituraFake(
+            [
+                [(4,)],
+                [(4, 300)],
+                [(4, 175)],
+                [(4, 25)],
+            ]
+        )
+
+        self.assertEqual(_saldos_titulos_ativos(session, titulos)[4], 100)
 
 
 if __name__ == "__main__":

@@ -11,6 +11,10 @@
   quantidade refletem somente as linhas exibidas.
 - Impacto: alteracao focal na rota e no template da consulta, sem banco,
   migration, variavel de ambiente ou mudanca em producao.
+- Correcao de revisao: titulo que possui parcelas, mas teve todas elas excluidas,
+  tem total ativo zero e portanto nao permanece artificialmente em aberto. O
+  fallback para `titulo.valor` vale apenas para titulo simples, sem qualquer
+  parcela cadastrada.
 
 ## 2026-08-14 - PLA-2453 - Filtro de empresa em analise e extrato
 
