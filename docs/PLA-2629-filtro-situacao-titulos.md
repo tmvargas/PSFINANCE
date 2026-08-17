@@ -34,3 +34,25 @@
   testes da funcao agregadora cobrem os dois estados e as baixas ativas.
 - Risco residual: a prova com dados reais de PostgreSQL depende de dados ja
   existentes ou de autorizacao expressa de Thiago para preparar massa.
+
+## Evidencia real em staging
+
+Commit publicado: `7bafc313ef9e5b82d85ff2290b7a50732ccb1511`.
+
+As consultas abaixo foram somente leitura, na porta corporativa `5001`, usando
+agosto de 2026 e empresa `1 - THIAGO`:
+
+| Situacao | HTTP | Titulos | Selecao preservada |
+| --- | ---: | ---: | --- |
+| Todas | 200 | 9 | mes `8`, ano `2026`, empresa `1`, situacao `todas` |
+| Em aberto | 200 | 9 | mes `8`, ano `2026`, empresa `1`, situacao `em_aberto` |
+| Baixada | 200 | 0 | mes `8`, ano `2026`, empresa `1`, situacao `baixada` |
+
+Evidencias visuais do mesmo conjunto de filtros:
+
+- `docs/evidencias/PLA-2629/titulos-todas-empresa-mes-ano-5001.png`;
+- `docs/evidencias/PLA-2629/titulos-em-aberto-empresa-mes-ano-5001.png`;
+- `docs/evidencias/PLA-2629/titulos-baixada-empresa-mes-ano-5001.png`.
+
+Os tres screenshots preservam o layout existente e mostram separadamente as
+tres opcoes selecionadas no seletor compacto, sem texto explicativo adicional.
