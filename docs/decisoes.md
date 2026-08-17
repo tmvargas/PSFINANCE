@@ -1,5 +1,22 @@
 # Decisoes - PSCONTROL
 
+## 2026-08-17 - PLA-2611 - Wake orientado a evento do monitor PLA-2609
+
+- Decisao: manter o coletor externo somente leitura a cada 120 segundos e usar
+  um observador separado para acordar o GDSIS apenas quando houver falha da
+  unidade, estado sem atualizacao, reinicio da aplicacao ou resposta diferente
+  de HTTP 200 em uma das seis rotas monitoradas.
+- Deadline: a consolidacao de 24 horas permanece sob o monitor nativo da
+  `executionPolicy` do Paperclip em `2026-08-18T19:45:23Z`; amostras saudaveis
+  nao rearmam o Paperclip e nao geram ciclos CEO/GDSIS.
+- Seguranca: a credencial da API fica somente em arquivo operacional temporario
+  com modo `0600`, fora do Git e dos logs. O observador nao escreve em banco,
+  nao reinicia servicos da aplicacao e nao atua em `main` ou producao.
+- Impacto: a janela iniciada em `2026-08-17T19:45:23Z` permanece continua. O
+  observador apenas le estado, logs sanitizados e propriedades do `systemd`, e
+  chama uma unica vez o endpoint nativo `monitor/check-now` quando detecta uma
+  ocorrencia.
+
 ## 2026-08-17 - PLA-2629 - Filtro de situacao na consulta de titulos
 
 - Decisao: a consulta mensal de titulos passa a oferecer as situacoes `Todas`,
