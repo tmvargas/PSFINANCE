@@ -3,6 +3,7 @@ from types import SimpleNamespace
 
 from financeiro.routes_titulos import (
     _calcular_saldo_titulo,
+    _filtrar_titulos_por_situacao,
     _normalizar_situacao_titulo,
     _saldos_titulos_ativos,
     _titulo_atende_situacao,
@@ -105,6 +106,44 @@ class FiltroSituacaoTitulosTest(unittest.TestCase):
         )
 
         self.assertEqual(_saldos_titulos_ativos(session, titulos)[4], 100)
+
+    def test_matriz_combina_periodo_empresa_e_situacao_sem_reintroduzir_registros(self):
+        # O controller entrega a este passo apenas os títulos do período/empresa.
+        # Os IDs 3 e 4 representam registros que aqueles filtros já eliminaram.
+        titulos_periodo_empresa = [
+            SimpleNamespace(id_titulo=1, valor=100),
+            SimpleNamespace(id_titulo=2, valor=250),
+        ]
+        saldos_globais = {1: 60, 2: 0, 3: 0, 4: 90}
+
+        casos = (
+            ("todas", [1, 2]),
+            ("em_aberto", [1]),
+            ("baixada", [2]),
+        )
+        for situacao, ids_esperados in casos:
+            with self.subTest(situacao=situacao):
+                resultado = _filtrar_titulos_por_situacao(
+                    titulos_periodo_empresa,
+                    saldos_globais,
+                    situacao,
+                )
+                self.assertEqual(
+                    [titulo.id_titulo for titulo in resultado],
+                    ids_esperados,
+                )
+
+    def test_filtro_de_situacao_trata_saldo_ausente_sem_falhar(self):
+        titulo_legado = SimpleNamespace(id_titulo=10, valor=80)
+
+        self.assertEqual(
+            _filtrar_titulos_por_situacao([titulo_legado], {}, "em_aberto"),
+            [titulo_legado],
+        )
+        self.assertEqual(
+            _filtrar_titulos_por_situacao([titulo_legado], {}, "baixada"),
+            [],
+        )
 
 
 if __name__ == "__main__":

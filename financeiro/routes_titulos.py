@@ -109,6 +109,22 @@ def _titulo_atende_situacao(saldo_titulo: float, situacao: str) -> bool:
     return True
 
 
+def _filtrar_titulos_por_situacao(
+    titulos: list[Titulo],
+    saldos_titulos: dict[int, float],
+    situacao: str,
+) -> list[Titulo]:
+    """Aplica a situação ao conjunto já limitado por período e empresa."""
+    return [
+        titulo
+        for titulo in titulos
+        if _titulo_atende_situacao(
+            saldos_titulos.get(titulo.id_titulo, float(titulo.valor or 0)),
+            situacao,
+        )
+    ]
+
+
 def _add_months(data_base: date, meses: int) -> date:
     mes_indice = data_base.month - 1 + meses
     ano = data_base.year + mes_indice // 12
@@ -563,6 +579,7 @@ def listar_titulos():
         [t.id_titulo for t in titulos],
     )
     saldos_titulos = _saldos_titulos_ativos(session, titulos)
+    titulos = _filtrar_titulos_por_situacao(titulos, saldos_titulos, situacao)
 
     rows = []
     total_valor_titulo = 0.0
@@ -575,9 +592,6 @@ def listar_titulos():
         valor_parcela_mes = float(titulos_periodo[t.id_titulo]["valor"] or 0)
         pago_mes = float(baixas_soma.get(t.id_titulo, 0) or 0)
         nao_pago_mes = max(0.0, valor_parcela_mes - pago_mes)
-
-        if not _titulo_atende_situacao(saldos_titulos[t.id_titulo], situacao):
-            continue
 
         total_valor_titulo += valor_total_titulo
         total_valor_parcela_mes += valor_parcela_mes
