@@ -1,5 +1,15 @@
 # Decisoes - PSCONTROL
 
+## 2026-08-17 - PLA-2628 - Filtro de situacao na consulta de titulos
+
+- Decisao: a consulta mensal de titulos passa a oferecer as situacoes `Todas`,
+  `Em aberto` e `Baixada`, mantendo `Todas` como estado padrao.
+- Regra: a situacao considera a parcela do periodo filtrado. O titulo fica
+  `Baixada` quando o valor nao pago no mes e zero, e `Em aberto` quando resta
+  saldo no mes. Os totais e a quantidade refletem somente as linhas exibidas.
+- Impacto: alteracao focal na rota e no template da consulta, sem banco,
+  migration, variavel de ambiente ou mudanca em producao.
+
 ## 2026-08-14 - PLA-2453 - Filtro de empresa em analise e extrato
 
 - Decisao: `Análise de Resultado` e `Extrato de Conta` passam a aceitar empresa opcional e compartilhar a preferência de sessão já adotada em Títulos; a opção `Todas` limpa a preferência e preserva a visão consolidada.

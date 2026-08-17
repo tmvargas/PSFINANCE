@@ -38,6 +38,7 @@ from models import (
 )
 
 LIMITE_PARCELAS_TITULO = 999
+SITUACOES_TITULO = {"todas", "baixada", "em_aberto"}
 
 
 def get_session():
@@ -89,6 +90,19 @@ def _parse_int(value: str | None):
         return int(value)
     except Exception:
         return None
+
+
+def _normalizar_situacao_titulo(value: str | None) -> str:
+    situacao = (value or "todas").strip().lower()
+    return situacao if situacao in SITUACOES_TITULO else "todas"
+
+
+def _titulo_atende_situacao(nao_pago_mes: float, situacao: str) -> bool:
+    if situacao == "baixada":
+        return nao_pago_mes <= 0
+    if situacao == "em_aberto":
+        return nao_pago_mes > 0
+    return True
 
 
 def _add_months(data_base: date, meses: int) -> date:
@@ -429,6 +443,7 @@ def listar_titulos():
     hoje = date.today()
     mes = request.args.get("mes", type=int) or hoje.month
     ano = request.args.get("ano", type=int) or hoje.year
+    situacao = _normalizar_situacao_titulo(request.args.get("situacao"))
 
     if mes < 1 or mes > 12:
         mes = hoje.month
@@ -488,6 +503,9 @@ def listar_titulos():
         pago_mes = float(baixas_soma.get(t.id_titulo, 0) or 0)
         nao_pago_mes = max(0.0, valor_parcela_mes - pago_mes)
 
+        if not _titulo_atende_situacao(nao_pago_mes, situacao):
+            continue
+
         total_valor_titulo += valor_total_titulo
         total_valor_parcela_mes += valor_parcela_mes
         total_pago_mes += pago_mes
@@ -537,6 +555,7 @@ def listar_titulos():
         anos=anos,
         empresas=empresas_view,
         id_empresa=id_empresa,
+        situacao=situacao,
         total_valor_titulo=total_valor_titulo,
         total_valor_parcela_mes=total_valor_parcela_mes,
         total_pago_mes=total_pago_mes,
