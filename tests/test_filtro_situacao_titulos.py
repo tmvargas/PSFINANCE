@@ -133,6 +133,44 @@ class FiltroSituacaoTitulosTest(unittest.TestCase):
                     ids_esperados,
                 )
 
+    def test_situacao_mensal_nao_usa_saldo_futuro_do_titulo_parcelado(self):
+        titulos_agosto_empresa_1 = [
+            SimpleNamespace(id_titulo=11, valor=120),
+            SimpleNamespace(id_titulo=12, valor=300),
+        ]
+        valores_agosto = {11: 30, 12: 100}
+        baixas_das_parcelas_de_agosto = {11: 30, 12: 40}
+        saldos_agosto = {
+            titulo.id_titulo: _calcular_saldo_titulo(
+                valores_agosto[titulo.id_titulo],
+                baixas_das_parcelas_de_agosto[titulo.id_titulo],
+            )
+            for titulo in titulos_agosto_empresa_1
+        }
+
+        todas = _filtrar_titulos_por_situacao(
+            titulos_agosto_empresa_1, saldos_agosto, "todas"
+        )
+        abertas = _filtrar_titulos_por_situacao(
+            titulos_agosto_empresa_1, saldos_agosto, "em_aberto"
+        )
+        baixadas = _filtrar_titulos_por_situacao(
+            titulos_agosto_empresa_1, saldos_agosto, "baixada"
+        )
+
+        self.assertEqual([titulo.id_titulo for titulo in todas], [11, 12])
+        self.assertEqual([titulo.id_titulo for titulo in abertas], [12])
+        self.assertEqual([titulo.id_titulo for titulo in baixadas], [11])
+        self.assertEqual(
+            {titulo.id_titulo for titulo in todas},
+            {titulo.id_titulo for titulo in abertas}
+            | {titulo.id_titulo for titulo in baixadas},
+        )
+        self.assertFalse(
+            {titulo.id_titulo for titulo in abertas}
+            & {titulo.id_titulo for titulo in baixadas}
+        )
+
     def test_filtro_de_situacao_trata_saldo_ausente_sem_falhar(self):
         titulo_legado = SimpleNamespace(id_titulo=10, valor=80)
 

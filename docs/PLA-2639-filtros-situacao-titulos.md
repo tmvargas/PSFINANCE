@@ -4,13 +4,28 @@
 
 A situação é aplicada explicitamente sobre o conjunto que a consulta já
 restringiu por mês, ano e empresa. `Todas` preserva o conjunto; `Em aberto`
-mantém somente saldo global ativo maior que zero; `Baixada` mantém somente
-saldo global ativo igual a zero. O filtro não pode reintroduzir títulos de
-outro período ou de outra empresa.
+mantém somente saldo das parcelas exibidas no mês maior que zero; `Baixada`
+mantém somente saldo dessas parcelas igual a zero. O filtro não pode
+reintroduzir títulos de outro período ou de outra empresa.
 
-O cálculo de saldo ativo e as regras de exclusão lógica permanecem os mesmos
-validados na PLA-2629. Não há escrita, migration ou mudança de estrutura de
-banco.
+Essa regra é coerente com a consulta mensal e com as colunas `Pago no mês` e
+`Não pago no mês`: uma parcela quitada em agosto aparece em `Baixada` em
+agosto, ainda que o título parcelado possua saldo futuro. As regras de exclusão
+lógica permanecem as mesmas. Não há escrita, migration ou mudança de estrutura
+de banco.
+
+## Causa da reprovação e evidência real de staging
+
+A implementação anterior classificava pelo saldo global do título. Em leitura
+somente do PostgreSQL de staging, empresa 1 e agosto/2026 contêm cinco títulos:
+duas parcelas mensais em aberto e três integralmente baixadas no mês. Como os
+três títulos quitados naquele mês possuem parcelas futuras, a regra global os
+mantinha indevidamente em `Em aberto` e deixava `Baixada` vazia.
+
+IDs sanitizados do cenário real: `072b030b` e `ea5d2f1c` em aberto;
+`c0c7c76d`, `f457c545` e `fc490ca4` baixados no mês. Assim, `Todas` deve conter
+os cinco, `Em aberto` somente os dois primeiros e `Baixada` somente os três
+últimos, sem interseção.
 
 ## Matriz de comprovação focal
 
@@ -25,7 +40,7 @@ banco.
 ## Arquitetura e prevenção
 
 - `financeiro/routes_titulos.py`: a rota obtém o conjunto mensal/empresarial,
-  calcula os saldos globais e aplica a situação em uma etapa explícita antes
+  calcula o saldo das parcelas do período e aplica a situação antes
   da montagem das linhas e dos totais.
 - `tests/test_filtro_situacao_titulos.py`: a matriz valida as três situações,
   a combinação com filtros anteriores e o fallback defensivo de título legado.

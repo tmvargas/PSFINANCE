@@ -114,7 +114,7 @@ def _filtrar_titulos_por_situacao(
     saldos_titulos: dict[int, float],
     situacao: str,
 ) -> list[Titulo]:
-    """Aplica a situação ao conjunto já limitado por período e empresa."""
+    """Aplica a situação usando o saldo das parcelas exibidas no período."""
     return [
         titulo
         for titulo in titulos
@@ -578,8 +578,14 @@ def listar_titulos():
         data_fim,
         [t.id_titulo for t in titulos],
     )
-    saldos_titulos = _saldos_titulos_ativos(session, titulos)
-    titulos = _filtrar_titulos_por_situacao(titulos, saldos_titulos, situacao)
+    saldos_periodo = {
+        t.id_titulo: _calcular_saldo_titulo(
+            titulos_periodo[t.id_titulo]["valor"],
+            baixas_soma.get(t.id_titulo, 0),
+        )
+        for t in titulos
+    }
+    titulos = _filtrar_titulos_por_situacao(titulos, saldos_periodo, situacao)
 
     rows = []
     total_valor_titulo = 0.0
