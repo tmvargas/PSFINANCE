@@ -18,10 +18,12 @@
 - Correção após revisão da PLA-2639: como a consulta e seus indicadores são
   mensais, a situação considera o saldo das parcelas exibidas no mês. Saldo de
   parcelas futuras não mantém uma parcela mensal já quitada em `Em aberto`.
-- Recorrência PLA-2641: a correção da PLA-2639 foi revalidada sobre o `staging`
-  `334a3d9` pela interface real, com cliques nas três situações, matriz combinada
-  de período e empresa, totais e screenshots. Casos ausentes na massa real
-  permanecem identificados e cobertos por teste focal, sem escrita no banco.
+- Recorrência PLA-2641: a correção da PLA-2639 foi revalidada pela interface
+  real, com cliques nas três situações, matriz combinada de período e empresa,
+  totais e screenshots. O commit funcional `334a3d9` é ancestral do commit
+  `4f48632`, confirmado como servido pela VPS e igual ao `origin/staging` na
+  revisão executiva. Casos ausentes na massa real permanecem identificados e
+  cobertos por teste focal, sem escrita no banco.
 - Correcao de revisao: titulo que possui parcelas, mas teve todas elas excluidas,
   tem total ativo zero e portanto nao permanece artificialmente em aberto. O
   fallback para `titulo.valor` vale apenas para titulo simples, sem qualquer
