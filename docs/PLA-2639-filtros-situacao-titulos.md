@@ -17,15 +17,40 @@ de banco.
 ## Causa da reprovação e evidência real de staging
 
 A implementação anterior classificava pelo saldo global do título. Em leitura
-somente do PostgreSQL de staging, empresa 1 e agosto/2026 contêm cinco títulos:
-duas parcelas mensais em aberto e três integralmente baixadas no mês. Como os
-três títulos quitados naquele mês possuem parcelas futuras, a regra global os
-mantinha indevidamente em `Em aberto` e deixava `Baixada` vazia.
+somente do PostgreSQL de staging, o subconjunto parcelado da empresa 1 em
+agosto/2026 contém cinco títulos: duas parcelas mensais em aberto e três
+integralmente baixadas no mês. Como os três títulos quitados naquele mês
+possuem parcelas futuras, a regra global os mantinha indevidamente em
+`Em aberto` e deixava `Baixada` vazia.
 
 IDs sanitizados do cenário real: `072b030b` e `ea5d2f1c` em aberto;
 `c0c7c76d`, `f457c545` e `fc490ca4` baixados no mês. Assim, `Todas` deve conter
 os cinco, `Em aberto` somente os dois primeiros e `Baixada` somente os três
 últimos, sem interseção.
+
+Na jornada completa da tela, o mesmo filtro inclui ainda quatro títulos legados
+sem parcelas, todos em aberto. O resultado publicado na porta `5001` é:
+
+| Situação | Quantidade | Relação comprovada |
+| --- | ---: | --- |
+| Todas | 9 | união exata dos demais conjuntos |
+| Em aberto | 6 | 2 parcelados e 4 legados |
+| Baixada | 3 | parcelas do mês integralmente quitadas |
+
+Os conjuntos `Em aberto` e `Baixada` são disjuntos. A troca do seletor altera
+imediatamente a URL, a opção selecionada, a quantidade e os totais exibidos.
+
+## Evidência visual da jornada na porta 5001
+
+- `docs/evidencias/PLA-2639/todas-empresa1-agosto2026-5001.png` — filtro e
+  resumo com `Todas` e 9 títulos.
+- `docs/evidencias/PLA-2639/em_aberto-empresa1-agosto2026-5001.png` — filtro e
+  resumo com `Em aberto` e 6 títulos.
+- `docs/evidencias/PLA-2639/baixada-empresa1-agosto2026-5001.png` — filtro e
+  resumo com `Baixada` e 3 títulos.
+
+Os recortes preservam os filtros e indicadores necessários à comparação e
+não expõem documentos ou identificadores operacionais.
 
 ## Matriz de comprovação focal
 
