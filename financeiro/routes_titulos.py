@@ -97,11 +97,15 @@ def _normalizar_situacao_titulo(value: str | None) -> str:
     return situacao if situacao in SITUACOES_TITULO else "todas"
 
 
-def _titulo_atende_situacao(nao_pago_mes: float, situacao: str) -> bool:
+def _calcular_saldo_titulo(total_ativo: float, baixado_ativo: float) -> float:
+    return max(0.0, float(total_ativo or 0) - float(baixado_ativo or 0))
+
+
+def _titulo_atende_situacao(saldo_titulo: float, situacao: str) -> bool:
     if situacao == "baixada":
-        return nao_pago_mes <= 0
+        return saldo_titulo <= 0
     if situacao == "em_aberto":
-        return nao_pago_mes > 0
+        return saldo_titulo > 0
     return True
 
 
@@ -310,6 +314,61 @@ def _baixas_periodo_por_parcela(session, data_ini: date, data_fim: date, ids_tit
     }
 
 
+def _saldos_titulos_ativos(session, titulos: list[Titulo]) -> dict[int, float]:
+    ids_titulos = [titulo.id_titulo for titulo in titulos]
+    if not ids_titulos:
+        return {}
+
+    totais_parcelas = dict(
+        session.query(
+            TituloParcela.id_titulo,
+            func.coalesce(func.sum(TituloParcela.valor), 0),
+        )
+        .filter(
+            TituloParcela.deleted.is_(False),
+            TituloParcela.id_titulo.in_(ids_titulos),
+        )
+        .group_by(TituloParcela.id_titulo)
+        .all()
+    )
+    baixas_parcelas = dict(
+        session.query(
+            Baixa.id_titulo,
+            func.coalesce(func.sum(Baixa.valor_baixa), 0),
+        )
+        .join(TituloParcela, TituloParcela.id_parcela == Baixa.id_parcela)
+        .filter(
+            Baixa.deleted.is_(False),
+            Baixa.id_titulo.in_(ids_titulos),
+            TituloParcela.deleted.is_(False),
+        )
+        .group_by(Baixa.id_titulo)
+        .all()
+    )
+    baixas_legadas = dict(
+        session.query(
+            Baixa.id_titulo,
+            func.coalesce(func.sum(Baixa.valor_baixa), 0),
+        )
+        .filter(
+            Baixa.deleted.is_(False),
+            Baixa.id_titulo.in_(ids_titulos),
+            Baixa.id_parcela.is_(None),
+        )
+        .group_by(Baixa.id_titulo)
+        .all()
+    )
+
+    return {
+        titulo.id_titulo: _calcular_saldo_titulo(
+            totais_parcelas.get(titulo.id_titulo, titulo.valor),
+            float(baixas_parcelas.get(titulo.id_titulo, 0) or 0)
+            + float(baixas_legadas.get(titulo.id_titulo, 0) or 0),
+        )
+        for titulo in titulos
+    }
+
+
 
 def _uploads_dir() -> Path:
     # guarda dentro da pasta do app (não versionada)
@@ -490,6 +549,7 @@ def listar_titulos():
         data_fim,
         [t.id_titulo for t in titulos],
     )
+    saldos_titulos = _saldos_titulos_ativos(session, titulos)
 
     rows = []
     total_valor_titulo = 0.0
@@ -503,7 +563,7 @@ def listar_titulos():
         pago_mes = float(baixas_soma.get(t.id_titulo, 0) or 0)
         nao_pago_mes = max(0.0, valor_parcela_mes - pago_mes)
 
-        if not _titulo_atende_situacao(nao_pago_mes, situacao):
+        if not _titulo_atende_situacao(saldos_titulos[t.id_titulo], situacao):
             continue
 
         total_valor_titulo += valor_total_titulo
