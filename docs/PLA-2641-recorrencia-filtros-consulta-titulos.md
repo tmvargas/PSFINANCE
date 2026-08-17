@@ -8,7 +8,8 @@ no mês sempre que o mesmo título possuía parcelas futuras; por consequência,
 `Baixada` podia ficar vazia na jornada real, embora a tela exibisse valores
 pagos no período.
 
-A correção presente no `staging` `334a3d9767b3f401bfd88c39be1b08f4c38f8ddf`
+A correção funcional, presente no histórico do `staging` desde o commit
+`334a3d9767b3f401bfd88c39be1b08f4c38f8ddf`,
 calcula a situação pelo saldo das parcelas exibidas no mês, depois de mês, ano
 e empresa já terem limitado o conjunto e antes da montagem das linhas e dos
 totais. A interface e os indicadores mensais passam a usar a mesma regra.
@@ -85,7 +86,11 @@ também foram aprovados.
 
 - Branch funcional já integrada: `fix/PLA-2639-situacao-saldo-mensal`.
 - Commit funcional: `7de976c136332f8b73dcecc7d6e68fe9cece0bca`.
-- Commit servido e `origin/staging`: `334a3d9767b3f401bfd88c39be1b08f4c38f8ddf`.
+- Commit servido e `origin/staging` na revisão executiva: `4f4863225e45c643034f0abffdf1fddb5de70fa7`.
+- O commit `334a3d9767b3f401bfd88c39be1b08f4c38f8ddf` permanece como ancestral
+  que já continha a correção funcional; `4f48632` acrescenta a consolidação
+  das evidências da PLA-2641 e foi o hash efetivamente confirmado na VPS e no
+  GitHub durante a revisão.
 - VPS: branch `staging`, árvore limpa e commit igual ao remoto.
 - Serviço: `psfinance-staging.service` ativo, Gunicorn em `127.0.0.1:5104`.
 - Porta corporativa `5001`: `/` HTTP 200 em 43 ms; `/gate` HTTP 200 em 3 ms.
