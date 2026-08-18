@@ -1,5 +1,51 @@
 # Decisoes - PSCONTROL
 
+## 2026-08-17 - PLA-2611 - Wake orientado a evento do monitor PLA-2609
+
+- Decisao: manter o coletor externo somente leitura a cada 120 segundos e usar
+  um observador separado para acordar o GDSIS apenas quando houver falha da
+  unidade, estado sem atualizacao, reinicio da aplicacao ou resposta diferente
+  de HTTP 200 em uma das seis rotas monitoradas.
+- Deadline: a consolidacao de 24 horas permanece sob o monitor nativo da
+  `executionPolicy` do Paperclip em `2026-08-18T19:45:23Z`; amostras saudaveis
+  nao rearmam o Paperclip e nao geram ciclos CEO/GDSIS.
+- Seguranca: a credencial da API fica somente em arquivo operacional temporario
+  com modo `0600`, fora do Git e dos logs. O observador nao escreve em banco,
+  nao reinicia servicos da aplicacao e nao atua em `main` ou producao.
+- Impacto: a janela iniciada em `2026-08-17T19:45:23Z` permanece continua. O
+  observador apenas le estado, logs sanitizados e propriedades do `systemd`, e
+  chama uma unica vez o endpoint nativo `monitor/check-now` quando detecta uma
+  ocorrencia.
+
+## 2026-08-17 - PLA-2629 - Filtro de situacao na consulta de titulos
+
+- Decisao: a consulta mensal de titulos passa a oferecer as situacoes `Todas`,
+  `Em aberto` e `Baixada`, mantendo `Todas` como estado padrao.
+- Regra: mes e ano definem quais titulos aparecem pela parcela do periodo; a
+  situacao considera o saldo global das parcelas ativas e somente baixas
+  ativas. O titulo fica `Baixada` sem saldo pendente e `Em aberto` quando resta
+  saldo. Parcelas e baixas excluidas nao entram no calculo. Os totais e a
+  quantidade refletem somente as linhas exibidas.
+- Impacto: alteracao focal na rota e no template da consulta, sem banco,
+  migration, variavel de ambiente ou mudanca em producao.
+- Comprovação PLA-2639: a situação passa a ser aplicada em etapa explícita
+  sobre o conjunto já limitado por mês, ano e empresa, antes da montagem das
+  linhas e dos totais. Assim, `Todas`, `Em aberto` e `Baixada` compartilham a
+  mesma base e não reintroduzem registros eliminados pelos filtros anteriores.
+- Correção após revisão da PLA-2639: como a consulta e seus indicadores são
+  mensais, a situação considera o saldo das parcelas exibidas no mês. Saldo de
+  parcelas futuras não mantém uma parcela mensal já quitada em `Em aberto`.
+- Recorrência PLA-2641: a correção da PLA-2639 foi revalidada pela interface
+  real, com cliques nas três situações, matriz combinada de período e empresa,
+  totais e screenshots. O commit funcional `334a3d9` é ancestral do commit
+  `4f48632`, confirmado como servido pela VPS e igual ao `origin/staging` na
+  revisão executiva. Casos ausentes na massa real permanecem identificados e
+  cobertos por teste focal, sem escrita no banco.
+- Correcao de revisao: titulo que possui parcelas, mas teve todas elas excluidas,
+  tem total ativo zero e portanto nao permanece artificialmente em aberto. O
+  fallback para `titulo.valor` vale apenas para titulo simples, sem qualquer
+  parcela cadastrada.
+
 ## 2026-08-14 - PLA-2453 - Filtro de empresa em analise e extrato
 
 - Decisao: `Análise de Resultado` e `Extrato de Conta` passam a aceitar empresa opcional e compartilhar a preferência de sessão já adotada em Títulos; a opção `Todas` limpa a preferência e preserva a visão consolidada.
@@ -797,7 +843,6 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   para baixas de titulo, apresenta a observacao original do titulo.
 - Motivo: separar identificacao documental da contraparte e tornar o extrato
   legivel para uso operacional, sem alterar persistencia ou estrutura de banco.
-
 ## 2026-08-16 - PLA-2597 - Estabilidade do Extrato
 
 - Causa visual: o layout dependia de CSS e JavaScript do `cdn.jsdelivr.net`; uma
@@ -812,3 +857,27 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   transferências, baixas e conciliação permanecem com as regras existentes.
 - Impacto: não há alteração de banco, migration, variável de ambiente, `main`
   ou produção.
+
+## 2026-08-16 - PLA-2612 - Rastreabilidade da baixa a partir do Extrato
+
+- Decisao: cada baixa exibida no Extrato deve oferecer acesso direto a lista
+  de baixas do titulo, identificando titulo, parcela e baixa sem depender do
+  filtro mensal da consulta de titulos.
+- Regra: baixa vinculada mostra numero e ID da parcela; baixa legada permanece
+  localizavel e e identificada como sem parcela. A exclusao exige que o ID da
+  baixa pertença ao titulo informado e continua proibida quando conciliada.
+- Impacto: a exclusao logica existente recalcula os saldos pelas consultas
+  atuais; nenhuma estrutura ou migration de banco e alterada.
+
+## 2026-08-16 - PLA-2609 - Monitor contínuo limitado e auditável
+
+- Projeto: PSFINANCE.
+- Decisão técnica: executar em staging um monitor somente leitura a cada 120
+  segundos, por no máximo 24 horas, com seis rotas funcionais, métricas
+  agregadas do sistema e PostgreSQL, logs sanitizados, estado verificável e
+  rotação limitada a 10 MiB mais uma geração anterior.
+- Motivo: o processo iniciado na PLA-2608 encerrou junto com o heartbeat e não
+  deixou continuidade auditável para capturar uma nova ocorrência.
+- Impacto: a PLA-2609 passa a possuir PID, deadline, amostras e arquivo de log
+  verificáveis sem escrever no banco, reiniciar a aplicação ou alterar
+  produção.

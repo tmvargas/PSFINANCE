@@ -1697,6 +1697,13 @@ def extrato_conta():
                     "documento": _compor_documento_extrato(t.documento, t.nr_documento),
                     "nr_documento": "",
                     "descricao": t.observacao or "",
+                    "id_titulo": t.id_titulo,
+                    "id_parcela": b.id_parcela,
+                    "numero_parcela": (
+                        b.parcela.numero_parcela
+                        if getattr(b, "parcela", None)
+                        else None
+                    ),
                     "entrada": 0.0,
                     "saida": valor,
                 }

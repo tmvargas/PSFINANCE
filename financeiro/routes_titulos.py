@@ -38,6 +38,7 @@ from models import (
 )
 
 LIMITE_PARCELAS_TITULO = 999
+SITUACOES_TITULO = {"todas", "baixada", "em_aberto"}
 
 
 def get_session():
@@ -89,6 +90,39 @@ def _parse_int(value: str | None):
         return int(value)
     except Exception:
         return None
+
+
+def _normalizar_situacao_titulo(value: str | None) -> str:
+    situacao = (value or "todas").strip().lower()
+    return situacao if situacao in SITUACOES_TITULO else "todas"
+
+
+def _calcular_saldo_titulo(total_ativo: float, baixado_ativo: float) -> float:
+    return max(0.0, float(total_ativo or 0) - float(baixado_ativo or 0))
+
+
+def _titulo_atende_situacao(saldo_titulo: float, situacao: str) -> bool:
+    if situacao == "baixada":
+        return saldo_titulo <= 0
+    if situacao == "em_aberto":
+        return saldo_titulo > 0
+    return True
+
+
+def _filtrar_titulos_por_situacao(
+    titulos: list[Titulo],
+    saldos_titulos: dict[int, float],
+    situacao: str,
+) -> list[Titulo]:
+    """Aplica a situação usando o saldo das parcelas exibidas no período."""
+    return [
+        titulo
+        for titulo in titulos
+        if _titulo_atende_situacao(
+            saldos_titulos.get(titulo.id_titulo, float(titulo.valor or 0)),
+            situacao,
+        )
+    ]
 
 
 def _add_months(data_base: date, meses: int) -> date:
@@ -296,6 +330,74 @@ def _baixas_periodo_por_parcela(session, data_ini: date, data_fim: date, ids_tit
     }
 
 
+def _saldos_titulos_ativos(session, titulos: list[Titulo]) -> dict[int, float]:
+    ids_titulos = [titulo.id_titulo for titulo in titulos]
+    if not ids_titulos:
+        return {}
+
+    ids_titulos_com_parcelas = {
+        id_titulo
+        for (id_titulo,) in (
+            session.query(TituloParcela.id_titulo)
+            .filter(TituloParcela.id_titulo.in_(ids_titulos))
+            .distinct()
+            .all()
+        )
+    }
+    totais_parcelas = dict(
+        session.query(
+            TituloParcela.id_titulo,
+            func.coalesce(func.sum(TituloParcela.valor), 0),
+        )
+        .filter(
+            TituloParcela.deleted.is_(False),
+            TituloParcela.id_titulo.in_(ids_titulos),
+        )
+        .group_by(TituloParcela.id_titulo)
+        .all()
+    )
+    baixas_parcelas = dict(
+        session.query(
+            Baixa.id_titulo,
+            func.coalesce(func.sum(Baixa.valor_baixa), 0),
+        )
+        .join(TituloParcela, TituloParcela.id_parcela == Baixa.id_parcela)
+        .filter(
+            Baixa.deleted.is_(False),
+            Baixa.id_titulo.in_(ids_titulos),
+            TituloParcela.deleted.is_(False),
+        )
+        .group_by(Baixa.id_titulo)
+        .all()
+    )
+    baixas_legadas = dict(
+        session.query(
+            Baixa.id_titulo,
+            func.coalesce(func.sum(Baixa.valor_baixa), 0),
+        )
+        .filter(
+            Baixa.deleted.is_(False),
+            Baixa.id_titulo.in_(ids_titulos),
+            Baixa.id_parcela.is_(None),
+        )
+        .group_by(Baixa.id_titulo)
+        .all()
+    )
+
+    return {
+        titulo.id_titulo: _calcular_saldo_titulo(
+            (
+                totais_parcelas.get(titulo.id_titulo, 0)
+                if titulo.id_titulo in ids_titulos_com_parcelas
+                else titulo.valor
+            ),
+            float(baixas_parcelas.get(titulo.id_titulo, 0) or 0)
+            + float(baixas_legadas.get(titulo.id_titulo, 0) or 0),
+        )
+        for titulo in titulos
+    }
+
+
 
 def _uploads_dir() -> Path:
     # guarda dentro da pasta do app (não versionada)
@@ -429,6 +531,7 @@ def listar_titulos():
     hoje = date.today()
     mes = request.args.get("mes", type=int) or hoje.month
     ano = request.args.get("ano", type=int) or hoje.year
+    situacao = _normalizar_situacao_titulo(request.args.get("situacao"))
 
     if mes < 1 or mes > 12:
         mes = hoje.month
@@ -475,6 +578,14 @@ def listar_titulos():
         data_fim,
         [t.id_titulo for t in titulos],
     )
+    saldos_periodo = {
+        t.id_titulo: _calcular_saldo_titulo(
+            titulos_periodo[t.id_titulo]["valor"],
+            baixas_soma.get(t.id_titulo, 0),
+        )
+        for t in titulos
+    }
+    titulos = _filtrar_titulos_por_situacao(titulos, saldos_periodo, situacao)
 
     rows = []
     total_valor_titulo = 0.0
@@ -537,6 +648,7 @@ def listar_titulos():
         anos=anos,
         empresas=empresas_view,
         id_empresa=id_empresa,
+        situacao=situacao,
         total_valor_titulo=total_valor_titulo,
         total_valor_parcela_mes=total_valor_parcela_mes,
         total_pago_mes=total_pago_mes,
@@ -1165,6 +1277,7 @@ def baixar_titulo(id_titulo: int):
 @bp_financeiro.route("/titulos/<int:id_titulo>/baixas")
 def listar_baixas_titulo(id_titulo: int):
     session = get_session()
+    id_baixa_destacada = request.args.get("baixa", type=int)
 
     titulo = (
         session.query(Titulo)
@@ -1218,34 +1331,41 @@ def listar_baixas_titulo(id_titulo: int):
         baixas=baixas_view,
         total_baixas=total,
         saldo_aberto=saldo_aberto,
+        id_baixa_destacada=id_baixa_destacada,
     )
 
 
 # ----------------------------------------------------------------------
 # EXCLUIR BAIXA (somente se NÃO conciliada)
 # ----------------------------------------------------------------------
-@bp_financeiro.route("/baixas/<int:id_baixa>/excluir", methods=["POST"])
-def excluir_baixa(id_baixa: int):
+@bp_financeiro.route(
+    "/titulos/<int:id_titulo>/baixas/<int:id_baixa>/excluir",
+    methods=["POST"],
+)
+def excluir_baixa(id_titulo: int, id_baixa: int):
     session = get_session()
 
     bx = (
         session.query(Baixa)
-        .filter(Baixa.id_baixa == id_baixa, Baixa.deleted.is_(False))
+        .filter(
+            Baixa.id_baixa == id_baixa,
+            Baixa.id_titulo == id_titulo,
+            Baixa.deleted.is_(False),
+        )
         .first()
     )
     if not bx:
         session.close()
-        flash("Baixa não encontrada.", "erro")
-        return redirect(url_for("financeiro.listar_titulos"))
+        flash("Baixa não encontrada para o título informado.", "erro")
+        return redirect(url_for("financeiro.listar_baixas_titulo", id_titulo=id_titulo))
 
     if bool(getattr(bx, "conciliado", False)):
         session.close()
         flash("Não é possível excluir uma baixa conciliada.", "erro")
-        return redirect(url_for("financeiro.listar_baixas_titulo", id_titulo=bx.id_titulo))
+        return redirect(url_for("financeiro.listar_baixas_titulo", id_titulo=id_titulo))
 
     bx.deleted = True
     session.commit()
-    id_titulo = bx.id_titulo
     session.close()
 
     flash("Baixa excluída com sucesso.", "sucesso")
