@@ -1,6 +1,7 @@
 # financeiro/routes_contas.py
 from datetime import date, datetime, timedelta
-from sqlalchemy import func, or_
+from sqlalchemy import case, func, or_
+from sqlalchemy.orm import joinedload
 from flask import render_template, request, redirect, url_for, flash, session as flask_session
 from datetime import date
 
@@ -1553,8 +1554,37 @@ def extrato_conta():
         # saldo inicial: saldo_inicial da conta + tudo antes de d_ini
         saldo = float(conta_sel.saldo_inicial or 0)
 
-        movs_before = (
-            session.query(MovimentacaoConta)
+        saldo_movimentos_anteriores = (
+            session.query(
+                func.coalesce(
+                    func.sum(
+                        case(
+                            (
+                                (MovimentacaoConta.tipo == "E")
+                                & (MovimentacaoConta.id_conta_destino == conta_sel.id_conta),
+                                MovimentacaoConta.valor,
+                            ),
+                            (
+                                (MovimentacaoConta.tipo == "S")
+                                & (MovimentacaoConta.id_conta_origem == conta_sel.id_conta),
+                                -MovimentacaoConta.valor,
+                            ),
+                            (
+                                (MovimentacaoConta.tipo == "T")
+                                & (MovimentacaoConta.id_conta_destino == conta_sel.id_conta),
+                                MovimentacaoConta.valor,
+                            ),
+                            (
+                                (MovimentacaoConta.tipo == "T")
+                                & (MovimentacaoConta.id_conta_origem == conta_sel.id_conta),
+                                -MovimentacaoConta.valor,
+                            ),
+                            else_=0,
+                        )
+                    ),
+                    0,
+                )
+            )
             .filter(
                 MovimentacaoConta.deleted.is_(False),
                 MovimentacaoConta.data < d_ini,
@@ -1563,39 +1593,27 @@ def extrato_conta():
                     MovimentacaoConta.id_conta_origem == conta_sel.id_conta,
                 ),
             )
-            .all()
+            .scalar()
         )
+        saldo += float(saldo_movimentos_anteriores or 0)
 
-        for m in movs_before:
-            valor = float(m.valor or 0)
-            if m.tipo == "E" and m.id_conta_destino == conta_sel.id_conta:
-                saldo += valor
-            elif m.tipo == "S" and m.id_conta_origem == conta_sel.id_conta:
-                saldo -= valor
-            elif m.tipo == "T":
-                if m.id_conta_destino == conta_sel.id_conta:
-                    saldo += valor
-                elif m.id_conta_origem == conta_sel.id_conta:
-                    saldo -= valor
-
-        baixas_before = (
-            session.query(Baixa)
+        total_baixas_anteriores = (
+            session.query(func.coalesce(func.sum(Baixa.valor_baixa), 0))
             .filter(
                 Baixa.deleted.is_(False),
                 Baixa.data < d_ini,
                 Baixa.id_conta == conta_sel.id_conta,
             )
-            .all()
+            .scalar()
         )
-
-        for b in baixas_before:
-            saldo -= float(b.valor_baixa or 0)
+        saldo -= float(total_baixas_anteriores or 0)
 
         saldo_inicial = saldo
 
         # movimentações no período (com flag conciliado)
         movs_periodo = (
             session.query(MovimentacaoConta)
+            .options(joinedload(MovimentacaoConta.documento))
             .filter(
                 MovimentacaoConta.deleted.is_(False),
                 MovimentacaoConta.data >= d_ini,
@@ -1612,6 +1630,7 @@ def extrato_conta():
         # baixas no período (com título e flag conciliado)
         baixas_periodo = (
             session.query(Baixa, Titulo)
+            .options(joinedload(Titulo.documento))
             .join(Titulo, Baixa.id_titulo == Titulo.id_titulo)
             .filter(
                 Baixa.deleted.is_(False),

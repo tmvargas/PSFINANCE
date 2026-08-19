@@ -843,6 +843,21 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   para baixas de titulo, apresenta a observacao original do titulo.
 - Motivo: separar identificacao documental da contraparte e tornar o extrato
   legivel para uso operacional, sem alterar persistencia ou estrutura de banco.
+## 2026-08-16 - PLA-2597 - Estabilidade do Extrato
+
+- Causa visual: o layout dependia de CSS e JavaScript do `cdn.jsdelivr.net`; uma
+  conexão externa lenta ou bloqueada mantinha o navegador em carregamento mesmo
+  depois de o HTML do PSFINANCE ter sido entregue. Os assets Bootstrap passam a
+  ser servidos pelo próprio PSFINANCE, eliminando essa dependência na jornada.
+- Causa de escalabilidade: o saldo inicial carregava todo o histórico anterior
+  em memória e os documentos do período eram obtidos por consultas N+1. O saldo
+  anterior passa a ser agregado no PostgreSQL e os documentos são carregados na
+  mesma consulta do período.
+- Preservação: filtros por empresa/conta, cálculo de entradas, saídas,
+  transferências, baixas e conciliação permanecem com as regras existentes.
+- Impacto: não há alteração de banco, migration, variável de ambiente, `main`
+  ou produção.
+
 ## 2026-08-16 - PLA-2612 - Rastreabilidade da baixa a partir do Extrato
 
 - Decisao: cada baixa exibida no Extrato deve oferecer acesso direto a lista
