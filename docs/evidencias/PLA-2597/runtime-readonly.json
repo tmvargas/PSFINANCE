@@ -1,0 +1,17 @@
+{
+  "started_at": "2026-08-19T19:44:52Z",
+  "finished_at": "2026-08-19T19:44:56Z",
+  "requests": 30,
+  "concurrency": 6,
+  "http_errors": 0,
+  "average_seconds": 0.070241,
+  "maximum_seconds": 0.085251,
+  "gunicorn_cpu_average_percent": 0.50,
+  "gunicorn_cpu_maximum_percent": 0.50,
+  "gunicorn_rss_maximum_kib": 241648,
+  "postgres_max_connections": 100,
+  "postgres_database_connections_after_load": 4,
+  "postgres_active_after_load": 1,
+  "postgres_lock_waiting_after_load": 0,
+  "postgres_idle_after_load": 3
+}

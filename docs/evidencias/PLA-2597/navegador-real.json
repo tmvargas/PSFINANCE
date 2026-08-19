@@ -1,0 +1,54 @@
+{
+  "capturedAt": "2026-08-19T19:46:53.786Z",
+  "url": "http://vps69143.publiccloud.com.br:5001/staging/psfinance/financeiro/extrato?id_empresa=1&id_conta=14&data_ini=2026-08-01&data_fim=2026-08-16",
+  "status": 200,
+  "loadElapsedMs": 826,
+  "navigation": {
+    "domContentLoadedMs": 398.4,
+    "loadEventMs": 420,
+    "durationMs": 420,
+    "transferSize": 9152
+  },
+  "resources": [
+    {
+      "name": "http://vps69143.publiccloud.com.br:5001/staging/psfinance/static/vendor/bootstrap-5.3.3/bootstrap.min.css",
+      "initiatorType": "link",
+      "startTimeMs": 264.2,
+      "responseEndMs": 309.3,
+      "durationMs": 45.1,
+      "transferSize": 233103
+    },
+    {
+      "name": "http://vps69143.publiccloud.com.br:5001/staging/psfinance/static/vendor/bootstrap-5.3.3/bootstrap.bundle.min.js",
+      "initiatorType": "script",
+      "startTimeMs": 270.9,
+      "responseEndMs": 308.1,
+      "durationMs": 37.2,
+      "transferSize": 81021
+    }
+  ],
+  "requestFailures": [],
+  "pendingRequestsAfterNetworkIdle": 0,
+  "smoke": [
+    {
+      "path": "/staging/psfinance/health",
+      "status": 200,
+      "elapsedMs": 672
+    },
+    {
+      "path": "/staging/psfinance/",
+      "status": 200,
+      "elapsedMs": 1036
+    },
+    {
+      "path": "/staging/psfinance/financeiro/titulos?mes=8&ano=2026&id_empresa=1",
+      "status": 200,
+      "elapsedMs": 856
+    },
+    {
+      "path": "/staging/psfinance/financeiro/analise?id_empresa=1&data_ini=2026-08-01&data_fim=2026-08-16",
+      "status": 200,
+      "elapsedMs": 793
+    }
+  ]
+}
