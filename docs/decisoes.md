@@ -889,6 +889,8 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
 - Motivo: comprovar banco alvo, schema, nulabilidade, volume e locks antes de
   qualquer autorizacao de fixtures ou testes persistentes.
 - Operacao futura: dados sinteticos limitados a menos de 20 registros em banco
-  isolado/efemero, com descarte integral ou restauracao validada.
+  isolado/efemero, com parametro obrigatorio de 1 a 19 e descarte integral ou
+  restauracao validada. Schema/nulabilidade divergentes, transacao concorrente,
+  espera ativa ou lock nao concedido interrompem a pre-validacao.
 - Preservacao: a baixa operacional `41` nao integra a fixture e nao pode ser
   alterada ou excluida por esse pacote.

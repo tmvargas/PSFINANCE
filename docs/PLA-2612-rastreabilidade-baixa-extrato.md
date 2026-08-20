@@ -124,9 +124,11 @@ deve ser um PostgreSQL isolado/efemero, diferente de `psfinance_staging` e
 - Efeito: somente `BEGIN TRANSACTION READ ONLY`, consultas de metadados,
   contagens e locks, seguido de `ROLLBACK`.
 - Checksum SHA-256:
-  `daaa72894169c415be6fa9b6e55bc8d1905d8cd1ee9e5b60cd2c110d1296d9d7`.
+  `99db40db1d7f813769da0a72c4fa3672509f920e8edd4a7d16d33e424da52a49`.
 - O script exige `expected_database`, compara o nome ao banco atual e falha
   fechado se o alvo for `psfinance_staging` ou `psfinance_prod`.
+- O script exige `synthetic_records` e aborta se o valor nao for inteiro entre
+  `1` e `19`; esse parametro representa o total da futura fixture autorizada.
 
 ### Schema e nulabilidade esperados
 
@@ -136,18 +138,20 @@ deve ser um PostgreSQL isolado/efemero, diferente de `psfinance_staging` e
 | `titulo_parcela` | `id_parcela`, `id_titulo`, `numero_parcela`, `valor`, `deleted` | todas `NOT NULL` |
 | `baixa` | `id_baixa`, `id_titulo`, `id_parcela`, `valor_baixa`, `conciliado`, `deleted` | `id_parcela` aceita `NULL` para legado; demais `NOT NULL` |
 
-Qualquer divergencia reprova a pre-condicao. Nenhuma correcao automatica de
-schema esta prevista ou autorizada.
+Qualquer coluna ausente ou divergencia de tipo/nulabilidade executa
+`RAISE EXCEPTION` e interrompe o script por `ON_ERROR_STOP`. Nenhuma correcao
+automatica de schema esta prevista ou autorizada.
 
 ### Volume, lock e duracao
 
-- Volume sintetico maximo: menos de 20 registros somando todas as tabelas da
-  fixture, conforme o quadro de autorizacao.
+- Volume sintetico maximo: de 1 a 19 registros somando todas as tabelas da
+  fixture. Valor ausente, nao inteiro, zero ou maior/igual a 20 aborta o script.
 - O script registra contagens iniciais de `titulo`, `titulo_parcela` e `baixa`.
 - `lock_timeout`: 1 segundo; `statement_timeout`: 5 segundos;
   `idle_in_transaction_session_timeout`: 10 segundos.
-- O script lista somente metadados de sessao e lock do banco isolado, sem texto
-  SQL. Lock nao concedido ou transacao concorrente inesperada exige aborto.
+- O script aborta via `RAISE EXCEPTION` ao detectar outra sessao com transacao
+  aberta, espera ativa ou lock nao concedido no banco isolado; depois do gate,
+  lista somente metadados sanitizados, sem texto SQL.
 - Duracao estimada da pre-validacao: menos de 10 segundos. Matriz funcional e
   descarte: ate 10 minutos, condicionados ao aceite e medidos na execucao.
 
@@ -192,3 +196,9 @@ contagens, sem expor dados privados.
   aciona o rollback antes de qualquer nova tentativa.
 - Nenhuma etapa deste pacote autoriza `main`, producao, migration, deploy
   produtivo, banco produtivo ou alteracao da baixa `41`.
+
+### Testes estaticos dos gates
+
+`python3 -m unittest tests.test_pla2612_prevalidacao_sql -v` comprova que o
+artefato permanece `READ ONLY`, usa `ON_ERROR_STOP` e contem gates fail-closed
+para schema/nulabilidade, locks/concorrencia e limite sintetico de 1 a 19.
