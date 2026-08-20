@@ -111,3 +111,84 @@ anterior/posterior e descarte ou rollback, continua dependente da autorizacao
 expressa e especifica de Thiago na interacao canonica da tarefa mae `PLA-743`.
 Sem essa autorizacao, a governanca proibe criar fixtures, excluir a baixa `41`
 ou executar qualquer teste que persista dados, inclusive em banco isolado.
+
+## Pacote de Pre-Validacao de Banco
+
+Pacote preparado em 20/08/2026 sem conexao nem escrita em banco. O alvo futuro
+deve ser um PostgreSQL isolado/efemero, diferente de `psfinance_staging` e
+`psfinance_prod`.
+
+### Script e integridade
+
+- Script: `scripts/sql/PLA-2612_prevalidacao_postgresql_isolado.sql`.
+- Efeito: somente `BEGIN TRANSACTION READ ONLY`, consultas de metadados,
+  contagens e locks, seguido de `ROLLBACK`.
+- Checksum SHA-256:
+  `daaa72894169c415be6fa9b6e55bc8d1905d8cd1ee9e5b60cd2c110d1296d9d7`.
+- O script exige `expected_database`, compara o nome ao banco atual e falha
+  fechado se o alvo for `psfinance_staging` ou `psfinance_prod`.
+
+### Schema e nulabilidade esperados
+
+| Tabela | Colunas verificadas | Nulabilidade relevante |
+| --- | --- | --- |
+| `titulo` | `id_titulo`, `deleted` | ambas `NOT NULL` |
+| `titulo_parcela` | `id_parcela`, `id_titulo`, `numero_parcela`, `valor`, `deleted` | todas `NOT NULL` |
+| `baixa` | `id_baixa`, `id_titulo`, `id_parcela`, `valor_baixa`, `conciliado`, `deleted` | `id_parcela` aceita `NULL` para legado; demais `NOT NULL` |
+
+Qualquer divergencia reprova a pre-condicao. Nenhuma correcao automatica de
+schema esta prevista ou autorizada.
+
+### Volume, lock e duracao
+
+- Volume sintetico maximo: menos de 20 registros somando todas as tabelas da
+  fixture, conforme o quadro de autorizacao.
+- O script registra contagens iniciais de `titulo`, `titulo_parcela` e `baixa`.
+- `lock_timeout`: 1 segundo; `statement_timeout`: 5 segundos;
+  `idle_in_transaction_session_timeout`: 10 segundos.
+- O script lista somente metadados de sessao e lock do banco isolado, sem texto
+  SQL. Lock nao concedido ou transacao concorrente inesperada exige aborto.
+- Duracao estimada da pre-validacao: menos de 10 segundos. Matriz funcional e
+  descarte: ate 10 minutos, condicionados ao aceite e medidos na execucao.
+
+### Backup e restauracao
+
+Antes da matriz autorizada, o GDSIS deve registrar uma das opcoes:
+
+1. banco efemero recem-criado a partir de schema versionado, sem dados
+   operacionais, cuja estrategia de rollback e o descarte integral; ou
+2. backup logico do banco isolado com `pg_dump --format=custom`, checksum
+   SHA-256, tamanho, horario UTC e teste de leitura do catalogo com
+   `pg_restore --list`.
+
+Restauracao proposta para a opcao 2: criar outro banco isolado vazio e usar
+`pg_restore --clean --if-exists --no-owner --no-privileges`; nunca restaurar
+sobre `psfinance_staging` ou `psfinance_prod`.
+
+### Matriz apos autorizacao
+
+O responsavel sera o GDSIS. A execucao usara exclusivamente dados sinteticos e
+validara:
+
+1. baixa ativa vinculada a parcela ativa;
+2. baixa ativa vinculada a parcela excluida;
+3. baixa legada com `id_parcela IS NULL`;
+4. baixa conciliada protegida;
+5. titulo manipulado rejeitado;
+6. reflexos apos exclusao permitida em parcela, titulo, Consulta Mensal,
+   Extrato e Analise.
+
+A baixa operacional `41` nao sera copiada, alterada ou excluida. A validacao
+registrara IDs sinteticos, estado anterior/posterior, HTTP, screenshots e
+contagens, sem expor dados privados.
+
+### Rollback e criterios de parada
+
+- Rollback padrao: descarte integral do banco efemero ou restauracao validada em
+  novo banco isolado.
+- Abortar sem escrita se banco, schema, nulabilidade, checksum, volume, backup,
+  locks, commit de `staging` ou escopo divergirem do pacote aprovado.
+- Erro durante a matriz interrompe novos casos, preserva logs sanitizados e
+  aciona o rollback antes de qualquer nova tentativa.
+- Nenhuma etapa deste pacote autoriza `main`, producao, migration, deploy
+  produtivo, banco produtivo ou alteracao da baixa `41`.
