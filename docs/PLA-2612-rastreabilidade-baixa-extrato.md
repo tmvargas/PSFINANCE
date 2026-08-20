@@ -83,3 +83,31 @@ ja excluida logicamente.
   dado operacional de staging. A recomendacao e preservar a baixa `41` ate a
   decisao de Thiago e executar a matriz persistente em banco PostgreSQL isolado,
   com transacao/rollback ou descarte integral do banco de teste autorizado.
+
+## Complemento apos revisao executiva de 20/08/2026
+
+A revisao solicitou prova adicional de protecao contra requisicao manipulada e
+dos reflexos da exclusao. Foi adicionado o teste sem banco
+`tests/test_pla2612_protecao_endpoint_sem_banco.py`, executado com sucesso em
+cinco casos:
+
+| Evidencia executavel | Resultado |
+| --- | --- |
+| Filtros de `id_baixa`, `id_titulo` e `deleted=False` | Aprovado |
+| Titulo manipulado retorna antes de qualquer `commit` | Aprovado |
+| Baixa conciliada retorna antes de `bx.deleted=True` | Aprovado |
+| Baixa permitida usa exclusao logica e um unico `commit` | Aprovado |
+| Saldo da parcela, saldo do titulo, consulta mensal, Extrato e Analise filtram baixas excluidas | Aprovado |
+
+Comando:
+
+```bash
+python3 -m unittest tests.test_pla2612_protecao_endpoint_sem_banco -v
+```
+
+Esse complemento nao abriu conexao e nao escreveu em SQLite ou PostgreSQL. A
+matriz funcional persistente em PostgreSQL isolado, incluindo prova de estado
+anterior/posterior e descarte ou rollback, continua dependente da autorizacao
+expressa e especifica de Thiago na interacao canonica da tarefa mae `PLA-743`.
+Sem essa autorizacao, a governanca proibe criar fixtures, excluir a baixa `41`
+ou executar qualquer teste que persista dados, inclusive em banco isolado.
