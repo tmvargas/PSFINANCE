@@ -881,3 +881,16 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
 - Impacto: a PLA-2609 passa a possuir PID, deadline, amostras e arquivo de log
   verificáveis sem escrever no banco, reiniciar a aplicação ou alterar
   produção.
+## 2026-08-20 - PLA-2612 - Pre-validacao separada da escrita funcional
+
+- Decisao: o pacote de autorizacao da matriz PostgreSQL deve usar um script de
+  pre-validacao estritamente `READ ONLY`, com falha fechada para os bancos
+  `psfinance_staging` e `psfinance_prod`.
+- Motivo: comprovar banco alvo, schema, nulabilidade, volume e locks antes de
+  qualquer autorizacao de fixtures ou testes persistentes.
+- Operacao futura: dados sinteticos limitados a menos de 20 registros em banco
+  isolado/efemero, com parametro obrigatorio de 1 a 19 e descarte integral ou
+  restauracao validada. Schema/nulabilidade divergentes, transacao concorrente,
+  espera ativa ou lock nao concedido interrompem a pre-validacao.
+- Preservacao: a baixa operacional `41` nao integra a fixture e nao pode ser
+  alterada ou excluida por esse pacote.

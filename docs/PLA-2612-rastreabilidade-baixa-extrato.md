@@ -83,3 +83,122 @@ ja excluida logicamente.
   dado operacional de staging. A recomendacao e preservar a baixa `41` ate a
   decisao de Thiago e executar a matriz persistente em banco PostgreSQL isolado,
   com transacao/rollback ou descarte integral do banco de teste autorizado.
+
+## Complemento apos revisao executiva de 20/08/2026
+
+A revisao solicitou prova adicional de protecao contra requisicao manipulada e
+dos reflexos da exclusao. Foi adicionado o teste sem banco
+`tests/test_pla2612_protecao_endpoint_sem_banco.py`, executado com sucesso em
+cinco casos:
+
+| Evidencia executavel | Resultado |
+| --- | --- |
+| Filtros de `id_baixa`, `id_titulo` e `deleted=False` | Aprovado |
+| Titulo manipulado retorna antes de qualquer `commit` | Aprovado |
+| Baixa conciliada retorna antes de `bx.deleted=True` | Aprovado |
+| Baixa permitida usa exclusao logica e um unico `commit` | Aprovado |
+| Saldo da parcela, saldo do titulo, consulta mensal, Extrato e Analise filtram baixas excluidas | Aprovado |
+
+Comando:
+
+```bash
+python3 -m unittest tests.test_pla2612_protecao_endpoint_sem_banco -v
+```
+
+Esse complemento nao abriu conexao e nao escreveu em SQLite ou PostgreSQL. A
+matriz funcional persistente em PostgreSQL isolado, incluindo prova de estado
+anterior/posterior e descarte ou rollback, continua dependente da autorizacao
+expressa e especifica de Thiago na interacao canonica da tarefa mae `PLA-743`.
+Sem essa autorizacao, a governanca proibe criar fixtures, excluir a baixa `41`
+ou executar qualquer teste que persista dados, inclusive em banco isolado.
+
+## Pacote de Pre-Validacao de Banco
+
+Pacote preparado em 20/08/2026 sem conexao nem escrita em banco. O alvo futuro
+deve ser um PostgreSQL isolado/efemero, diferente de `psfinance_staging` e
+`psfinance_prod`.
+
+### Script e integridade
+
+- Script: `scripts/sql/PLA-2612_prevalidacao_postgresql_isolado.sql`.
+- Efeito: somente `BEGIN TRANSACTION READ ONLY`, consultas de metadados,
+  contagens e locks, seguido de `ROLLBACK`.
+- Checksum SHA-256:
+  `99db40db1d7f813769da0a72c4fa3672509f920e8edd4a7d16d33e424da52a49`.
+- O script exige `expected_database`, compara o nome ao banco atual e falha
+  fechado se o alvo for `psfinance_staging` ou `psfinance_prod`.
+- O script exige `synthetic_records` e aborta se o valor nao for inteiro entre
+  `1` e `19`; esse parametro representa o total da futura fixture autorizada.
+
+### Schema e nulabilidade esperados
+
+| Tabela | Colunas verificadas | Nulabilidade relevante |
+| --- | --- | --- |
+| `titulo` | `id_titulo`, `deleted` | ambas `NOT NULL` |
+| `titulo_parcela` | `id_parcela`, `id_titulo`, `numero_parcela`, `valor`, `deleted` | todas `NOT NULL` |
+| `baixa` | `id_baixa`, `id_titulo`, `id_parcela`, `valor_baixa`, `conciliado`, `deleted` | `id_parcela` aceita `NULL` para legado; demais `NOT NULL` |
+
+Qualquer coluna ausente ou divergencia de tipo/nulabilidade executa
+`RAISE EXCEPTION` e interrompe o script por `ON_ERROR_STOP`. Nenhuma correcao
+automatica de schema esta prevista ou autorizada.
+
+### Volume, lock e duracao
+
+- Volume sintetico maximo: de 1 a 19 registros somando todas as tabelas da
+  fixture. Valor ausente, nao inteiro, zero ou maior/igual a 20 aborta o script.
+- O script registra contagens iniciais de `titulo`, `titulo_parcela` e `baixa`.
+- `lock_timeout`: 1 segundo; `statement_timeout`: 5 segundos;
+  `idle_in_transaction_session_timeout`: 10 segundos.
+- O script aborta via `RAISE EXCEPTION` ao detectar outra sessao com transacao
+  aberta, espera ativa ou lock nao concedido no banco isolado; depois do gate,
+  lista somente metadados sanitizados, sem texto SQL.
+- Duracao estimada da pre-validacao: menos de 10 segundos. Matriz funcional e
+  descarte: ate 10 minutos, condicionados ao aceite e medidos na execucao.
+
+### Backup e restauracao
+
+Antes da matriz autorizada, o GDSIS deve registrar uma das opcoes:
+
+1. banco efemero recem-criado a partir de schema versionado, sem dados
+   operacionais, cuja estrategia de rollback e o descarte integral; ou
+2. backup logico do banco isolado com `pg_dump --format=custom`, checksum
+   SHA-256, tamanho, horario UTC e teste de leitura do catalogo com
+   `pg_restore --list`.
+
+Restauracao proposta para a opcao 2: criar outro banco isolado vazio e usar
+`pg_restore --clean --if-exists --no-owner --no-privileges`; nunca restaurar
+sobre `psfinance_staging` ou `psfinance_prod`.
+
+### Matriz apos autorizacao
+
+O responsavel sera o GDSIS. A execucao usara exclusivamente dados sinteticos e
+validara:
+
+1. baixa ativa vinculada a parcela ativa;
+2. baixa ativa vinculada a parcela excluida;
+3. baixa legada com `id_parcela IS NULL`;
+4. baixa conciliada protegida;
+5. titulo manipulado rejeitado;
+6. reflexos apos exclusao permitida em parcela, titulo, Consulta Mensal,
+   Extrato e Analise.
+
+A baixa operacional `41` nao sera copiada, alterada ou excluida. A validacao
+registrara IDs sinteticos, estado anterior/posterior, HTTP, screenshots e
+contagens, sem expor dados privados.
+
+### Rollback e criterios de parada
+
+- Rollback padrao: descarte integral do banco efemero ou restauracao validada em
+  novo banco isolado.
+- Abortar sem escrita se banco, schema, nulabilidade, checksum, volume, backup,
+  locks, commit de `staging` ou escopo divergirem do pacote aprovado.
+- Erro durante a matriz interrompe novos casos, preserva logs sanitizados e
+  aciona o rollback antes de qualquer nova tentativa.
+- Nenhuma etapa deste pacote autoriza `main`, producao, migration, deploy
+  produtivo, banco produtivo ou alteracao da baixa `41`.
+
+### Testes estaticos dos gates
+
+`python3 -m unittest tests.test_pla2612_prevalidacao_sql -v` comprova que o
+artefato permanece `READ ONLY`, usa `ON_ERROR_STOP` e contem gates fail-closed
+para schema/nulabilidade, locks/concorrencia e limite sintetico de 1 a 19.
