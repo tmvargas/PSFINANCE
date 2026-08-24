@@ -1,0 +1,165 @@
+[
+  {
+    "id": "credor-positivo",
+    "objetivo": "Comprovar credor vinculado à empresa com resultado positivo.",
+    "url": "http://127.0.0.1:15104/staging/psfinance/financeiro/titulos?mes=8&ano=2026&modo_vencimento=mes&id_empresa=2&id_credor=6&situacao=em_aberto",
+    "expectedRows": 1,
+    "returnedTitles": [
+      69
+    ],
+    "expectedTitles": [
+      69
+    ],
+    "unexpectedTitles": [
+      49
+    ],
+    "selected": {
+      "empresa": "2 - PLANSMART",
+      "credor": "Amico Celular",
+      "situacao": "Em aberto",
+      "modo": "mes",
+      "emissao": "",
+      "titulo": ""
+    },
+    "metrics": {
+      "Títulos filtrados": "1",
+      "Valor total dos títulos": "R$ 159.00",
+      "Valor da parcela no mês": "R$ 31.80",
+      "Pago no mês": "R$ 0.00",
+      "Não pago no mês": "R$ 31.80"
+    },
+    "result": "aprovado"
+  },
+  {
+    "id": "emissao-positiva",
+    "objetivo": "Comprovar emissão exata combinada com situação Baixada.",
+    "url": "http://127.0.0.1:15104/staging/psfinance/financeiro/titulos?mes=8&ano=2026&modo_vencimento=mes&id_empresa=1&emissao=2026-08-10&situacao=baixada",
+    "expectedRows": 3,
+    "returnedTitles": [
+      50,
+      49,
+      53
+    ],
+    "expectedTitles": [
+      49,
+      50,
+      53
+    ],
+    "unexpectedTitles": [
+      54,
+      55,
+      69
+    ],
+    "selected": {
+      "empresa": "1 - THIAGO",
+      "credor": "Todos",
+      "situacao": "Baixada",
+      "modo": "mes",
+      "emissao": "2026-08-10",
+      "titulo": ""
+    },
+    "metrics": {
+      "Títulos filtrados": "3",
+      "Valor total dos títulos": "R$ 13820.31",
+      "Valor da parcela no mês": "R$ 2883.35",
+      "Pago no mês": "R$ 2883.35",
+      "Não pago no mês": "R$ 0.00"
+    },
+    "result": "aprovado"
+  },
+  {
+    "id": "titulo-simples",
+    "objetivo": "Comprovar busca por ID em título legado sem parcelas.",
+    "url": "http://127.0.0.1:15104/staging/psfinance/financeiro/titulos?mes=8&ano=2026&modo_vencimento=mes&id_empresa=1&titulo=54&situacao=em_aberto",
+    "expectedRows": 1,
+    "returnedTitles": [
+      54
+    ],
+    "expectedTitles": [
+      54
+    ],
+    "unexpectedTitles": [
+      66
+    ],
+    "selected": {
+      "empresa": "1 - THIAGO",
+      "credor": "Todos",
+      "situacao": "Em aberto",
+      "modo": "mes",
+      "emissao": "",
+      "titulo": "54"
+    },
+    "metrics": {
+      "Títulos filtrados": "1",
+      "Valor total dos títulos": "R$ 128.00",
+      "Valor da parcela no mês": "R$ 128.00",
+      "Pago no mês": "R$ 0.00",
+      "Não pago no mês": "R$ 128.00"
+    },
+    "result": "aprovado"
+  },
+  {
+    "id": "titulo-parcelado",
+    "objetivo": "Comprovar busca operacional por descrição em título parcelado.",
+    "url": "http://127.0.0.1:15104/staging/psfinance/financeiro/titulos?modo_vencimento=periodo&vencimento_inicial=2026-08-01&vencimento_final=2026-08-31&id_empresa=4&titulo=TERRENO+VIDA+NOVA&situacao=baixada",
+    "expectedRows": 1,
+    "returnedTitles": [
+      66
+    ],
+    "expectedTitles": [
+      66
+    ],
+    "unexpectedTitles": [
+      54
+    ],
+    "selected": {
+      "empresa": "4 - OBRA VIDA NOVA",
+      "credor": "Todos",
+      "situacao": "Baixada",
+      "modo": "periodo",
+      "emissao": "",
+      "titulo": "TERRENO VIDA NOVA"
+    },
+    "metrics": {
+      "Títulos filtrados": "1",
+      "Valor total dos títulos": "R$ 206436.46",
+      "Valor da parcela no mês": "R$ 1148.52",
+      "Pago no mês": "R$ 1148.52",
+      "Não pago no mês": "R$ 0.00"
+    },
+    "result": "aprovado"
+  },
+  {
+    "id": "combinacao-positiva",
+    "objetivo": "Comprovar período, empresa, credor, emissão, título e situação combinados com resultado positivo.",
+    "url": "http://127.0.0.1:15104/staging/psfinance/financeiro/titulos?modo_vencimento=periodo&vencimento_inicial=2026-08-01&vencimento_final=2026-08-31&id_empresa=2&id_credor=6&emissao=2026-08-01&titulo=EMAILGO&situacao=em_aberto",
+    "expectedRows": 1,
+    "returnedTitles": [
+      69
+    ],
+    "expectedTitles": [
+      69
+    ],
+    "unexpectedTitles": [
+      49,
+      50,
+      66
+    ],
+    "selected": {
+      "empresa": "2 - PLANSMART",
+      "credor": "Amico Celular",
+      "situacao": "Em aberto",
+      "modo": "periodo",
+      "emissao": "2026-08-01",
+      "titulo": "EMAILGO"
+    },
+    "metrics": {
+      "Títulos filtrados": "1",
+      "Valor total dos títulos": "R$ 159.00",
+      "Valor da parcela no mês": "R$ 31.80",
+      "Pago no mês": "R$ 0.00",
+      "Não pago no mês": "R$ 31.80"
+    },
+    "result": "aprovado"
+  }
+]
