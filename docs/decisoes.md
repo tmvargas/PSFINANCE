@@ -881,3 +881,17 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
 - Impacto: a PLA-2609 passa a possuir PID, deadline, amostras e arquivo de log
   verificáveis sem escrever no banco, reiniciar a aplicação ou alterar
   produção.
+
+## 2026-08-24 - PLA-3429 - Filtros ampliados da Consulta de Títulos
+
+- Decisão: o vencimento mantém `Mês` como modo padrão e oferece `Período` como
+  alternativa exclusiva, com limites inicial e final inclusivos. Parâmetros
+  ausentes, invertidos ou inválidos retornam de forma segura ao mês atual.
+- Regra: credor, emissão exata e identificação do título são aplicados nas
+  consultas SQL de parcelas e títulos legados antes do carregamento dos
+  objetos. A identificação pesquisa número do documento, código/nome do tipo
+  documental e ID exato quando o termo é numérico.
+- Segurança: o credor selecionável deve estar ativo e vinculado a pelo menos um
+  título ativo da empresa memorizada; um ID manipulado é descartado.
+- Impacto: nenhuma alteração de banco, migration, variável de ambiente,
+  `main` ou produção.
