@@ -1,0 +1,67 @@
+[
+  {
+    "id": "mes-todas",
+    "url": "http://127.0.0.1:15104/staging/psfinance/financeiro/titulos?mes=8&ano=2026&modo_vencimento=mes&situacao=todas",
+    "rows": 9,
+    "empty": false,
+    "summary": {
+      "Títulos filtrados": "9",
+      "Valor total dos títulos": "R$ 295349.27",
+      "Valor da parcela no mês": "R$ 6023.41",
+      "Pago no mês": "R$ 5728.41",
+      "Não pago no mês": "R$ 295.00"
+    }
+  },
+  {
+    "id": "credor-em-aberto",
+    "url": "http://127.0.0.1:15104/staging/psfinance/financeiro/titulos?mes=8&ano=2026&modo_vencimento=mes&id_credor=6&situacao=em_aberto",
+    "rows": 0,
+    "empty": true,
+    "summary": {
+      "Títulos filtrados": "0",
+      "Valor total dos títulos": "R$ 0.00",
+      "Valor da parcela no mês": "R$ 0.00",
+      "Pago no mês": "R$ 0.00",
+      "Não pago no mês": "R$ 0.00"
+    }
+  },
+  {
+    "id": "periodo-titulo-id",
+    "url": "http://127.0.0.1:15104/staging/psfinance/financeiro/titulos?modo_vencimento=periodo&vencimento_inicial=2026-08-01&vencimento_final=2026-08-31&titulo=66&situacao=todas",
+    "rows": 1,
+    "empty": false,
+    "summary": {
+      "Títulos filtrados": "1",
+      "Valor total dos títulos": "R$ 206436.46",
+      "Valor da parcela no mês": "R$ 1148.52",
+      "Pago no mês": "R$ 1148.52",
+      "Não pago no mês": "R$ 0.00"
+    }
+  },
+  {
+    "id": "periodo-emissao-baixada",
+    "url": "http://127.0.0.1:15104/staging/psfinance/financeiro/titulos?modo_vencimento=periodo&vencimento_inicial=2026-08-01&vencimento_final=2026-08-31&emissao=2026-08-01&situacao=baixada",
+    "rows": 0,
+    "empty": true,
+    "summary": {
+      "Títulos filtrados": "0",
+      "Valor total dos títulos": "R$ 0.00",
+      "Valor da parcela no mês": "R$ 0.00",
+      "Pago no mês": "R$ 0.00",
+      "Não pago no mês": "R$ 0.00"
+    }
+  },
+  {
+    "id": "periodo-mobile",
+    "url": "http://127.0.0.1:15104/staging/psfinance/financeiro/titulos?modo_vencimento=periodo&vencimento_inicial=2026-08-01&vencimento_final=2026-08-31&situacao=todas",
+    "rows": 9,
+    "empty": false,
+    "summary": {
+      "Títulos filtrados": "9",
+      "Valor total dos títulos": "R$ 295349.27",
+      "Valor da parcela no mês": "R$ 6023.41",
+      "Pago no mês": "R$ 5728.41",
+      "Não pago no mês": "R$ 295.00"
+    }
+  }
+]
