@@ -33,6 +33,9 @@
 | Título simples | empresa `1`, agosto, ID `54`, `Em aberto` | título simples `54`, sem parcelas | título parcelado `66` | 1 registro; R$ 128,00 não pago |
 | Título parcelado | empresa `4`, período de agosto, descrição `TERRENO VIDA NOVA`, `Baixada` | título parcelado `66`, com 180 parcelas ativas | título simples `54` | 1 registro; R$ 1.148,52 pago no período |
 | Combinação completa | período de agosto, empresa `2`, Amico Celular, emissão `01/08/2026`, `EMAILGO`, `Em aberto` | título `69` | títulos `49`, `50` e `66` | 1 registro; totais iguais à linha retornada |
+| Segundo credor distinto | empresa `1`, Estácio, agosto, todas as situações | títulos `54` e `65` | títulos `49`, `66` e `69` | 2 registros, ambos do credor Estácio |
+| Emissão adjacente | empresa `1`, emissão `09/08/2026`, agosto, `Baixada` | nenhum título | títulos `49`, `50` e `53`, emitidos em `10/08/2026` | conjunto vazio e totais zerados |
+| Limites inclusivos | empresa `1`, período `10/08/2026` a `21/08/2026`, todas as situações | títulos `49` e `50` no limite inicial; título `56` no limite final | títulos `66` e `69`, de outras empresas | 8 registros; os dois limites aparecem na jornada real |
 
 A classificação simples/parcelado foi confirmada por consulta somente leitura
 no PostgreSQL de staging: o título `54` não possui parcela ativa e o título
@@ -49,6 +52,9 @@ calculada sobre o valor e as baixas das parcelas contidas no período exibido.
 - `docs/evidencias/PLA-3429/matriz-jornada-5001.json`;
 - `docs/evidencias/PLA-3429/consulta-titulos-filtro-positivo-5001.png`;
 - `docs/evidencias/PLA-3429/matriz-complemento-revisao-5001.json`;
+- `docs/evidencias/PLA-3429/consulta-titulos-segundo-credor-5001.png`;
+- `docs/evidencias/PLA-3429/consulta-titulos-emissao-adjacente-vazia-5001.png`;
+- `docs/evidencias/PLA-3429/consulta-titulos-limites-inclusivos-5001.png`;
 - `scripts/pla3429_capture_complemento_revisao.js` — captura reproduzível
   com asserções de presença, ausência, quantidade, filtros selecionados e totais.
 
@@ -61,8 +67,9 @@ calculada sobre o valor e as baixas das parcelas contidas no período exibido.
 - healthcheck HTTP 200 e rota real HTTP 200 na porta `5001`;
 - serviços `psfinance-staging` e `psfinance-staging-gate` ativos;
 - logs sem erro de aplicação após o restart.
-- 5 jornadas complementares positivas executadas pela interface real na porta
-  `5001`, incluindo credor, emissão, simples, parcelado e combinação completa.
+- 8 jornadas complementares executadas pela interface real na porta `5001`,
+  incluindo dois credores distintos, emissão exata e adjacente vazia, títulos
+  simples e parcelados, combinação completa e limites inicial/final inclusivos.
 
 Uma rodada inicial de regressão executou um teste preexistente com SQLite em
 memória. Embora não tenha alterado arquivo nem ambiente compartilhado, isso é

@@ -41,6 +41,12 @@ async function collect(page, testCase) {
       throw new Error(`${testCase.id}: título indevido ${unexpected} foi retornado`);
     }
   }
+  for (const [title, fragment] of Object.entries(testCase.expectedRowFragments || {})) {
+    const row = rows.find((item) => item.startsWith(`${title} -`));
+    if (!row || !row.includes(fragment)) {
+      throw new Error(`${testCase.id}: título ${title} não comprovou o trecho ${fragment}`);
+    }
+  }
   if (rows.length !== testCase.expectedRows) {
     throw new Error(`${testCase.id}: esperado ${testCase.expectedRows}, obtido ${rows.length}`);
   }
@@ -57,6 +63,7 @@ async function collect(page, testCase) {
     returnedTitles: rows.map((row) => Number(row.match(/^(\d+)\s+-/)?.[1])).filter(Boolean),
     expectedTitles: testCase.expectedTitles,
     unexpectedTitles: testCase.unexpectedTitles || [],
+    expectedRowFragments: testCase.expectedRowFragments || {},
     selected: Object.fromEntries(Object.entries(selected).map(([key, value]) => [key, normalize(value || "")])),
     metrics,
     result: "aprovado",
@@ -108,6 +115,35 @@ async function collect(page, testCase) {
       expectedTitles: [69],
       unexpectedTitles: [49, 50, 66],
       screenshot: "consulta-titulos-filtro-positivo-5001.png",
+    },
+    {
+      id: "segundo-credor-distinto",
+      objective: "Comprovar um segundo credor distinto, limitado à empresa selecionada.",
+      params: { mes: "8", ano: "2026", modo_vencimento: "mes", id_empresa: "1", id_credor: "11", situacao: "todas" },
+      expectedRows: 2,
+      expectedTitles: [54, 65],
+      unexpectedTitles: [49, 66, 69],
+      expectedRowFragments: { 54: "Estácio", 65: "Estácio" },
+      screenshot: "consulta-titulos-segundo-credor-5001.png",
+    },
+    {
+      id: "emissao-adjacente-sem-correspondencia",
+      objective: "Comprovar que a data adjacente à emissão positiva não produz correspondência indevida.",
+      params: { mes: "8", ano: "2026", modo_vencimento: "mes", id_empresa: "1", emissao: "2026-08-09", situacao: "baixada" },
+      expectedRows: 0,
+      expectedTitles: [],
+      unexpectedTitles: [49, 50, 53],
+      screenshot: "consulta-titulos-emissao-adjacente-vazia-5001.png",
+    },
+    {
+      id: "limites-periodo-inclusivos",
+      objective: "Comprovar títulos nos limites inicial e final do período real.",
+      params: { modo_vencimento: "periodo", vencimento_inicial: "2026-08-10", vencimento_final: "2026-08-21", id_empresa: "1", situacao: "todas" },
+      expectedRows: 8,
+      expectedTitles: [49, 50, 53, 54, 55, 56, 64, 65],
+      unexpectedTitles: [66, 69],
+      expectedRowFragments: { 49: "10/08/2026", 50: "10/08/2026", 56: "21/08/2026" },
+      screenshot: "consulta-titulos-limites-inclusivos-5001.png",
     },
   ];
 

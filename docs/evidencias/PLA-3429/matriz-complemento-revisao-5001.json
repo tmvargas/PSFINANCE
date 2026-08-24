@@ -13,6 +13,7 @@
     "unexpectedTitles": [
       49
     ],
+    "expectedRowFragments": {},
     "selected": {
       "empresa": "2 - PLANSMART",
       "credor": "Amico Celular",
@@ -50,6 +51,7 @@
       55,
       69
     ],
+    "expectedRowFragments": {},
     "selected": {
       "empresa": "1 - THIAGO",
       "credor": "Todos",
@@ -81,6 +83,7 @@
     "unexpectedTitles": [
       66
     ],
+    "expectedRowFragments": {},
     "selected": {
       "empresa": "1 - THIAGO",
       "credor": "Todos",
@@ -112,6 +115,7 @@
     "unexpectedTitles": [
       54
     ],
+    "expectedRowFragments": {},
     "selected": {
       "empresa": "4 - OBRA VIDA NOVA",
       "credor": "Todos",
@@ -145,6 +149,7 @@
       50,
       66
     ],
+    "expectedRowFragments": {},
     "selected": {
       "empresa": "2 - PLANSMART",
       "credor": "Amico Celular",
@@ -159,6 +164,126 @@
       "Valor da parcela no mês": "R$ 31.80",
       "Pago no mês": "R$ 0.00",
       "Não pago no mês": "R$ 31.80"
+    },
+    "result": "aprovado"
+  },
+  {
+    "id": "segundo-credor-distinto",
+    "objetivo": "Comprovar um segundo credor distinto, limitado à empresa selecionada.",
+    "url": "http://127.0.0.1:15104/staging/psfinance/financeiro/titulos?mes=8&ano=2026&modo_vencimento=mes&id_empresa=1&id_credor=11&situacao=todas",
+    "expectedRows": 2,
+    "returnedTitles": [
+      54,
+      65
+    ],
+    "expectedTitles": [
+      54,
+      65
+    ],
+    "unexpectedTitles": [
+      49,
+      66,
+      69
+    ],
+    "expectedRowFragments": {
+      "54": "Estácio",
+      "65": "Estácio"
+    },
+    "selected": {
+      "empresa": "1 - THIAGO",
+      "credor": "Estácio",
+      "situacao": "Todas",
+      "modo": "mes",
+      "emissao": "",
+      "titulo": ""
+    },
+    "metrics": {
+      "Títulos filtrados": "2",
+      "Valor total dos títulos": "R$ 1076.06",
+      "Valor da parcela no mês": "R$ 286.01",
+      "Pago no mês": "R$ 158.01",
+      "Não pago no mês": "R$ 128.00"
+    },
+    "result": "aprovado"
+  },
+  {
+    "id": "emissao-adjacente-sem-correspondencia",
+    "objetivo": "Comprovar que a data adjacente à emissão positiva não produz correspondência indevida.",
+    "url": "http://127.0.0.1:15104/staging/psfinance/financeiro/titulos?mes=8&ano=2026&modo_vencimento=mes&id_empresa=1&emissao=2026-08-09&situacao=baixada",
+    "expectedRows": 0,
+    "returnedTitles": [],
+    "expectedTitles": [],
+    "unexpectedTitles": [
+      49,
+      50,
+      53
+    ],
+    "expectedRowFragments": {},
+    "selected": {
+      "empresa": "1 - THIAGO",
+      "credor": "Todos",
+      "situacao": "Baixada",
+      "modo": "mes",
+      "emissao": "2026-08-09",
+      "titulo": ""
+    },
+    "metrics": {
+      "Títulos filtrados": "0",
+      "Valor total dos títulos": "R$ 0.00",
+      "Valor da parcela no mês": "R$ 0.00",
+      "Pago no mês": "R$ 0.00",
+      "Não pago no mês": "R$ 0.00"
+    },
+    "result": "aprovado"
+  },
+  {
+    "id": "limites-periodo-inclusivos",
+    "objetivo": "Comprovar títulos nos limites inicial e final do período real.",
+    "url": "http://127.0.0.1:15104/staging/psfinance/financeiro/titulos?modo_vencimento=periodo&vencimento_inicial=2026-08-10&vencimento_final=2026-08-21&id_empresa=1&situacao=todas",
+    "expectedRows": 8,
+    "returnedTitles": [
+      50,
+      49,
+      54,
+      53,
+      65,
+      64,
+      55,
+      56
+    ],
+    "expectedTitles": [
+      49,
+      50,
+      53,
+      54,
+      55,
+      56,
+      64,
+      65
+    ],
+    "unexpectedTitles": [
+      66,
+      69
+    ],
+    "expectedRowFragments": {
+      "49": "10/08/2026",
+      "50": "10/08/2026",
+      "56": "21/08/2026"
+    },
+    "selected": {
+      "empresa": "1 - THIAGO",
+      "credor": "Todos",
+      "situacao": "Todas",
+      "modo": "periodo",
+      "emissao": "",
+      "titulo": ""
+    },
+    "metrics": {
+      "Títulos filtrados": "8",
+      "Valor total dos títulos": "R$ 88912.81",
+      "Valor da parcela no mês": "R$ 4874.89",
+      "Pago no mês": "R$ 4579.89",
+      "Não pago no mês": "R$ 295.00"
     },
     "result": "aprovado"
   }
