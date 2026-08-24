@@ -2,7 +2,7 @@
 import os
 import uuid as uuid_lib
 import calendar
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 from flask import (
@@ -16,7 +16,7 @@ from flask import (
     url_for,
 )
 from sqlalchemy.orm import joinedload
-from sqlalchemy import func
+from sqlalchemy import func, or_
 
 from . import bp_financeiro
 from .regras_empresa_centro import (
@@ -39,6 +39,7 @@ from models import (
 
 LIMITE_PARCELAS_TITULO = 999
 SITUACOES_TITULO = {"todas", "baixada", "em_aberto"}
+MODOS_VENCIMENTO = {"mes", "periodo"}
 
 
 def get_session():
@@ -95,6 +96,74 @@ def _parse_int(value: str | None):
 def _normalizar_situacao_titulo(value: str | None) -> str:
     situacao = (value or "todas").strip().lower()
     return situacao if situacao in SITUACOES_TITULO else "todas"
+
+
+def _normalizar_busca_titulo(value: str | None) -> str:
+    return " ".join((value or "").strip().split())[:80]
+
+
+def _termo_like_literal(value: str) -> str:
+    return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+
+
+def _resolver_periodo_vencimento(args, hoje: date):
+    modo = (args.get("modo_vencimento") or "mes").strip().lower()
+    if modo not in MODOS_VENCIMENTO:
+        modo = "mes"
+
+    mes = _parse_int(args.get("mes")) or hoje.month
+    ano = _parse_int(args.get("ano")) or hoje.year
+    if mes < 1 or mes > 12 or ano < 1900 or ano > 9998:
+        mes, ano = hoje.month, hoje.year
+
+    if modo == "periodo":
+        vencimento_inicial = _parse_date(args.get("vencimento_inicial"))
+        vencimento_final = _parse_date(args.get("vencimento_final"))
+        if vencimento_inicial and vencimento_final and vencimento_inicial <= vencimento_final:
+            return {
+                "modo": modo,
+                "mes": mes,
+                "ano": ano,
+                "data_ini": vencimento_inicial,
+                "data_fim": vencimento_final + timedelta(days=1),
+                "vencimento_inicial": vencimento_inicial,
+                "vencimento_final": vencimento_final,
+            }
+        modo = "mes"
+
+    data_ini = date(ano, mes, 1)
+    data_fim = date(ano + 1, 1, 1) if mes == 12 else date(ano, mes + 1, 1)
+    return {
+        "modo": modo,
+        "mes": mes,
+        "ano": ano,
+        "data_ini": data_ini,
+        "data_fim": data_fim,
+        "vencimento_inicial": None,
+        "vencimento_final": None,
+    }
+
+
+def _aplicar_filtros_titulo(query, id_credor=None, emissao=None, busca_titulo=""):
+    if id_credor:
+        query = query.filter(Titulo.id_credor == id_credor)
+    if emissao:
+        query = query.filter(Titulo.emissao == emissao)
+    if busca_titulo:
+        termo = f"%{_termo_like_literal(busca_titulo)}%"
+        condicoes = [
+            Titulo.nr_documento.ilike(termo, escape="\\"),
+            Documento.tipo_doc.ilike(termo, escape="\\"),
+            Documento.nome_doc.ilike(termo, escape="\\"),
+        ]
+        id_titulo = _parse_int(busca_titulo)
+        if id_titulo is not None:
+            condicoes.append(Titulo.id_titulo == id_titulo)
+        query = query.join(Documento, Documento.id_doc == Titulo.id_doc).filter(
+            Documento.deleted.is_(False),
+            or_(*condicoes),
+        )
+    return query
 
 
 def _calcular_saldo_titulo(total_ativo: float, baixado_ativo: float) -> float:
@@ -233,7 +302,10 @@ def _quantidade_parcelas_ativas(session, id_titulo: int | None) -> int:
     return max(1, int(quantidade or 0))
 
 
-def _titulos_periodo_por_parcela(session, data_ini: date, data_fim: date, id_empresa: int | None):
+def _titulos_periodo_por_parcela(
+    session, data_ini: date, data_fim: date, id_empresa: int | None,
+    id_credor=None, emissao=None, busca_titulo="",
+):
     query = (
         session.query(
             TituloParcela.id_titulo,
@@ -252,6 +324,8 @@ def _titulos_periodo_por_parcela(session, data_ini: date, data_fim: date, id_emp
     if id_empresa:
         query = query.filter(Titulo.id_empresa == id_empresa)
 
+    query = _aplicar_filtros_titulo(query, id_credor, emissao, busca_titulo)
+
     return {
         id_titulo: {
             "vencimento": vencimento_periodo,
@@ -261,7 +335,10 @@ def _titulos_periodo_por_parcela(session, data_ini: date, data_fim: date, id_emp
     }
 
 
-def _titulos_legados_periodo_sem_parcela(session, data_ini: date, data_fim: date, id_empresa: int | None):
+def _titulos_legados_periodo_sem_parcela(
+    session, data_ini: date, data_fim: date, id_empresa: int | None,
+    id_credor=None, emissao=None, busca_titulo="",
+):
     titulos_com_parcela_ativa = (
         session.query(TituloParcela.id_titulo)
         .filter(TituloParcela.deleted.is_(False))
@@ -276,6 +353,8 @@ def _titulos_legados_periodo_sem_parcela(session, data_ini: date, data_fim: date
 
     if id_empresa:
         query = query.filter(Titulo.id_empresa == id_empresa)
+
+    query = _aplicar_filtros_titulo(query, id_credor, emissao, busca_titulo)
 
     return {
         id_titulo: {
@@ -529,21 +608,38 @@ def listar_titulos():
     session = get_session()
 
     hoje = date.today()
-    mes = request.args.get("mes", type=int) or hoje.month
-    ano = request.args.get("ano", type=int) or hoje.year
+    periodo = _resolver_periodo_vencimento(request.args, hoje)
+    mes = periodo["mes"]
+    ano = periodo["ano"]
     situacao = _normalizar_situacao_titulo(request.args.get("situacao"))
-
-    if mes < 1 or mes > 12:
-        mes = hoje.month
-
-    data_ini = date(ano, mes, 1)
-    data_fim = date(ano + 1, 1, 1) if mes == 12 else date(ano, mes + 1, 1)
+    emissao = _parse_date(request.args.get("emissao"))
+    busca_titulo = _normalizar_busca_titulo(request.args.get("titulo"))
+    data_ini = periodo["data_ini"]
+    data_fim = periodo["data_fim"]
     empresas_view, _centros_custo_view = listar_empresas_centros_ativos(session)
     id_empresa = resolver_filtro_empresa_memorizado(empresas_view, request.args, flask_session)
 
-    titulos_periodo = _titulos_periodo_por_parcela(session, data_ini, data_fim, id_empresa)
+    credores_query = (
+        session.query(Credor)
+        .join(Titulo, Titulo.id_credor == Credor.id_credor)
+        .filter(Credor.deleted.is_(False), Titulo.deleted.is_(False))
+    )
+    if id_empresa:
+        credores_query = credores_query.filter(Titulo.id_empresa == id_empresa)
+    credores = credores_query.order_by(Credor.nome).distinct().all()
+    credores_view = [{"id": credor.id_credor, "nome": credor.nome} for credor in credores]
+    ids_credores_validos = {credor["id"] for credor in credores_view}
+    id_credor = _parse_int(request.args.get("id_credor"))
+    if id_credor not in ids_credores_validos:
+        id_credor = None
+
+    titulos_periodo = _titulos_periodo_por_parcela(
+        session, data_ini, data_fim, id_empresa, id_credor, emissao, busca_titulo
+    )
     titulos_periodo.update(
-        _titulos_legados_periodo_sem_parcela(session, data_ini, data_fim, id_empresa)
+        _titulos_legados_periodo_sem_parcela(
+            session, data_ini, data_fim, id_empresa, id_credor, emissao, busca_titulo
+        )
     )
     ids_titulos = list(titulos_periodo)
 
@@ -646,8 +742,15 @@ def listar_titulos():
         ano=ano,
         meses=meses,
         anos=anos,
+        modo_vencimento=periodo["modo"],
+        vencimento_inicial=periodo["vencimento_inicial"],
+        vencimento_final=periodo["vencimento_final"],
         empresas=empresas_view,
         id_empresa=id_empresa,
+        credores=credores_view,
+        id_credor=id_credor,
+        emissao=emissao,
+        busca_titulo=busca_titulo,
         situacao=situacao,
         total_valor_titulo=total_valor_titulo,
         total_valor_parcela_mes=total_valor_parcela_mes,
