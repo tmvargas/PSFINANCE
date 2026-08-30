@@ -895,3 +895,9 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
   título ativo da empresa memorizada; um ID manipulado é descartado.
 - Impacto: nenhuma alteração de banco, migration, variável de ambiente,
   `main` ou produção.
+
+# PLA-743 — Qualificação do candidato para produção
+
+- Em 2026-08-30, a regressão completa de `staging` encontrou uma expectativa com dupla codificação no teste do link de título no Extrato.
+- O HTML da aplicação já renderizava `Título #<id>` corretamente em UTF-8; portanto, a correção ficou restrita à expectativa automatizada, sem alterar comportamento funcional.
+- A promoção permanece condicionada a suíte verde, PR de `staging` para `main` e autorização expressa para produção, infraestrutura e banco produtivo.

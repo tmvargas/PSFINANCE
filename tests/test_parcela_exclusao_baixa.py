@@ -261,7 +261,7 @@ class ExclusaoParcelaComBaixaTest(unittest.TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn(f"T\xc3\xadtulo #{self.titulo_id}".encode(), response.data)
+        self.assertIn(f"Título #{self.titulo_id}".encode(), response.data)
         self.assertIn(
             f"Parcela 1 (ID #{self.parcela_com_baixa_id})".encode(),
             response.data,
