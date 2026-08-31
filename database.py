@@ -29,12 +29,42 @@ DATABASE_URL_SOURCE = next(
     "sqlite_fallback",
 )
 
-engine = create_engine(
-    DATABASE_URL,
-    echo=os.getenv("PSFINANCE_SQL_ECHO", "false").lower() == "true",
-    future=True,
-    pool_pre_ping=True,
-)
+
+def _positive_int_env(name: str, default: int) -> int:
+    try:
+        value = int(os.getenv(name, str(default)))
+    except ValueError:
+        return default
+    return value if value > 0 else default
+
+
+def engine_options(database_url: str) -> dict:
+    options = {
+        "echo": os.getenv("PSFINANCE_SQL_ECHO", "false").lower() == "true",
+        "future": True,
+        "pool_pre_ping": True,
+    }
+    if database_url.startswith(("postgresql://", "postgresql+psycopg2://")):
+        connect_timeout = _positive_int_env("PSFINANCE_DB_CONNECT_TIMEOUT", 5)
+        statement_timeout = _positive_int_env("PSFINANCE_DB_STATEMENT_TIMEOUT_MS", 10000)
+        lock_timeout = _positive_int_env("PSFINANCE_DB_LOCK_TIMEOUT_MS", 3000)
+        options.update(
+            {
+                "pool_recycle": _positive_int_env("PSFINANCE_DB_POOL_RECYCLE_SECONDS", 300),
+                "pool_timeout": _positive_int_env("PSFINANCE_DB_POOL_TIMEOUT_SECONDS", 5),
+                "connect_args": {
+                    "connect_timeout": connect_timeout,
+                    "options": (
+                        f"-c statement_timeout={statement_timeout} "
+                        f"-c lock_timeout={lock_timeout}"
+                    ),
+                },
+            }
+        )
+    return options
+
+
+engine = create_engine(DATABASE_URL, **engine_options(DATABASE_URL))
 
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
