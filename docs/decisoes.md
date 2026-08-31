@@ -901,3 +901,9 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
 - Em 2026-08-30, a regressão completa de `staging` encontrou uma expectativa com dupla codificação no teste do link de título no Extrato.
 - O HTML da aplicação já renderizava `Título #<id>` corretamente em UTF-8; portanto, a correção ficou restrita à expectativa automatizada, sem alterar comportamento funcional.
 - A promoção permanece condicionada a suíte verde, PR de `staging` para `main` e autorização expressa para produção, infraestrutura e banco produtivo.
+
+## PLA-743 — Resiliência das conexões PostgreSQL em staging
+
+- Após dois timeouts de workers Gunicorn, foram definidos limites padrão para conexão (5 s), espera no pool (5 s), comando (10 s), lock (3 s) e reciclagem de conexões (300 s).
+- Os limites se aplicam somente ao PostgreSQL; o SQLite usado nos testes locais permanece sem parâmetros incompatíveis.
+- A mudança não altera schema nem dados. Seu objetivo é liberar rapidamente o worker diante de indisponibilidade, lock ou comando anormalmente demorado.
