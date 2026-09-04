@@ -914,3 +914,10 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
 - A seleção no modal atualiza o mesmo `id_credor`, preservando validação e regra de negócio do backend.
 - O cadastro de novo credor abre em janela separada; ao retornar para o título, a lista pode ser consultada novamente sem perder os demais campos preenchidos.
 - A consulta JSON é somente leitura, retorna apenas credores ativos, filtra por parte do nome e limita o resultado a 100 registros.
+
+## PLA-3911 — Seleção de credor conforme o fluxo do Sienge
+
+- O cadastro de título mantém um único campo textual de credor e armazena o identificador selecionado em campo oculto, preservando o contrato `id_credor` do backend sem exibir uma combobox redundante.
+- Ao sair do campo após digitar, um resultado único é selecionado automaticamente; zero ou múltiplos resultados abrem a mesma modal para orientação ou escolha explícita.
+- O cadastro auxiliar usa uma única janela nomeada. Após salvar, a própria origem devolve por `postMessage` somente ID e nome do credor criado, que passa a ser a seleção do título sem perder os demais dados digitados.
+- Não há alteração de schema, migration, infraestrutura, `main` ou produção.

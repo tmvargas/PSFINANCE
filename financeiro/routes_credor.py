@@ -55,6 +55,21 @@ def buscar_credores():
 @bp_financeiro.route("/credores/novo", methods=["GET", "POST"])
 def novo_credor():
     session = get_session()
+    origem = request.values.get("origem") if request.values.get("origem") == "titulo" else None
+
+    id_credor_criado = request.args.get("criado", type=int)
+    if request.method == "GET" and origem and id_credor_criado:
+        credor_criado = (
+            session.query(Credor)
+            .filter(Credor.id_credor == id_credor_criado, Credor.deleted.is_(False))
+            .first()
+        )
+        if credor_criado:
+            credor_view = {"id": credor_criado.id_credor, "nome": credor_criado.nome}
+            session.close()
+            return render_template(
+                "credor_form.html", credor=None, origem=origem, credor_criado=credor_view
+            )
 
     if request.method == "POST":
         nome = (request.form.get("nome") or "").strip()
@@ -70,13 +85,20 @@ def novo_credor():
             credor = Credor(nome=nome)
             session.add(credor)
             session.commit()
+            id_credor = credor.id_credor
             session.close()
 
+            if origem:
+                return redirect(
+                    url_for("financeiro.novo_credor", origem=origem, criado=id_credor)
+                )
             flash("Credor cadastrado com sucesso!", "sucesso")
             return redirect(url_for("financeiro.listar_credores"))
 
     session.close()
-    return render_template("credor_form.html", credor=None)
+    return render_template(
+        "credor_form.html", credor=None, origem=origem, credor_criado=None
+    )
 
 
 # ----------------------------------------------------------------------
