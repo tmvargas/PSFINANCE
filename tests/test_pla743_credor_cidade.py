@@ -38,6 +38,36 @@ class CredorCidadeTest(unittest.TestCase):
         self.assertIn("revisaoConsulta!==revisao", html)
         self.assertIn("Selecione uma cidade válida ou limpe o campo.", html)
 
+    def test_cadastro_popup_tem_layout_proprio_sem_menu_e_header(self):
+        client = app.test_client()
+        popup = client.get("/financeiro/cidades/nova?origem=credor").get_data(as_text=True)
+        pagina = client.get("/financeiro/cidades/nova").get_data(as_text=True)
+        self.assertIn('class="popup-page"', popup)
+        self.assertIn('class="popup-shell"', popup)
+        self.assertNotIn('class="app-shell', popup)
+        self.assertNotIn('class="sidebar"', popup)
+        self.assertIn('class="app-shell', pagina)
+
+    def test_cadastro_popup_salva_retorna_e_fecha(self):
+        response = app.test_client().post(
+            "/financeiro/cidades/nova",
+            data={"origem": "credor", "nome": "São Leopoldo"},
+        )
+        html = response.get_data(as_text=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("psfinance:cidade-criada", html)
+        self.assertIn('"nome": "S\\u00e3o Leopoldo"', html)
+        self.assertIn("window.close()", html)
+        session = SessionLocal()
+        self.assertIsNotNone(session.query(Cidade).filter_by(nome="São Leopoldo", deleted=False).one_or_none())
+        session.close()
+
+    def test_busca_cidade_nao_usa_botao_limpar_nativo_sobreposto(self):
+        html = app.test_client().get("/financeiro/credores/novo").get_data(as_text=True)
+        self.assertIn('type="text" id="busca_cidade"', html)
+        self.assertNotIn('type="search" id="busca_cidade"', html)
+        self.assertIn("document.body.appendChild(modal)", html)
+
     def test_credor_persiste_novos_campos_e_cidade(self):
         response = app.test_client().post("/financeiro/credores/novo", data={
             "nome": "Fornecedor completo", "cnpj": "12.345.678/0001-90", "endereco": "Rua Um, 10",

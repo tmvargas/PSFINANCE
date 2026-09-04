@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8">
+    <title>{% block title %}Cadastro auxiliar - PSFINANCE{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="{{ url_for('static', filename='vendor/bootstrap-5.3.3/bootstrap.min.css') }}" rel="stylesheet">
+    <style>
+      :root { --ps-bg:#f4f7f5; --ps-border:#d6e1da; --ps-text:#1b2520; --ps-green:#16834a; --ps-green-dark:#0f5c36; }
+      * { box-sizing:border-box; }
+      body { background:var(--ps-bg); color:var(--ps-text); font-family:Inter,Arial,sans-serif; margin:0; }
+      .popup-titlebar { align-items:center; background:#173c28; color:#fff; display:flex; justify-content:space-between; min-height:52px; padding:10px 18px; }
+      .popup-titlebar strong { font-size:.95rem; }
+      .popup-close { background:transparent; border:0; color:#fff; font-size:1.7rem; line-height:1; padding:0 4px; }
+      .popup-shell { margin:0 auto; max-width:820px; padding:22px; }
+      .card { border-color:var(--ps-border); border-radius:8px; }
+      .btn { border-radius:7px; font-weight:700; }
+      .btn-success { background-color:var(--ps-green); border-color:var(--ps-green); }
+      .btn-success:hover { background-color:var(--ps-green-dark); border-color:var(--ps-green-dark); }
+      @media (max-width:576px) { .popup-shell { padding:14px; } }
+    </style>
+  </head>
+  <body class="popup-page">
+    <header class="popup-titlebar"><strong>Cadastro auxiliar</strong><button type="button" class="popup-close" onclick="window.close()" aria-label="Fechar janela">&times;</button></header>
+    <main class="popup-shell">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, msg in messages %}<div class="alert {{ 'alert-danger' if category == 'erro' else 'alert-success' }} py-2">{{ msg }}</div>{% endfor %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </main>
+    <script src="{{ url_for('static', filename='vendor/bootstrap-5.3.3/bootstrap.bundle.min.js') }}"></script>
+  </body>
+</html>
