@@ -15,9 +15,10 @@
     <div class="col-md-4"><label class="form-label">Cidade</label>
       <div class="input-group">
         <input id="cidade_codigo" class="form-control" style="max-width:90px" inputmode="numeric" value="{{ credor.id_cidade if credor and credor.id_cidade else '' }}" placeholder="Código">
-        <input id="cidade_nome" class="form-control" value="{{ credor.cidade if credor else '' }}" placeholder="Nome da cidade" readonly>
+        <input id="cidade_nome" class="form-control" value="{{ credor.cidade if credor else '' }}" placeholder="Nome da cidade" autocomplete="off">
         <input type="hidden" name="id_cidade" id="id_cidade" value="{{ credor.id_cidade if credor and credor.id_cidade else '' }}">
         <button type="button" class="btn btn-outline-primary" id="abrir_busca_cidade" data-bs-toggle="modal" data-bs-target="#modal_busca_cidade" aria-label="Pesquisar cidade">&#128269;</button>
+        <button type="button" class="btn btn-outline-secondary" id="limpar_cidade" aria-label="Limpar cidade" title="Limpar cidade">&times;</button>
       </div>
     </div>
     <div class="col-md-4"><label class="form-label">WhatsApp</label><input name="whats" class="form-control" maxlength="30" value="{{ credor.whats if credor else '' }}"></div>
@@ -34,10 +35,54 @@
 </div></div></div>
 {% if credor_criado %}<script>if(window.opener&&!window.opener.closed){window.opener.postMessage({type: "psfinance:credor-criado", credor: {{ credor_criado|tojson }}},window.location.origin);window.close();}</script>{% endif %}
 <script>
-(()=>{const modal=document.querySelector('#modal_busca_cidade'),codigo=document.querySelector('#cidade_codigo'),nome=document.querySelector('#cidade_nome'),id=document.querySelector('#id_cidade'),busca=document.querySelector('#busca_cidade'),lista=document.querySelector('#resultado_busca_cidade'),msg=document.querySelector('#mensagem_busca_cidade');let timer;
-const escolher=c=>{codigo.value=c.id;nome.value=c.nome;id.value=c.id;bootstrap.Modal.getOrCreateInstance(modal).hide();};
-async function carregar(abrirMultiplo=false){const r=await fetch({{ url_for('financeiro.buscar_cidades')|tojson }}+'?q='+encodeURIComponent(busca.value.trim()));const data=await r.json();lista.replaceChildren();const itens=data.cidades||[];msg.classList.toggle('d-none',itens.length>0);msg.textContent=itens.length?'':'Nenhuma cidade encontrada.';itens.forEach(c=>{const b=document.createElement('button');b.type='button';b.className='list-group-item list-group-item-action';b.textContent=c.id+' - '+c.nome;b.onclick=()=>escolher(c);lista.appendChild(b);});if(abrirMultiplo&&itens.length===1)escolher(itens[0]);else if(abrirMultiplo)bootstrap.Modal.getOrCreateInstance(modal).show();}
-modal.addEventListener('shown.bs.modal',()=>{busca.value=codigo.value||nome.value;carregar();busca.focus();});busca.addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(carregar,250);});document.querySelector('#atualizar_cidades').onclick=carregar;codigo.addEventListener('change',()=>{busca.value=codigo.value;carregar(true);});codigo.addEventListener('keydown',e=>{if(e.key==='Tab'&&codigo.value){busca.value=codigo.value;carregar(true);}});
-document.querySelector('#nova_cidade_popup').onclick=()=>window.open({{ url_for('financeiro.nova_cidade', origem='credor')|tojson }},'psfinanceCadastroCidade','width=760,height=560,resizable=yes,scrollbars=yes');window.addEventListener('message',e=>{if(e.origin===window.location.origin&&e.data?.type==='psfinance:cidade-criada')escolher(e.data.cidade);});})();
+(()=>{
+  const formulario=document.querySelector('form'),modal=document.querySelector('#modal_busca_cidade'),codigo=document.querySelector('#cidade_codigo'),nome=document.querySelector('#cidade_nome'),id=document.querySelector('#id_cidade'),busca=document.querySelector('#busca_cidade'),lista=document.querySelector('#resultado_busca_cidade'),msg=document.querySelector('#mensagem_busca_cidade');
+  let timer,consultaEmCurso=false,ultimoNomeSelecionado=nome.value;
+  const instanciaModal=()=>bootstrap.Modal.getOrCreateInstance(modal);
+  const limpar=(manterNome=false)=>{id.value='';codigo.value='';if(!manterNome)nome.value='';ultimoNomeSelecionado='';nome.setCustomValidity('');};
+  const escolher=c=>{codigo.value=c.id;nome.value=c.nome;id.value=c.id;ultimoNomeSelecionado=c.nome;nome.setCustomValidity('');instanciaModal().hide();};
+  async function pesquisar(termo){
+    const r=await fetch({{ url_for('financeiro.buscar_cidades')|tojson }}+'?q='+encodeURIComponent(termo.trim()));
+    if(!r.ok)throw new Error('Falha ao pesquisar cidades.');
+    return (await r.json()).cidades||[];
+  }
+  function renderizar(itens){
+    lista.replaceChildren();msg.classList.toggle('d-none',itens.length>0);msg.textContent=itens.length?'':'Nenhuma cidade encontrada.';
+    itens.forEach(c=>{const b=document.createElement('button');b.type='button';b.className='list-group-item list-group-item-action';b.textContent=c.id+' - '+c.nome;b.onclick=()=>escolher(c);lista.appendChild(b);});
+  }
+  async function carregar(){
+    try{renderizar(await pesquisar(busca.value));}
+    catch(e){renderizar([]);msg.classList.remove('d-none');msg.textContent=e.message;}
+  }
+  async function resolver(termo,campo){
+    termo=termo.trim();
+    if(!termo){limpar();return;}
+    if(consultaEmCurso)return;
+    consultaEmCurso=true;
+    try{
+      const itens=await pesquisar(termo);
+      const exato=campo==='codigo'?itens.find(c=>String(c.id)===termo):itens.find(c=>c.nome.localeCompare(termo,undefined,{sensitivity:'base'})===0);
+      if(exato||itens.length===1){escolher(exato||itens[0]);return;}
+      id.value='';
+      if(campo==='codigo')nome.value='';else codigo.value='';
+      busca.value=termo;renderizar(itens);instanciaModal().show();
+    }catch(e){nome.setCustomValidity(e.message);nome.reportValidity();}
+    finally{consultaEmCurso=false;}
+  }
+  modal.addEventListener('shown.bs.modal',()=>{if(!busca.value)busca.value=codigo.value||nome.value;carregar();busca.focus();});
+  busca.addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(carregar,250);});
+  document.querySelector('#atualizar_cidades').onclick=carregar;
+  document.querySelector('#abrir_busca_cidade').addEventListener('click',()=>{busca.value=codigo.value||nome.value;});
+  document.querySelector('#limpar_cidade').onclick=()=>{limpar();codigo.focus();};
+  codigo.addEventListener('input',()=>{id.value='';nome.value='';ultimoNomeSelecionado='';});
+  codigo.addEventListener('change',()=>resolver(codigo.value,'codigo'));
+  codigo.addEventListener('keydown',e=>{if(e.key==='Tab')resolver(codigo.value,'codigo');});
+  nome.addEventListener('input',()=>{if(nome.value!==ultimoNomeSelecionado){id.value='';codigo.value='';}});
+  nome.addEventListener('change',()=>resolver(nome.value,'nome'));
+  nome.addEventListener('keydown',e=>{if(e.key==='Tab')resolver(nome.value,'nome');});
+  formulario.addEventListener('submit',e=>{if(nome.value.trim()&&!id.value){e.preventDefault();nome.setCustomValidity('Selecione uma cidade válida ou limpe o campo.');nome.reportValidity();resolver(nome.value,'nome');}});
+  document.querySelector('#nova_cidade_popup').onclick=()=>window.open({{ url_for('financeiro.nova_cidade', origem='credor')|tojson }},'psfinanceCadastroCidade','width=760,height=560,resizable=yes,scrollbars=yes');
+  window.addEventListener('message',e=>{if(e.origin===window.location.origin&&e.data?.type==='psfinance:cidade-criada')escolher(e.data.cidade);});
+})();
 </script>
 {% endblock %}

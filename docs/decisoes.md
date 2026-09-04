@@ -929,3 +929,10 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
 - Ao sair do campo após digitar, um resultado único é selecionado automaticamente; zero ou múltiplos resultados abrem a mesma modal para orientação ou escolha explícita.
 - O cadastro auxiliar usa uma única janela nomeada. Após salvar, a própria origem devolve por `postMessage` somente ID e nome do credor criado, que passa a ser a seleção do título sem perder os demais dados digitados.
 - Não há alteração de schema, migration, infraestrutura, `main` ou produção.
+# 2026-09-04 — Seleção de cidade editável no cadastro do credor (PLA-743)
+
+- O campo de cidade segue a interação solicitada com código curto, nome pesquisável e lupa.
+- Código ou nome resolvem a seleção ao sair do campo: um resultado é preenchido diretamente; múltiplos ou nenhum abrem a busca para escolha ou novo cadastro.
+- A cidade selecionada pode ser substituída digitando novamente em qualquer campo ou removida pelo botão de limpeza.
+- O identificador persistido é invalidado imediatamente quando o usuário edita a descrição, evitando salvar uma cidade diferente daquela exibida.
+- O ajuste é somente de interface; não exige migration nem escrita administrativa no banco.
