@@ -17,12 +17,18 @@ def validar(page, viewport_name):
 
     page.locator("#cidade_codigo").fill(str(cidade["id"]))
     page.locator("#cidade_codigo").press("Tab")
+    page.locator("#limpar_cidade").click()
+    page.wait_for_timeout(500)
+    assert page.locator("#id_cidade").input_value() == ""
+
+    page.locator("#cidade_codigo").fill(str(cidade["id"]))
+    page.locator("#cidade_codigo").press("Tab")
     page.wait_for_function("value => document.querySelector('#id_cidade').value === String(value)", arg=cidade["id"])
     assert page.locator("#cidade_nome").input_value() == cidade["nome"]
 
     page.locator("#cidade_nome").fill(cidade["nome"])
     page.locator("#cidade_nome").press("Tab")
-    page.wait_for_function("value => document.querySelector('#cidade_nome').value === value", arg=cidade["nome"])
+    page.wait_for_function("value => document.querySelector('#id_cidade').value === String(value)", arg=cidade["id"])
     assert page.locator("#cidade_codigo").input_value() == str(cidade["id"])
 
     page.locator("#limpar_cidade").click()

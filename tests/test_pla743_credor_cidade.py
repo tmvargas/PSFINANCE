@@ -35,6 +35,7 @@ class CredorCidadeTest(unittest.TestCase):
         self.assertIn('id="limpar_cidade"', html)
         self.assertIn("resolver(codigo.value,'codigo')", html)
         self.assertIn("resolver(nome.value,'nome')", html)
+        self.assertIn("revisaoConsulta!==revisao", html)
         self.assertIn("Selecione uma cidade válida ou limpe o campo.", html)
 
     def test_credor_persiste_novos_campos_e_cidade(self):
