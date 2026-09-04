@@ -358,7 +358,7 @@
 
 </form>
 
-<div class="modal fade" id="modal_busca_credor" tabindex="-1" aria-labelledby="titulo_modal_busca_credor" aria-hidden="true">
+<div class="modal" id="modal_busca_credor" tabindex="-1" aria-labelledby="titulo_modal_busca_credor" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
@@ -368,7 +368,7 @@
       <div class="modal-body">
         <label for="busca_credor" class="form-label">Nome do credor</label>
         <div class="input-group mb-3">
-          <input type="search" class="form-control" id="busca_credor" placeholder="Digite parte do nome" autocomplete="off">
+          <input type="text" class="form-control" id="busca_credor" placeholder="Digite parte do nome" autocomplete="off">
           <button type="button" class="btn btn-outline-secondary" id="atualizar_credores">Atualizar</button>
         </div>
         <div id="resultado_busca_credor" class="list-group" aria-live="polite"></div>
@@ -394,6 +394,7 @@
   const message = document.getElementById("mensagem_busca_credor");
   const refresh = document.getElementById("atualizar_credores");
   const create = document.getElementById("novo_credor_janela");
+  document.body.appendChild(modalElement);
   const searchUrl = {{ url_for('financeiro.buscar_credores')|tojson }};
   const createUrl = {{ url_for('financeiro.novo_credor')|tojson }};
   let requestNumber = 0;
