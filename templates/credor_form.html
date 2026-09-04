@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "popup_base.html" if origem else "base.html" %}
 {% set titulo_pagina = "Editar credor" if credor else "Novo credor" %}
 {% block title %}{{ titulo_pagina }}{% endblock %}
 {% block content %}
@@ -28,15 +28,16 @@
   <div class="d-flex gap-2 mt-4"><button class="btn btn-success">Salvar</button>{% if origem %}<button type="button" class="btn btn-secondary" onclick="window.close()">Cancelar</button>{% else %}<a href="{{ url_for('financeiro.listar_credores') }}" class="btn btn-secondary">Cancelar</a>{% endif %}</div>
 </form>
 
-<div class="modal fade" id="modal_busca_cidade" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-dialog-scrollable"><div class="modal-content">
+<div class="modal" id="modal_busca_cidade" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-dialog-scrollable"><div class="modal-content">
   <div class="modal-header"><h2 class="modal-title fs-5">Pesquisar cidade</h2><button class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div>
-  <div class="modal-body"><label class="form-label">Código ou parte do nome</label><div class="input-group mb-3"><input type="search" id="busca_cidade" class="form-control"><button type="button" id="atualizar_cidades" class="btn btn-outline-secondary">Buscar</button></div><div id="resultado_busca_cidade" class="list-group"></div><p id="mensagem_busca_cidade" class="text-muted d-none mb-0"></p></div>
+  <div class="modal-body"><label class="form-label">Código ou parte do nome</label><div class="input-group mb-3"><input type="text" id="busca_cidade" class="form-control" autocomplete="off"><button type="button" id="atualizar_cidades" class="btn btn-outline-secondary">Buscar</button></div><div id="resultado_busca_cidade" class="list-group"></div><p id="mensagem_busca_cidade" class="text-muted d-none mb-0"></p></div>
   <div class="modal-footer justify-content-between"><button type="button" id="nova_cidade_popup" class="btn btn-outline-primary">Cadastrar nova cidade</button><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button></div>
 </div></div></div>
 {% if credor_criado %}<script>if(window.opener&&!window.opener.closed){window.opener.postMessage({type: "psfinance:credor-criado", credor: {{ credor_criado|tojson }}},window.location.origin);window.close();}</script>{% endif %}
 <script>
 (()=>{
   const formulario=document.querySelector('form'),modal=document.querySelector('#modal_busca_cidade'),codigo=document.querySelector('#cidade_codigo'),nome=document.querySelector('#cidade_nome'),id=document.querySelector('#id_cidade'),busca=document.querySelector('#busca_cidade'),lista=document.querySelector('#resultado_busca_cidade'),msg=document.querySelector('#mensagem_busca_cidade');
+  document.body.appendChild(modal);
   let timer,ultimoNomeSelecionado=nome.value,revisao=0;
   const instanciaModal=()=>bootstrap.Modal.getOrCreateInstance(modal);
   const limpar=(manterNome=false)=>{revisao++;id.value='';codigo.value='';if(!manterNome)nome.value='';ultimoNomeSelecionado='';nome.setCustomValidity('');};

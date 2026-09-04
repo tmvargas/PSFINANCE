@@ -936,3 +936,11 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
 - A cidade selecionada pode ser substituída digitando novamente em qualquer campo ou removida pelo botão de limpeza.
 - O identificador persistido é invalidado imediatamente quando o usuário edita a descrição, evitando salvar uma cidade diferente daquela exibida.
 - O ajuste é somente de interface; não exige migration nem escrita administrativa no banco.
+# 2026-09-04 — Layout próprio para cadastros auxiliares em popup (PLA-743)
+
+- Formulários abertos com `origem` usam `popup_base.html`, sem menu lateral, busca global ou cabeçalho da aplicação.
+- O mesmo formulário continua usando o layout completo quando acessado pelo menu, evitando duplicação de regras e rotas.
+- O campo de pesquisa de Cidade usa entrada textual sem o botão de limpeza nativo do navegador, que sobrepunha visualmente a ação Buscar.
+- O modal é movido para o `body` antes da inicialização do Bootstrap, mantendo-o acima do backdrop fora do contexto de empilhamento do shell responsivo.
+- A transição `fade` foi removida deste modal para evitar o estado visual intermediário translúcido durante a abertura em dispositivos móveis.
+- O retorno ao formulário chamador continua por `postMessage` de mesma origem e fechamento automático após salvar.

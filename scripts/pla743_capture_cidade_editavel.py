@@ -42,6 +42,16 @@ def validar(page, viewport_name):
     assert page.locator("#resultado_busca_cidade button").count() == 0
     assert page.locator("#mensagem_busca_cidade").inner_text() == "Nenhuma cidade encontrada."
     page.screenshot(path=OUTPUT_DIR / f"cidade-editavel-{viewport_name}.png", full_page=True)
+    with page.expect_popup() as popup_info:
+        page.locator("#nova_cidade_popup").click()
+    popup = popup_info.value
+    popup.wait_for_load_state("networkidle")
+    assert popup.locator(".popup-shell").count() == 1
+    assert popup.locator(".app-shell").count() == 0
+    assert popup.locator(".sidebar").count() == 0
+    assert popup.locator(".topbar").count() == 0
+    popup.screenshot(path=OUTPUT_DIR / f"popup-cidade-{viewport_name}.png", full_page=True)
+    popup.close()
 
 
 def main():
@@ -51,7 +61,7 @@ def main():
         for name, viewport in (("desktop", {"width": 1440, "height": 1000}), ("mobile", {"width": 390, "height": 844})):
             page = browser.new_page(viewport=viewport)
             validar(page, name)
-            print(f"{name}: código, nome, troca, limpeza e busca sem resultado validados")
+            print(f"{name}: busca, limpeza e popup auxiliar sem navegação validados")
             page.close()
         browser.close()
 
