@@ -12,6 +12,7 @@
   <h1 class="h4 mb-3">{{ titulo_pagina }}</h1>
 
   <form method="post" class="border rounded p-3 bg-white">
+    {% if origem %}<input type="hidden" name="origem" value="{{ origem }}">{% endif %}
     <div class="mb-3">
       <label class="form-label">Nome do credor</label>
       <input
@@ -26,8 +27,25 @@
     <button type="submit" class="btn btn-success">
       Salvar
     </button>
-    <a href="{{ url_for('financeiro.listar_credores') }}" class="btn btn-secondary">
-      Cancelar
-    </a>
+    {% if origem %}
+    <button type="button" class="btn btn-secondary" onclick="window.close()">Cancelar</button>
+    {% else %}
+    <a href="{{ url_for('financeiro.listar_credores') }}" class="btn btn-secondary">Cancelar</a>
+    {% endif %}
   </form>
+
+  {% if credor_criado %}
+  <div class="alert alert-success mt-3" role="status">
+    Credor cadastrado. Retornando ao título...
+  </div>
+  <script>
+    if (window.opener && !window.opener.closed) {
+      window.opener.postMessage({
+        type: "psfinance:credor-criado",
+        credor: {{ credor_criado|tojson }}
+      }, window.location.origin);
+      window.close();
+    }
+  </script>
+  {% endif %}
 {% endblock %}

@@ -87,15 +87,17 @@
     <div class="col-md-6">
       <label class="form-label">Credor</label>
       <div class="input-group">
-        <select name="id_credor" id="id_credor" class="form-select" required>
-          <option value="">Selecione...</option>
-          {% for c in credores %}
-            <option value="{{ c.id_credor }}"
-              {% if titulo and titulo.id_credor == c.id_credor %}selected{% endif %}>
-              {{ c.nome }}
-            </option>
-          {% endfor %}
-        </select>
+        <input
+          type="text"
+          id="credor_nome"
+          class="form-control"
+          autocomplete="off"
+          placeholder="Digite o nome e pressione Tab"
+          value="{% if titulo %}{% for c in credores %}{% if titulo.id_credor == c.id_credor %}{{ c.nome }}{% endif %}{% endfor %}{% endif %}"
+          aria-describedby="credor_help"
+          required
+        >
+        <input type="hidden" name="id_credor" id="id_credor" value="{{ titulo.id_credor if titulo else '' }}">
         <button
           type="button"
           class="btn btn-outline-primary"
@@ -108,7 +110,7 @@
           &#128269;
         </button>
       </div>
-      <div class="form-text">Use a lupa para pesquisar ou cadastrar um credor sem sair do título.</div>
+      <div class="form-text" id="credor_help">Digite o nome e pressione Tab ou use a lupa para pesquisar.</div>
     </div>
   </div>
 
@@ -385,7 +387,8 @@
 <script>
 (function () {
   const modalElement = document.getElementById("modal_busca_credor");
-  const select = document.getElementById("id_credor");
+  const idInput = document.getElementById("id_credor");
+  const nameInput = document.getElementById("credor_nome");
   const search = document.getElementById("busca_credor");
   const results = document.getElementById("resultado_busca_credor");
   const message = document.getElementById("mensagem_busca_credor");
@@ -396,6 +399,7 @@
   let requestNumber = 0;
   let debounceTimer = null;
   let cadastroWindow = null;
+  let selectedName = nameInput.value;
 
   function setMessage(text, isError) {
     message.textContent = text;
@@ -404,18 +408,13 @@
     message.classList.toggle("d-none", !text);
   }
 
-  function selectCredor(credor) {
-    let option = Array.from(select.options).find((item) => item.value === String(credor.id));
-    if (!option) {
-      option = new Option(credor.nome, credor.id);
-      select.add(option);
-    } else {
-      option.textContent = credor.nome;
-    }
-    select.value = String(credor.id);
-    select.dispatchEvent(new Event("change", { bubbles: true }));
+  function selectCredor(credor, options = {}) {
+    idInput.value = String(credor.id);
+    nameInput.value = credor.nome;
+    selectedName = credor.nome;
+    idInput.dispatchEvent(new Event("change", { bubbles: true }));
     bootstrap.Modal.getOrCreateInstance(modalElement).hide();
-    select.focus();
+    if (options.focus !== false) nameInput.focus();
   }
 
   function render(credores) {
@@ -440,7 +439,7 @@
     });
   }
 
-  async function loadCredores() {
+  async function loadCredores(options = {}) {
     const currentRequest = ++requestNumber;
     setMessage("Carregando credores...", false);
     try {
@@ -449,7 +448,14 @@
       });
       if (!response.ok) throw new Error("Falha ao consultar credores");
       const data = await response.json();
-      if (currentRequest === requestNumber) render(data.credores || []);
+      if (currentRequest !== requestNumber) return;
+      const credores = data.credores || [];
+      if (options.autoSelect && credores.length === 1) {
+        selectCredor(credores[0], { focus: false });
+        return;
+      }
+      render(credores);
+      if (options.showModal) bootstrap.Modal.getOrCreateInstance(modalElement).show();
     } catch (error) {
       if (currentRequest === requestNumber) {
         results.replaceChildren();
@@ -463,14 +469,36 @@
     search.select();
     loadCredores();
   });
+  document.getElementById("abrir_busca_credor").addEventListener("click", () => {
+    search.value = nameInput.value.trim();
+  });
+  nameInput.addEventListener("input", () => {
+    if (nameInput.value !== selectedName) idInput.value = "";
+  });
+  nameInput.addEventListener("blur", () => {
+    const term = nameInput.value.trim();
+    if (!term || (idInput.value && term === selectedName)) return;
+    search.value = term;
+    loadCredores({ autoSelect: true, showModal: true });
+  });
   search.addEventListener("input", () => {
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(loadCredores, 250);
   });
   refresh.addEventListener("click", loadCredores);
   create.addEventListener("click", () => {
-    cadastroWindow = window.open(createUrl, "psfinanceCadastroCredor", "width=900,height=720,resizable=yes,scrollbars=yes");
+    if (cadastroWindow && !cadastroWindow.closed) {
+      cadastroWindow.focus();
+      return;
+    }
+    const url = `${createUrl}?origem=titulo`;
+    cadastroWindow = window.open(url, "psfinanceCadastroCredor", "width=900,height=720,resizable=yes,scrollbars=yes");
     if (!cadastroWindow) setMessage("O navegador bloqueou a nova janela. Libere pop-ups para este site.", true);
+  });
+  window.addEventListener("message", (event) => {
+    if (event.origin !== window.location.origin || event.data?.type !== "psfinance:credor-criado") return;
+    selectCredor(event.data.credor);
+    cadastroWindow = null;
   });
   window.addEventListener("focus", () => {
     if (cadastroWindow && cadastroWindow.closed && modalElement.classList.contains("show")) {
