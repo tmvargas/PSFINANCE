@@ -74,7 +74,7 @@ class LimiteParcelasTituloTest(unittest.TestCase):
         self.assertIn(b'id="abrir_busca_credor"', response.data)
         self.assertIn(b'id="modal_busca_credor"', response.data)
         self.assertIn(b'id="novo_credor_janela"', response.data)
-        self.assertIn(b'window.open(createUrl, "psfinanceCadastroCredor"', response.data)
+        self.assertIn(b'window.open(url, "psfinanceCadastroCredor"', response.data)
 
     def test_busca_credor_filtra_nome_e_ignora_excluidos(self):
         session = SessionLocal()
