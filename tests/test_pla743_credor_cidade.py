@@ -28,6 +28,15 @@ class CredorCidadeTest(unittest.TestCase):
         self.assertEqual(por_codigo, [{"id": self.id_cidade, "nome": "Porto Alegre"}])
         self.assertEqual(por_nome, por_codigo)
 
+    def test_formulario_permite_editar_limpar_e_resolver_cidade(self):
+        html = app.test_client().get("/financeiro/credores/novo").get_data(as_text=True)
+        self.assertIn('id="cidade_nome"', html)
+        self.assertNotIn('id="cidade_nome" class="form-control" value="" placeholder="Nome da cidade" readonly', html)
+        self.assertIn('id="limpar_cidade"', html)
+        self.assertIn("resolver(codigo.value,'codigo')", html)
+        self.assertIn("resolver(nome.value,'nome')", html)
+        self.assertIn("Selecione uma cidade válida ou limpe o campo.", html)
+
     def test_credor_persiste_novos_campos_e_cidade(self):
         response = app.test_client().post("/financeiro/credores/novo", data={
             "nome": "Fornecedor completo", "cnpj": "12.345.678/0001-90", "endereco": "Rua Um, 10",
