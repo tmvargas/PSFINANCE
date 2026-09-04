@@ -67,6 +67,33 @@ class LimiteParcelasTituloTest(unittest.TestCase):
         self.assertIn(b'max="999"', response.data)
         self.assertIn(b"Math.min(999,", response.data)
 
+    def test_formulario_oferece_busca_e_cadastro_de_credor_sem_sair(self):
+        response = app.test_client().get("/financeiro/titulos/novo")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'id="abrir_busca_credor"', response.data)
+        self.assertIn(b'id="modal_busca_credor"', response.data)
+        self.assertIn(b'id="novo_credor_janela"', response.data)
+        self.assertIn(b'window.open(createUrl, "psfinanceCadastroCredor"', response.data)
+
+    def test_busca_credor_filtra_nome_e_ignora_excluidos(self):
+        session = SessionLocal()
+        session.add_all(
+            [
+                Credor(nome="Alfa Serviços"),
+                Credor(nome="Alfa Excluído", deleted=True),
+                Credor(nome="Beta Materiais"),
+            ]
+        )
+        session.commit()
+        session.close()
+
+        response = app.test_client().get("/financeiro/credores/busca?q=alfa")
+
+        self.assertEqual(response.status_code, 200)
+        nomes = [item["nome"] for item in response.get_json()["credores"]]
+        self.assertEqual(nomes, ["Alfa Serviços"])
+
     def _criar_e_validar_quantidade(self, quantidade):
         response = app.test_client().post(
             "/financeiro/titulos/novo", data=self._dados_titulo(quantidade)

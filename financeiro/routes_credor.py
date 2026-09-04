@@ -1,5 +1,5 @@
 # financeiro/routes_credor.py
-from flask import render_template, request, redirect, url_for, flash
+from flask import flash, jsonify, redirect, render_template, request, url_for
 
 from . import bp_financeiro
 from database import SessionLocal
@@ -34,6 +34,19 @@ def listar_credores():
 
     session.close()
     return render_template("credores_list.html", credores=credores_view)
+
+
+@bp_financeiro.get("/credores/busca")
+def buscar_credores():
+    termo = (request.args.get("q") or "").strip()[:100]
+    session = get_session()
+    query = session.query(Credor).filter(Credor.deleted.is_(False))
+    if termo:
+        query = query.filter(Credor.nome.ilike(f"%{termo}%"))
+    credores = query.order_by(Credor.nome).limit(100).all()
+    resultado = [{"id": credor.id_credor, "nome": credor.nome} for credor in credores]
+    session.close()
+    return jsonify({"credores": resultado})
 
 
 # ----------------------------------------------------------------------

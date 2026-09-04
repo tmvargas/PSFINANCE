@@ -907,3 +907,10 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
 - Após dois timeouts de workers Gunicorn, foram definidos limites padrão para conexão (5 s), espera no pool (5 s), comando (10 s), lock (3 s) e reciclagem de conexões (300 s).
 - Os limites se aplicam somente ao PostgreSQL; o SQLite usado nos testes locais permanece sem parâmetros incompatíveis.
 - A mudança não altera schema nem dados. Seu objetivo é liberar rapidamente o worker diante de indisponibilidade, lock ou comando anormalmente demorado.
+
+## PLA-743 — Busca de credor sem abandonar o título
+
+- O campo Credor permanece um `select` obrigatório e compatível com o POST existente, acrescido de uma lupa que abre uma busca em modal.
+- A seleção no modal atualiza o mesmo `id_credor`, preservando validação e regra de negócio do backend.
+- O cadastro de novo credor abre em janela separada; ao retornar para o título, a lista pode ser consultada novamente sem perder os demais campos preenchidos.
+- A consulta JSON é somente leitura, retorna apenas credores ativos, filtra por parte do nome e limita o resultado a 100 registros.

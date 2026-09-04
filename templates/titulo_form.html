@@ -86,15 +86,29 @@
 
     <div class="col-md-6">
       <label class="form-label">Credor</label>
-      <select name="id_credor" class="form-select" required>
-        <option value="">Selecione...</option>
-        {% for c in credores %}
-          <option value="{{ c.id_credor }}"
-            {% if titulo and titulo.id_credor == c.id_credor %}selected{% endif %}>
-            {{ c.nome }}
-          </option>
-        {% endfor %}
-      </select>
+      <div class="input-group">
+        <select name="id_credor" id="id_credor" class="form-select" required>
+          <option value="">Selecione...</option>
+          {% for c in credores %}
+            <option value="{{ c.id_credor }}"
+              {% if titulo and titulo.id_credor == c.id_credor %}selected{% endif %}>
+              {{ c.nome }}
+            </option>
+          {% endfor %}
+        </select>
+        <button
+          type="button"
+          class="btn btn-outline-primary"
+          id="abrir_busca_credor"
+          data-bs-toggle="modal"
+          data-bs-target="#modal_busca_credor"
+          title="Pesquisar credor sem sair do título"
+          aria-label="Pesquisar credor"
+        >
+          &#128269;
+        </button>
+      </div>
+      <div class="form-text">Use a lupa para pesquisar ou cadastrar um credor sem sair do título.</div>
     </div>
   </div>
 
@@ -341,6 +355,131 @@
   </div>
 
 </form>
+
+<div class="modal fade" id="modal_busca_credor" tabindex="-1" aria-labelledby="titulo_modal_busca_credor" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title fs-5" id="titulo_modal_busca_credor">Pesquisar credor</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        <label for="busca_credor" class="form-label">Nome do credor</label>
+        <div class="input-group mb-3">
+          <input type="search" class="form-control" id="busca_credor" placeholder="Digite parte do nome" autocomplete="off">
+          <button type="button" class="btn btn-outline-secondary" id="atualizar_credores">Atualizar</button>
+        </div>
+        <div id="resultado_busca_credor" class="list-group" aria-live="polite"></div>
+        <p id="mensagem_busca_credor" class="text-muted mb-0 d-none"></p>
+      </div>
+      <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-outline-primary" id="novo_credor_janela">
+          Cadastrar novo credor
+        </button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const modalElement = document.getElementById("modal_busca_credor");
+  const select = document.getElementById("id_credor");
+  const search = document.getElementById("busca_credor");
+  const results = document.getElementById("resultado_busca_credor");
+  const message = document.getElementById("mensagem_busca_credor");
+  const refresh = document.getElementById("atualizar_credores");
+  const create = document.getElementById("novo_credor_janela");
+  const searchUrl = {{ url_for('financeiro.buscar_credores')|tojson }};
+  const createUrl = {{ url_for('financeiro.novo_credor')|tojson }};
+  let requestNumber = 0;
+  let debounceTimer = null;
+  let cadastroWindow = null;
+
+  function setMessage(text, isError) {
+    message.textContent = text;
+    message.classList.toggle("text-danger", Boolean(isError));
+    message.classList.toggle("text-muted", !isError);
+    message.classList.toggle("d-none", !text);
+  }
+
+  function selectCredor(credor) {
+    let option = Array.from(select.options).find((item) => item.value === String(credor.id));
+    if (!option) {
+      option = new Option(credor.nome, credor.id);
+      select.add(option);
+    } else {
+      option.textContent = credor.nome;
+    }
+    select.value = String(credor.id);
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+    bootstrap.Modal.getOrCreateInstance(modalElement).hide();
+    select.focus();
+  }
+
+  function render(credores) {
+    results.replaceChildren();
+    if (!credores.length) {
+      setMessage("Nenhum credor encontrado. Você pode cadastrá-lo em uma nova janela.", false);
+      return;
+    }
+    setMessage("", false);
+    credores.forEach((credor) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "list-group-item list-group-item-action d-flex justify-content-between align-items-center";
+      const name = document.createElement("span");
+      name.textContent = credor.nome;
+      const choose = document.createElement("span");
+      choose.className = "badge text-bg-primary";
+      choose.textContent = "Selecionar";
+      button.append(name, choose);
+      button.addEventListener("click", () => selectCredor(credor));
+      results.appendChild(button);
+    });
+  }
+
+  async function loadCredores() {
+    const currentRequest = ++requestNumber;
+    setMessage("Carregando credores...", false);
+    try {
+      const response = await fetch(`${searchUrl}?q=${encodeURIComponent(search.value.trim())}`, {
+        headers: { Accept: "application/json" }
+      });
+      if (!response.ok) throw new Error("Falha ao consultar credores");
+      const data = await response.json();
+      if (currentRequest === requestNumber) render(data.credores || []);
+    } catch (error) {
+      if (currentRequest === requestNumber) {
+        results.replaceChildren();
+        setMessage("Não foi possível atualizar os credores. Tente novamente.", true);
+      }
+    }
+  }
+
+  modalElement.addEventListener("shown.bs.modal", () => {
+    search.focus();
+    search.select();
+    loadCredores();
+  });
+  search.addEventListener("input", () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(loadCredores, 250);
+  });
+  refresh.addEventListener("click", loadCredores);
+  create.addEventListener("click", () => {
+    cadastroWindow = window.open(createUrl, "psfinanceCadastroCredor", "width=900,height=720,resizable=yes,scrollbars=yes");
+    if (!cadastroWindow) setMessage("O navegador bloqueou a nova janela. Libere pop-ups para este site.", true);
+  });
+  window.addEventListener("focus", () => {
+    if (cadastroWindow && cadastroWindow.closed && modalElement.classList.contains("show")) {
+      cadastroWindow = null;
+      loadCredores();
+    }
+  });
+})();
+</script>
 
 <script>
 (function () {
