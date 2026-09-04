@@ -944,3 +944,10 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
 - O modal é movido para o `body` antes da inicialização do Bootstrap, mantendo-o acima do backdrop fora do contexto de empilhamento do shell responsivo.
 - A transição `fade` foi removida deste modal para evitar o estado visual intermediário translúcido durante a abertura em dispositivos móveis.
 - O retorno ao formulário chamador continua por `postMessage` de mesma origem e fechamento automático após salvar.
+# 2026-09-04 — Padrão de consulta com cadastro em popup (PLA-743)
+
+- O padrão aprovado em Cidade passa a ser a referência do PSFINANCE para pedidos de “consulta com cadastro em popup”.
+- A busca deve usar modal sólido no `body`, campo textual sem controles nativos sobrepostos, seleção sem perder o formulário e tratamento de zero/um/múltiplos resultados.
+- O cadastro deve abrir em uma única janela auxiliar baseada em `popup_base.html`, sem menu lateral, busca global ou header da aplicação.
+- Ao salvar, a janela comunica o novo registro por `postMessage` de mesma origem, fecha e preenche imediatamente o formulário chamador.
+- O cadastro de Credor dentro do Título foi alinhado a esse padrão.

@@ -13,6 +13,7 @@ PSCONTROL e um projeto PlanSmart para controle interno, acompanhamento operacion
 - Nao expor tokens, secrets, dados de clientes ou documentos privados.
 - Nao duplicar regras de negocio sem necessidade.
 - Documentar qualquer decisao relevante em `docs/decisoes.md`.
+- Quando Thiago pedir "consulta com cadastro em popup", seguir o padrão registrado em `docs/decisoes.md`: modal sólido acima da navegação, busca sem sobreposição, janela auxiliar sem menu/header e retorno automático do registro ao formulário chamador.
 
 ## Padrao de entrega
 
@@ -28,4 +29,3 @@ Ao entregar alteracao de desenvolvimento, informar:
 
 - VPS planejada: `vps69143.publiccloud.com.br` (`191.252.93.136`).
 - Stack tecnica ainda pendente.
-

@@ -61,6 +61,11 @@ def main():
             page.locator("#novo_credor_janela").click()
         popup = popup_info.value
         popup.wait_for_load_state("networkidle")
+        if popup.locator(".popup-shell").count() != 1:
+            raise AssertionError("Cadastro de credor não abriu no layout auxiliar")
+        if popup.locator(".app-shell, .sidebar, .topbar").count():
+            raise AssertionError("Popup de credor exibiu navegação do sistema")
+        popup.screenshot(path=OUTPUT_DIR / "popup-credor-desktop.png", full_page=True)
         page.locator("#novo_credor_janela").click()
         page.wait_for_timeout(300)
         if len(page.context.pages) != 2:
@@ -75,7 +80,7 @@ def main():
 
         print(
             f"unico={unico['nome']}; multiplos={len(credores)}; "
-            "zero=ok; janela_unica=ok; desktop=ok; mobile=ok"
+            "zero=ok; janela_unica=ok; popup_auxiliar=ok; desktop=ok; mobile=ok"
         )
         browser.close()
 

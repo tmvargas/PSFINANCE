@@ -37,6 +37,16 @@ class SelecaoCredorSiengeTest(unittest.TestCase):
             'url_for("financeiro.novo_credor", origem=origem, criado=id_credor)', rota
         )
 
+    def test_busca_e_popup_seguem_padrao_auxiliar_aprovado(self):
+        titulo = (ROOT / "templates" / "titulo_form.html").read_text(encoding="utf-8")
+        credor = (ROOT / "templates" / "credor_form.html").read_text(encoding="utf-8")
+
+        self.assertIn('<div class="modal" id="modal_busca_credor"', titulo)
+        self.assertNotIn('<div class="modal fade" id="modal_busca_credor"', titulo)
+        self.assertIn('type="text" class="form-control" id="busca_credor"', titulo)
+        self.assertIn("document.body.appendChild(modalElement)", titulo)
+        self.assertIn('{% extends "popup_base.html" if origem else "base.html" %}', credor)
+
 
 if __name__ == "__main__":
     unittest.main()
