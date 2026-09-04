@@ -915,6 +915,14 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
 - O cadastro de novo credor abre em janela separada; ao retornar para o título, a lista pode ser consultada novamente sem perder os demais campos preenchidos.
 - A consulta JSON é somente leitura, retorna apenas credores ativos, filtra por parte do nome e limita o resultado a 100 registros.
 
+## PLA-743 — Dados do credor e cadastro auxiliar de Cidade
+
+- Cidade passa a ser cadastro auxiliar com ID incremental, nome, CRUD próprio e vínculo opcional no Credor.
+- A pesquisa aceita código exato ou parte do nome. Resultado único digitado no código preenche o formulário; múltiplos resultados abrem a seleção.
+- Novo cadastro de Cidade usa popup fixa e comunica o registro à janela do Credor antes de fechar.
+- Credor recebe CNPJ, endereço, bairro, CEP, cidade, WhatsApp, telefone e e-mail. Sua exclusão lógica é bloqueada enquanto houver título ativo vinculado.
+- A migration `20260904_pla743_credor_cidade.sql` não deve ser aplicada em nenhum ambiente sem autorização expressa de Thiago.
+
 ## PLA-3911 — Seleção de credor conforme o fluxo do Sienge
 
 - O cadastro de título mantém um único campo textual de credor e armazena o identificador selecionado em campo oculto, preservando o contrato `id_credor` do backend sem exibir uma combobox redundante.

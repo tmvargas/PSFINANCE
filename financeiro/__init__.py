@@ -5,6 +5,7 @@ bp_financeiro = Blueprint("financeiro", __name__)
 
 # Importa as rotas ao carregar o Blueprint
 from . import (
+    routes_cidade,
     routes_centro_custo,
     routes_contas,
     routes_credor,

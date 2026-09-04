@@ -31,6 +31,7 @@
               <tr>
                 <th style="width: 90px;">ID</th>
                 <th>Credor</th>
+                <th>CNPJ</th><th>Cidade</th>
                 <th style="width: 100px;" class="text-center">Ações</th>
               </tr>
             </thead>
@@ -43,6 +44,7 @@
                       {{ c.nome }}
                     </div>
                   </td>
+                  <td>{{ c.cnpj or '-' }}</td><td>{{ c.cidade or '-' }}</td>
                   <td class="text-center">
                     <div class="consultation-row-actions">
                       <a
@@ -53,6 +55,7 @@
                       >
                         <svg class="icon"><use href="#icon-pencil"></use></svg>
                       </a>
+                      <form method="post" action="{{ url_for('financeiro.excluir_credor', id_credor=c.id) }}" class="consultation-action-form" onsubmit="return confirm('Excluir este credor?')"><button class="consultation-action consultation-action-danger" title="Excluir credor" aria-label="Excluir credor {{ c.id }}"><svg class="icon"><use href="#icon-trash"></use></svg></button></form>
                     </div>
                   </td>
                 </tr>

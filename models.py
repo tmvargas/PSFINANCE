@@ -116,6 +116,18 @@ class PlanoDeContas(Base, TimestampMixin):
 
 
 # ---------------------------------------------------------------------
+# CIDADE
+# ---------------------------------------------------------------------
+class Cidade(Base, TimestampMixin):
+    __tablename__ = "cidade"
+
+    id_cidade = Column(Integer, primary_key=True, autoincrement=True)
+    uuid = Column(String(36), default=lambda: str(uuid.uuid4()), unique=True, nullable=False)
+    nome = Column(String(255), nullable=False)
+    credores = relationship("Credor", back_populates="cidade")
+
+
+# ---------------------------------------------------------------------
 # CREDOR
 # ---------------------------------------------------------------------
 class Credor(Base, TimestampMixin):
@@ -125,7 +137,16 @@ class Credor(Base, TimestampMixin):
     uuid = Column(String(36), default=lambda: str(uuid.uuid4()), unique=True, nullable=False)
 
     nome = Column(String(255), nullable=False)
+    cnpj = Column(String(18), nullable=True)
+    endereco = Column(String(255), nullable=True)
+    bairro = Column(String(120), nullable=True)
+    cep = Column(String(9), nullable=True)
+    id_cidade = Column(Integer, ForeignKey("cidade.id_cidade"), nullable=True)
+    whats = Column(String(30), nullable=True)
+    fone = Column(String(30), nullable=True)
+    email = Column(String(255), nullable=True)
 
+    cidade = relationship("Cidade", back_populates="credores")
     titulos = relationship("Titulo", back_populates="credor")
 
     def __repr__(self):

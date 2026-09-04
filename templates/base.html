@@ -751,6 +751,9 @@
       'financeiro.listar_credores',
       'financeiro.novo_credor',
       'financeiro.editar_credor',
+      'financeiro.listar_cidades',
+      'financeiro.nova_cidade',
+      'financeiro.editar_cidade',
       'financeiro.listar_plano',
       'financeiro.novo_plano',
       'financeiro.editar_plano',
@@ -948,6 +951,7 @@
               </button>
               <div class="submenu" aria-label="Submenu Cadastro Geral">
                 <a class="submenu-item {% if endpoint in ['financeiro.listar_credores', 'financeiro.novo_credor', 'financeiro.editar_credor'] %}active{% endif %}" href="{{ url_for('financeiro.listar_credores') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-user"></use></svg></span><span>Credor</span></a>
+                <a class="submenu-item {% if endpoint in ['financeiro.listar_cidades', 'financeiro.nova_cidade', 'financeiro.editar_cidade'] %}active{% endif %}" href="{{ url_for('financeiro.listar_cidades') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-landmark"></use></svg></span><span>Cidade</span></a>
                 <a class="submenu-item {% if endpoint in ['financeiro.listar_plano', 'financeiro.novo_plano', 'financeiro.editar_plano'] %}active{% endif %}" href="{{ url_for('financeiro.listar_plano') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-list-tree"></use></svg></span><span>Plano Financeiro</span></a>
                 <a class="submenu-item {% if endpoint in ['financeiro.listar_empresas', 'financeiro.nova_empresa', 'financeiro.editar_empresa'] %}active{% endif %}" href="{{ url_for('financeiro.listar_empresas') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-landmark"></use></svg></span><span>Empresa</span></a>
                 <a class="submenu-item {% if endpoint in ['financeiro.listar_centros_custo', 'financeiro.novo_centro_custo', 'financeiro.editar_centro_custo'] %}active{% endif %}" href="{{ url_for('financeiro.listar_centros_custo') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-list-tree"></use></svg></span><span>Centro de Custo</span></a>
@@ -963,6 +967,7 @@
                 </button>
                 <div class="submenu" aria-label="Submenu Cadastro Geral">
                   <a class="submenu-item {% if endpoint in ['financeiro.listar_credores', 'financeiro.novo_credor', 'financeiro.editar_credor'] %}active{% endif %}" href="{{ url_for('financeiro.listar_credores') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-user"></use></svg></span><span>Credor</span></a>
+                  <a class="submenu-item {% if endpoint in ['financeiro.listar_cidades', 'financeiro.nova_cidade', 'financeiro.editar_cidade'] %}active{% endif %}" href="{{ url_for('financeiro.listar_cidades') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-landmark"></use></svg></span><span>Cidade</span></a>
                   <a class="submenu-item {% if endpoint in ['financeiro.listar_plano', 'financeiro.novo_plano', 'financeiro.editar_plano'] %}active{% endif %}" href="{{ url_for('financeiro.listar_plano') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-list-tree"></use></svg></span><span>Plano Financeiro</span></a>
                   <a class="submenu-item {% if endpoint in ['financeiro.listar_empresas', 'financeiro.nova_empresa', 'financeiro.editar_empresa'] %}active{% endif %}" href="{{ url_for('financeiro.listar_empresas') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-landmark"></use></svg></span><span>Empresa</span></a>
                   <a class="submenu-item {% if endpoint in ['financeiro.listar_centros_custo', 'financeiro.novo_centro_custo', 'financeiro.editar_centro_custo'] %}active{% endif %}" href="{{ url_for('financeiro.listar_centros_custo') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-list-tree"></use></svg></span><span>Centro de Custo</span></a>
