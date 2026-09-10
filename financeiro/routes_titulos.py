@@ -202,6 +202,72 @@ def _add_months(data_base: date, meses: int) -> date:
     return date(ano, mes, min(data_base.day, ultimo_dia))
 
 
+def _proximo_vencimento_cartao(hoje: date, dia_vencimento: int) -> date:
+    ultimo_dia = calendar.monthrange(hoje.year, hoje.month)[1]
+    vencimento = date(hoje.year, hoje.month, min(dia_vencimento, ultimo_dia))
+    if vencimento >= hoje:
+        return vencimento
+    return _add_months(vencimento, 1)
+
+
+def _previsoes_cartao_credito(
+    session,
+    hoje: date,
+    data_ini: date,
+    data_fim: date,
+    id_empresa: int | None,
+    id_credor: int | None,
+    emissao: date | None,
+    busca_titulo: str,
+    situacao: str,
+):
+    if id_credor or emissao or situacao == "baixada":
+        return []
+
+    query = session.query(Conta).filter(
+        Conta.deleted.is_(False),
+        Conta.tipo == "cartao_credito",
+        Conta.dia_vencimento_cartao.isnot(None),
+    )
+    if id_empresa:
+        query = query.filter(Conta.id_empresa == id_empresa)
+
+    termo = busca_titulo.casefold()
+    previsoes = []
+    for conta in query.order_by(Conta.descricao).all():
+        saldo = float(conta.saldo_atual or 0)
+        if saldo >= -0.005:
+            continue
+        if termo and termo not in f"cartão cartao fatura {conta.descricao}".casefold():
+            continue
+        vencimento = _proximo_vencimento_cartao(hoje, conta.dia_vencimento_cartao)
+        if not data_ini <= vencimento < data_fim:
+            continue
+        valor = abs(saldo)
+        previsoes.append(
+            {
+                "id": f"cartao-{conta.id_conta}",
+                "tipo_linha": "cartao_credito",
+                "id_conta": conta.id_conta,
+                "id_empresa": conta.id_empresa,
+                "doc_label": "Previsão de cartão",
+                "nr_documento": "Saldo flutuante",
+                "credor": conta.descricao,
+                "empresa": f"{conta.empresa.codigo} - {conta.empresa.nome}" if conta.empresa else "",
+                "centro_custo": "",
+                "plano": "Fatura prevista",
+                "emissao": "",
+                "vencimento": vencimento.strftime("%d/%m/%Y"),
+                "vencimento_data": vencimento,
+                "valor_total_titulo": valor,
+                "valor_parcela_mes": valor,
+                "pago_mes": 0.0,
+                "nao_pago_mes": valor,
+            }
+        )
+    return previsoes
+
+
 def _gerar_parcelas(valor_total: float, vencimento_inicial: date, quantidade: int):
     total_centavos = round(float(valor_total or 0) * 100)
     base_centavos = total_centavos // quantidade
@@ -720,12 +786,25 @@ def listar_titulos():
                 "plano": f"{t.plano.cod_estrutural} - {t.plano.nome_conta}" if t.plano else "",
                 "emissao": t.emissao.strftime("%d/%m/%Y") if t.emissao else "",
                 "vencimento": vencimento_periodo.strftime("%d/%m/%Y") if vencimento_periodo else "",
+                "vencimento_data": vencimento_periodo,
+                "tipo_linha": "titulo",
                 "valor_total_titulo": valor_total_titulo,
                 "valor_parcela_mes": valor_parcela_mes,
                 "pago_mes": pago_mes,
                 "nao_pago_mes": nao_pago_mes,
             }
         )
+
+    previsoes_cartao = _previsoes_cartao_credito(
+        session, hoje, data_ini, data_fim, id_empresa, id_credor,
+        emissao, busca_titulo, situacao,
+    )
+    for previsao in previsoes_cartao:
+        rows.append(previsao)
+        total_valor_titulo += previsao["valor_total_titulo"]
+        total_valor_parcela_mes += previsao["valor_parcela_mes"]
+        total_nao_pago_mes += previsao["nao_pago_mes"]
+    rows.sort(key=lambda row: (row.get("vencimento_data") or date.max, str(row["id"])))
 
     meses = [
         (1, "Jan"), (2, "Fev"), (3, "Mar"), (4, "Abr"),

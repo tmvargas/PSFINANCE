@@ -951,3 +951,10 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
 - O cadastro deve abrir em uma única janela auxiliar baseada em `popup_base.html`, sem menu lateral, busca global ou header da aplicação.
 - Ao salvar, a janela comunica o novo registro por `postMessage` de mesma origem, fecha e preenche imediatamente o formulário chamador.
 - O cadastro de Credor dentro do Título foi alinhado a esse padrão.
+# 2026-09-10 — Previsão flutuante de cartão de crédito (PLA-743)
+
+- A conta `cartao_credito` possui somente `dia_vencimento_cartao`; não existe fechamento de fatura no modelo.
+- A previsão não gera `Titulo`: ela é calculada pelo módulo do saldo negativo atual do cartão e aparece uma única vez no próximo vencimento igual ou posterior ao dia corrente.
+- Saídas aumentam o saldo devedor e transferências para o cartão o reduzem. Pagamento parcial carrega o residual ao vencimento seguinte; saldo zero ou positivo não produz previsão.
+- Dias inexistentes no mês são ajustados para o último dia do mês.
+- A linha sintética é visualmente identificada como `Previsão` e leva ao extrato da conta, sem ações de baixa, edição ou exclusão de título.

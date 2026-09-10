@@ -185,6 +185,15 @@
       color: var(--ps-green-dark);
     }
 
+    .titles-status-card {
+      background: #e8e8ff;
+      color: #34348a;
+    }
+
+    .titles-row-card {
+      --bs-table-bg: #fafaff;
+    }
+
     .titles-values {
       display: grid;
       gap: 2px;
@@ -419,7 +428,7 @@
 
     <div class="titles-summary" aria-label="Resumo financeiro dos títulos filtrados">
       <div class="titles-metric">
-        <span>Títulos filtrados</span>
+        <span>Títulos e previsões</span>
         <strong>{{ titulos|length }}</strong>
       </div>
       <div class="titles-metric">
@@ -460,13 +469,13 @@
               {% for t in titulos %}
                 {% set nao_pago_mes = (t.nao_pago_mes or 0) %}
 
-                <tr>
+                <tr class="{% if t.tipo_linha == 'cartao_credito' %}titles-row-card{% endif %}">
                   <td>
                     <div
                       class="titles-text-main titles-truncate"
                       title="Título {{ t.id }}{% if t.doc_label %} - {{ t.doc_label }}{% endif %}"
                     >
-                      {{ t.id }}{% if t.doc_label %} - {{ t.doc_label }}{% endif %}
+                      {% if t.tipo_linha == 'cartao_credito' %}{{ t.doc_label }}{% else %}{{ t.id }}{% if t.doc_label %} - {{ t.doc_label }}{% endif %}{% endif %}
                     </div>
                     <div class="titles-text-muted titles-truncate" title="{{ t.nr_documento or '-' }}">
                       Nº {{ t.nr_documento or '-' }}
@@ -493,7 +502,7 @@
                   <td class="text-end">
                     <div class="titles-values">
                       <div class="titles-value-row">
-                        <span>Valor total do título</span>
+                        <span>{% if t.tipo_linha == 'cartao_credito' %}Saldo previsto{% else %}Valor total do título{% endif %}</span>
                         <strong>R$ {{ "%.2f"|format(t.valor_total_titulo or 0) }}</strong>
                       </div>
                       <div class="titles-value-row">
@@ -512,7 +521,9 @@
                   </td>
 
                   <td class="text-center">
-                    {% if nao_pago_mes <= 0 %}
+                    {% if t.tipo_linha == 'cartao_credito' %}
+                      <span class="titles-status titles-status-card">Previsão</span>
+                    {% elif nao_pago_mes <= 0 %}
                       <span class="titles-status titles-status-paid">Pago no mês</span>
                     {% else %}
                       <span class="titles-status titles-status-open">Não pago no mês</span>
@@ -520,6 +531,13 @@
                   </td>
 
                   <td class="text-center">
+                    {% if t.tipo_linha == 'cartao_credito' %}
+                      <div class="titles-actions" aria-label="Ações da previsão {{ t.credor }}">
+                        <a href="{{ url_for('financeiro.extrato_conta', id_empresa=t.id_empresa, id_conta=t.id_conta) }}" class="titles-action" title="Abrir extrato do cartão" aria-label="Abrir extrato do cartão {{ t.credor }}">
+                          <svg class="icon"><use href="#icon-receipt"></use></svg>
+                        </a>
+                      </div>
+                    {% else %}
                     <div class="titles-actions" aria-label="Ações do título {{ t.id }}">
                       {% if nao_pago_mes > 0 %}
                         <a
@@ -595,6 +613,7 @@
                         </button>
                       </form>
                     </div>
+                    {% endif %}
                   </td>
                 </tr>
               {% endfor %}

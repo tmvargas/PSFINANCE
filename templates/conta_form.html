@@ -46,7 +46,13 @@
           <option value="corrente" {% if tipo_sel == 'corrente' %}selected{% endif %}>Corrente</option>
           <option value="aplicacao" {% if tipo_sel == 'aplicacao' %}selected{% endif %}>Aplicação</option>
           <option value="caixa" {% if tipo_sel == 'caixa' %}selected{% endif %}>Caixa</option>
+          <option value="cartao_credito" {% if tipo_sel == 'cartao_credito' %}selected{% endif %}>Cartão de crédito</option>
         </select>
+      </div>
+      <div class="col-md-3" id="campo_vencimento_cartao" {% if tipo_sel != 'cartao_credito' %}hidden{% endif %}>
+        <label class="form-label">Dia de vencimento</label>
+        <input type="number" min="1" max="31" name="dia_vencimento_cartao" class="form-control" value="{{ conta.dia_vencimento_cartao if conta and conta.dia_vencimento_cartao else '' }}">
+        <div class="form-text">A previsão usa o próximo vencimento deste dia.</div>
       </div>
       <div class="col-md-3">
         <label class="form-label">Banco / Código</label>
@@ -95,6 +101,21 @@
       Cancelar
     </a>
   </form>
+  <script>
+    (() => {
+      const tipo = document.querySelector('[name="tipo"]');
+      const grupo = document.querySelector('#campo_vencimento_cartao');
+      const dia = grupo.querySelector('[name="dia_vencimento_cartao"]');
+      const atualizar = () => {
+        const cartao = tipo.value === 'cartao_credito';
+        grupo.hidden = !cartao;
+        dia.required = cartao;
+        if (!cartao) dia.value = '';
+      };
+      tipo.addEventListener('change', atualizar);
+      atualizar();
+    })();
+  </script>
   {% if not empresas %}
     <div class="alert alert-warning mt-3">
       Cadastre uma empresa ativa antes de criar ou editar contas.
