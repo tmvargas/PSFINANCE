@@ -165,8 +165,9 @@ class Conta(Base, TimestampMixin):
     descricao = Column(String(255), nullable=False)
     id_empresa = Column(Integer, ForeignKey("empresa.id_empresa"), nullable=False)
     id_banco = Column(String(50), nullable=True)
-    # 'corrente', 'aplicacao', 'caixa'
+    # 'corrente', 'aplicacao', 'caixa', 'cartao_credito'
     tipo = Column(String(20), nullable=False)
+    dia_vencimento_cartao = Column(Integer, nullable=True)
 
     saldo_inicial = Column(Numeric(15, 2), default=0, nullable=False)
     data_saldo_inicial = Column(Date, nullable=True)

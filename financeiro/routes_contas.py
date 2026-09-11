@@ -80,12 +80,18 @@ def parse_money_ptbr(valor_str: str) -> float:
 
 def conta_to_view(conta):
     empresa = getattr(conta, "empresa", None)
+    tipos = {
+        "corrente": "Corrente", "aplicacao": "Aplicação", "caixa": "Caixa",
+        "cartao_credito": "Cartão de crédito",
+    }
     return {
         "id": conta.id_conta,
         "descricao": conta.descricao,
         "empresa": f"{empresa.codigo} - {empresa.nome}" if empresa else "",
         "id_empresa": getattr(conta, "id_empresa", None),
         "tipo": conta.tipo,
+        "tipo_label": tipos.get(conta.tipo, conta.tipo),
+        "dia_vencimento_cartao": conta.dia_vencimento_cartao,
         "id_banco": conta.id_banco or "",
         "saldo_inicial": float(conta.saldo_inicial or 0),
         "data_saldo_inicial": conta.data_saldo_inicial.strftime("%d/%m/%Y") if conta.data_saldo_inicial else "",
@@ -135,7 +141,8 @@ def nova_conta():
     if request.method == "POST":
         descricao = (request.form.get("descricao") or "").strip()
         id_empresa = request.form.get("id_empresa", type=int)
-        tipo = (request.form.get("tipo") or "").strip()  # corrente, aplicacao, caixa
+        tipo = (request.form.get("tipo") or "").strip()
+        dia_vencimento_cartao = request.form.get("dia_vencimento_cartao", type=int)
         id_banco = (request.form.get("id_banco") or "").strip()
         saldo_inicial_str = (request.form.get("saldo_inicial") or "").replace(",", ".").strip()
         data_saldo_str = (request.form.get("data_saldo_inicial") or "").strip()
@@ -147,8 +154,12 @@ def nova_conta():
         erros_empresa, _empresa = validar_empresa_ativa(session, id_empresa)
         erros.extend(erros_empresa)
 
-        if tipo not in ("corrente", "aplicacao", "caixa"):
-            erros.append("Tipo de conta inválido. Use corrente, aplicação ou caixa.")
+        if tipo not in ("corrente", "aplicacao", "caixa", "cartao_credito"):
+            erros.append("Tipo de conta inválido.")
+        if tipo == "cartao_credito" and not 1 <= (dia_vencimento_cartao or 0) <= 31:
+            erros.append("Informe o dia de vencimento do cartão entre 1 e 31.")
+        if tipo != "cartao_credito":
+            dia_vencimento_cartao = None
 
         # saldo inicial (opcional)
         saldo_inicial = 0.0
@@ -177,6 +188,7 @@ def nova_conta():
                 descricao=descricao,
                 id_empresa=id_empresa,
                 tipo=tipo,
+                dia_vencimento_cartao=dia_vencimento_cartao,
                 id_banco=id_banco or None,
                 saldo_inicial=saldo_inicial,
                 data_saldo_inicial=data_saldo_inicial,
@@ -223,6 +235,7 @@ def editar_conta(id_conta):
         descricao = (request.form.get("descricao") or "").strip()
         id_empresa = request.form.get("id_empresa", type=int)
         tipo = (request.form.get("tipo") or "").strip()
+        dia_vencimento_cartao = request.form.get("dia_vencimento_cartao", type=int)
         id_banco = (request.form.get("id_banco") or "").strip()
         saldo_inicial_str = (request.form.get("saldo_inicial") or "").replace(",", ".").strip()
         data_saldo_str = (request.form.get("data_saldo_inicial") or "").strip()
@@ -234,8 +247,12 @@ def editar_conta(id_conta):
         erros_empresa, _empresa = validar_empresa_ativa(session, id_empresa)
         erros.extend(erros_empresa)
 
-        if tipo not in ("corrente", "aplicacao", "caixa"):
-            erros.append("Tipo de conta inválido. Use corrente, aplicação ou caixa.")
+        if tipo not in ("corrente", "aplicacao", "caixa", "cartao_credito"):
+            erros.append("Tipo de conta inválido.")
+        if tipo == "cartao_credito" and not 1 <= (dia_vencimento_cartao or 0) <= 31:
+            erros.append("Informe o dia de vencimento do cartão entre 1 e 31.")
+        if tipo != "cartao_credito":
+            dia_vencimento_cartao = None
 
         # saldo inicial (opcional)
         saldo_inicial = conta.saldo_inicial or 0.0
@@ -266,6 +283,7 @@ def editar_conta(id_conta):
             conta.descricao = descricao
             conta.id_empresa = id_empresa
             conta.tipo = tipo
+            conta.dia_vencimento_cartao = dia_vencimento_cartao
             conta.id_banco = id_banco or None
             conta.saldo_inicial = saldo_inicial
             conta.data_saldo_inicial = data_saldo_inicial

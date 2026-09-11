@@ -45,7 +45,7 @@
                     </div>
                   </td>
                   <td>{{ c.empresa or '-' }}</td>
-                  <td>{{ c.tipo }}</td>
+                  <td>{{ c.tipo_label }}{% if c.dia_vencimento_cartao %}<div class="consultation-text-muted">Vence dia {{ c.dia_vencimento_cartao }}</div>{% endif %}</td>
                   <td class="text-end text-nowrap">R$ {{ '%.2f'|format(c.saldo_inicial) }}</td>
                   <td class="text-nowrap">{{ c.data_saldo_inicial }}</td>
                   <td class="text-end text-nowrap">R$ {{ '%.2f'|format(c.saldo_atual) }}</td>
