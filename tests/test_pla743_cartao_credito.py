@@ -108,14 +108,16 @@ class CartaoCreditoTest(unittest.TestCase):
         session.close()
 
     def test_consulta_titulos_renderiza_previsao_e_link_para_extrato(self):
+        vencimento = _proximo_vencimento_cartao(date.today(), self.cartao.dia_vencimento_cartao)
         response = app.test_client().get(
-            f"/financeiro/titulos?mes=9&ano=2026&id_empresa={self.id_empresa}&situacao=em_aberto"
+            f"/financeiro/titulos?mes={vencimento.month}&ano={vencimento.year}"
+            f"&id_empresa={self.id_empresa}&situacao=em_aberto"
         )
         html = response.get_data(as_text=True)
         self.assertEqual(response.status_code, 200)
         self.assertIn("Previsão de cartão", html)
         self.assertIn("Cartão corporativo", html)
-        self.assertIn("10/09/2026", html)
+        self.assertIn(vencimento.strftime("%d/%m/%Y"), html)
         self.assertIn("200.00", html)
         self.assertIn(f"id_conta={self.id_cartao}", html)
 
