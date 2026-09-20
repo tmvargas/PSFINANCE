@@ -958,3 +958,10 @@ tabelas operacionais existentes, dados produtivos, variaveis de ambiente, VPS,
 - Saídas aumentam o saldo devedor e transferências para o cartão o reduzem. Pagamento parcial carrega o residual ao vencimento seguinte; saldo zero ou positivo não produz previsão.
 - Dias inexistentes no mês são ajustados para o último dia do mês.
 - A linha sintética é visualmente identificada como `Previsão` e leva ao extrato da conta, sem ações de baixa, edição ou exclusão de título.
+## 2026-09-20 — Edição explícita de contas para conversão em cartão
+
+Decisão: a consulta de contas deve exibir o botão textual `Editar`, abrindo o
+formulário com os atributos atuais. A alteração para `Cartão de crédito` exige
+dia de vencimento entre 1 e 31 e atualiza a própria conta, preservando seu ID,
+movimentos e saldo calculado. Ao escolher outro tipo, o vencimento específico
+do cartão é removido.
