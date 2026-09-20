@@ -61,11 +61,12 @@
                     <div class="consultation-row-actions">
                       <a
                         href="{{ url_for('financeiro.editar_conta', id_conta=c.id) }}"
-                        class="consultation-action"
+                        class="btn btn-sm btn-outline-primary btn-icon-label"
                         title="Editar conta"
                         aria-label="Editar conta {{ c.id }}"
                       >
                         <svg class="icon"><use href="#icon-pencil"></use></svg>
+                        <span>Editar</span>
                       </a>
                       <form
                         method="post"

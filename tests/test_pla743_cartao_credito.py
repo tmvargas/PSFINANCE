@@ -107,6 +107,65 @@ class CartaoCreditoTest(unittest.TestCase):
         self.assertIsNone(session.query(Conta).filter_by(descricao="Caixa novo").one().dia_vencimento_cartao)
         session.close()
 
+    def test_edicao_converte_conta_existente_em_cartao_sem_alterar_movimentos(self):
+        client = app.test_client()
+        saldo_antes = None
+        session = SessionLocal()
+        conta = session.get(Conta, self.id_banco)
+        saldo_antes = conta.saldo_atual
+        movimentos_antes = session.query(MovimentacaoConta).filter(
+            (MovimentacaoConta.id_conta_origem == self.id_banco)
+            | (MovimentacaoConta.id_conta_destino == self.id_banco)
+        ).count()
+        session.close()
+
+        response = client.post(f"/financeiro/contas/{self.id_banco}/editar", data={
+            "descricao": "Cartão convertido",
+            "id_empresa": self.id_empresa,
+            "tipo": "cartao_credito",
+            "dia_vencimento_cartao": "15",
+            "id_banco": "341",
+            "saldo_inicial": "0.00",
+            "data_saldo_inicial": "",
+        }, follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Conta atualizada com sucesso!", response.get_data(as_text=True))
+
+        session = SessionLocal()
+        conta = session.get(Conta, self.id_banco)
+        self.assertEqual(conta.descricao, "Cartão convertido")
+        self.assertEqual(conta.tipo, "cartao_credito")
+        self.assertEqual(conta.dia_vencimento_cartao, 15)
+        self.assertEqual(conta.id_banco, "341")
+        self.assertEqual(conta.saldo_atual, saldo_antes)
+        movimentos_depois = session.query(MovimentacaoConta).filter(
+            (MovimentacaoConta.id_conta_origem == self.id_banco)
+            | (MovimentacaoConta.id_conta_destino == self.id_banco)
+        ).count()
+        self.assertEqual(movimentos_depois, movimentos_antes)
+        session.close()
+
+    def test_edicao_rejeita_cartao_sem_vencimento_e_lista_botao_explicito(self):
+        client = app.test_client()
+        lista = client.get("/financeiro/contas")
+        self.assertIn(">Editar</span>", lista.get_data(as_text=True))
+
+        response = client.post(f"/financeiro/contas/{self.id_banco}/editar", data={
+            "descricao": "Banco",
+            "id_empresa": self.id_empresa,
+            "tipo": "cartao_credito",
+            "dia_vencimento_cartao": "",
+            "saldo_inicial": "0.00",
+            "data_saldo_inicial": "",
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Informe o dia de vencimento", response.get_data(as_text=True))
+        session = SessionLocal()
+        conta = session.get(Conta, self.id_banco)
+        self.assertEqual(conta.tipo, "corrente")
+        self.assertIsNone(conta.dia_vencimento_cartao)
+        session.close()
+
     def test_consulta_titulos_renderiza_previsao_e_link_para_extrato(self):
         vencimento = _proximo_vencimento_cartao(date.today(), self.cartao.dia_vencimento_cartao)
         response = app.test_client().get(
