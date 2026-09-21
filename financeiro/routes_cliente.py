@@ -11,7 +11,8 @@ def _dados(cliente):
     cliente.endereco = (request.form.get("endereco") or "").strip() or None
     cliente.bairro = (request.form.get("bairro") or "").strip() or None
     cliente.cep = (request.form.get("cep") or "").strip() or None
-    cliente.id_cidade = request.form.get("id_cidade", type=int)
+    id_cidade = request.form.get("id_cidade", type=int)
+    cliente.id_cidade = id_cidade if id_cidade and id_cidade > 0 else None
     cliente.whats = (request.form.get("whats") or "").strip() or None
     cliente.fone = (request.form.get("fone") or "").strip() or None
     cliente.email = (request.form.get("email") or "").strip() or None
