@@ -9,6 +9,7 @@ from . import (
     routes_centro_custo,
     routes_contas,
     routes_credor,
+    routes_cliente,
     routes_empresa,
     routes_home,
     routes_plano,

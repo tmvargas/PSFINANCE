@@ -125,6 +125,7 @@ class Cidade(Base, TimestampMixin):
     uuid = Column(String(36), default=lambda: str(uuid.uuid4()), unique=True, nullable=False)
     nome = Column(String(255), nullable=False)
     credores = relationship("Credor", back_populates="cidade")
+    clientes = relationship("Cliente", back_populates="cidade")
 
 
 # ---------------------------------------------------------------------
@@ -151,6 +152,27 @@ class Credor(Base, TimestampMixin):
 
     def __repr__(self):
         return f"<Credor {self.nome}>"
+
+
+class Cliente(Base, TimestampMixin):
+    __tablename__ = "cliente"
+
+    id_cliente = Column(Integer, primary_key=True, autoincrement=True)
+    uuid = Column(String(36), default=lambda: str(uuid.uuid4()), unique=True, nullable=False)
+    nome = Column(String(255), nullable=False)
+    cpf_cnpj = Column(String(18), nullable=True)
+    endereco = Column(String(255), nullable=True)
+    bairro = Column(String(120), nullable=True)
+    cep = Column(String(9), nullable=True)
+    id_cidade = Column(Integer, ForeignKey("cidade.id_cidade"), nullable=True)
+    whats = Column(String(30), nullable=True)
+    fone = Column(String(30), nullable=True)
+    email = Column(String(255), nullable=True)
+
+    cidade = relationship("Cidade", back_populates="clientes")
+
+    def __repr__(self):
+        return f"<Cliente {self.nome}>"
 
 
 # ---------------------------------------------------------------------
