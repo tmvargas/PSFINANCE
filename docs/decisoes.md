@@ -965,3 +965,10 @@ formulário com os atributos atuais. A alteração para `Cartão de crédito` ex
 dia de vencimento entre 1 e 31 e atualiza a própria conta, preservando seu ID,
 movimentos e saldo calculado. Ao escolher outro tipo, o vencimento específico
 do cartão é removido.
+## 2026-09-21 — Domínio separado para Contas a Receber
+
+Decisão: Cliente e Recebível serão entidades próprias, sem reutilizar Credor ou
+misturar títulos a pagar. O cadastro de Cliente segue os mesmos dados e padrão
+de popup do Credor; os recebíveis usarão apenas contas analíticas do grupo de
+entrada do Plano Financeiro. A separação evita que consultas, baixas e saldos
+de pagar e receber contaminem um ao outro.
