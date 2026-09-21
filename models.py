@@ -170,9 +170,79 @@ class Cliente(Base, TimestampMixin):
     email = Column(String(255), nullable=True)
 
     cidade = relationship("Cidade", back_populates="clientes")
+    recebiveis = relationship("Recebivel", back_populates="cliente")
 
     def __repr__(self):
         return f"<Cliente {self.nome}>"
+
+
+class Recebivel(Base, TimestampMixin):
+    __tablename__ = "recebivel"
+    id_recebivel = Column(Integer, primary_key=True, autoincrement=True)
+    uuid = Column(String(36), default=lambda: str(uuid.uuid4()), unique=True, nullable=False)
+    id_doc = Column(Integer, ForeignKey("documento.id_doc"), nullable=False)
+    nr_documento = Column(String(50), nullable=False)
+    id_cliente = Column(Integer, ForeignKey("cliente.id_cliente"), nullable=False)
+    id_empresa = Column(Integer, ForeignKey("empresa.id_empresa"), nullable=False)
+    id_centro_custo = Column(Integer, ForeignKey("centro_custo.id_centro_custo"), nullable=True)
+    id_plano = Column(Integer, ForeignKey("plano_de_contas.id_plano"), nullable=False)
+    valor = Column(Numeric(15, 2), nullable=False)
+    emissao = Column(Date, nullable=False)
+    vencimento = Column(Date, nullable=False)
+    observacao = Column(String(1000), nullable=True)
+    cliente = relationship("Cliente", back_populates="recebiveis")
+    documento = relationship("Documento")
+    empresa = relationship("Empresa")
+    centro_custo = relationship("CentroCusto")
+    plano = relationship("PlanoDeContas")
+    parcelas = relationship("RecebivelParcela", back_populates="recebivel", cascade="all, delete-orphan")
+    anexos = relationship("RecebivelAnexo", back_populates="recebivel", cascade="all, delete-orphan")
+    recebimentos = relationship("Recebimento", back_populates="recebivel")
+
+    @property
+    def total_recebido(self):
+        return float(sum(float(r.valor_recebido or 0) for r in self.recebimentos if not r.deleted))
+
+    @property
+    def saldo_aberto(self):
+        return float(self.valor or 0) - self.total_recebido
+
+
+class RecebivelParcela(Base, TimestampMixin):
+    __tablename__ = "recebivel_parcela"
+    id_parcela = Column(Integer, primary_key=True, autoincrement=True)
+    uuid = Column(String(36), default=lambda: str(uuid.uuid4()), unique=True, nullable=False)
+    id_recebivel = Column(Integer, ForeignKey("recebivel.id_recebivel"), nullable=False)
+    numero_parcela = Column(Integer, nullable=False)
+    vencimento = Column(Date, nullable=False)
+    valor = Column(Numeric(15, 2), nullable=False)
+    recebivel = relationship("Recebivel", back_populates="parcelas")
+    recebimentos = relationship("Recebimento", back_populates="parcela")
+
+
+class RecebivelAnexo(Base, TimestampMixin):
+    __tablename__ = "recebivel_anexo"
+    id_anexo = Column(Integer, primary_key=True, autoincrement=True)
+    uuid = Column(String(36), default=lambda: str(uuid.uuid4()), unique=True, nullable=False)
+    id_recebivel = Column(Integer, ForeignKey("recebivel.id_recebivel"), nullable=False)
+    nome_arquivo = Column(String(255), nullable=False)
+    caminho_arquivo = Column(String(255), nullable=False)
+    recebivel = relationship("Recebivel", back_populates="anexos")
+
+
+class Recebimento(Base, TimestampMixin):
+    __tablename__ = "recebimento"
+    id_recebimento = Column(Integer, primary_key=True, autoincrement=True)
+    uuid = Column(String(36), default=lambda: str(uuid.uuid4()), unique=True, nullable=False)
+    data = Column(Date, nullable=False)
+    id_conta = Column(Integer, ForeignKey("conta.id_conta"), nullable=False)
+    id_recebivel = Column(Integer, ForeignKey("recebivel.id_recebivel"), nullable=False)
+    id_parcela = Column(Integer, ForeignKey("recebivel_parcela.id_parcela"), nullable=True)
+    valor_recebido = Column(Numeric(15, 2), nullable=False)
+    conciliado = Column(Boolean, default=False, nullable=False)
+    conta = relationship("Conta")
+    recebivel = relationship("Recebivel", back_populates="recebimentos")
+    parcela = relationship("RecebivelParcela", back_populates="recebimentos")
 
 
 # ---------------------------------------------------------------------
