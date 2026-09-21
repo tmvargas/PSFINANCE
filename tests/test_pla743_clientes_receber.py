@@ -36,6 +36,20 @@ class ClientesReceberTest(unittest.TestCase):
         self.assertIn("Cidade selecionada não existe", html)
         session = SessionLocal(); self.assertEqual(session.query(Cliente).count(), 0); session.close()
 
+    def test_cidade_zero_e_normalizada_e_formulario_repete_padrao_credor(self):
+        resposta = self.client.post("/financeiro/clientes/novo", data={
+            "nome": "Cliente sem cidade", "id_cidade": "0",
+        }, follow_redirects=True)
+        self.assertEqual(resposta.status_code, 200)
+        self.assertIn("Cliente cadastrado com sucesso", resposta.get_data(as_text=True))
+        session = SessionLocal(); self.assertIsNone(session.query(Cliente).one().id_cidade); session.close()
+        formulario = self.client.get("/financeiro/clientes/novo").get_data(as_text=True)
+        for evidencia in (
+            'id="cidade_codigo"', 'id="cidade_nome"', 'id="abrir_busca_cidade"',
+            'id="limpar_cidade"', 'id="modal_busca_cidade"', 'id="nova_cidade_popup"',
+        ):
+            self.assertIn(evidencia, formulario)
+
 
 if __name__ == "__main__":
     unittest.main()
