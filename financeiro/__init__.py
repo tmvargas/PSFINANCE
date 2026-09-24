@@ -13,5 +13,6 @@ from . import (
     routes_empresa,
     routes_home,
     routes_plano,
+    routes_recebiveis,
     routes_titulos,
 )
