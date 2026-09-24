@@ -737,6 +737,11 @@
       'financeiro.baixar_titulo',
       'financeiro.listar_baixas_titulo'
     ] %}
+    {% set contas_receber_endpoints = [
+      'financeiro.listar_recebiveis', 'financeiro.novo_recebivel',
+      'financeiro.editar_recebivel', 'financeiro.copiar_recebivel',
+      'financeiro.receber_recebivel'
+    ] %}
     {% set caixas_endpoints = [
       'financeiro.listar_movimentacoes',
       'financeiro.nova_movimentacao',
@@ -896,6 +901,15 @@
                   <a class="submenu-item {% if endpoint in ['financeiro.baixar_titulo', 'financeiro.listar_baixas_titulo'] %}active{% endif %}" href="{{ url_for('financeiro.listar_titulos') }}">
                     <span class="nav-icon"><svg class="icon"><use href="#icon-check-circle"></use></svg></span><span>Baixa</span>
                   </a>
+                </div>
+              </div>
+
+              <div class="menu-node" data-menu-node="contas-receber">
+                <button class="menu-item submenu-toggle {% if endpoint in contas_receber_endpoints %}active{% endif %}" type="button" aria-label="Expandir Contas a Receber" aria-expanded="false">
+                  <span class="nav-icon"><svg class="icon"><use href="#icon-wallet"></use></svg></span><span class="nav-label">Contas a Receber</span><span class="nav-chevron">›</span>
+                </button>
+                <div class="submenu" aria-label="Submenu Contas a Receber">
+                  <a class="submenu-item {% if endpoint in contas_receber_endpoints %}active{% endif %}" href="{{ url_for('financeiro.listar_recebiveis') }}"><span class="nav-icon"><svg class="icon"><use href="#icon-file-text"></use></svg></span><span>Recebíveis</span></a>
                 </div>
               </div>
 
