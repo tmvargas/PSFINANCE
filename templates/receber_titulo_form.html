@@ -33,13 +33,13 @@
   </div>
   {% endif %}
 
-  {% set possui_cadastros_basicos = documentos and clientees and empresas and centros_custo and planos %}
+  {% set possui_cadastros_basicos = documentos and clientes and empresas and centros_custo and planos %}
   {% if not possui_cadastros_basicos %}
   <div class="alert alert-warning">
     <strong>Cadastro auxiliar pendente.</strong>
     Para criar um título, mantenha documento, cliente, empresa, centro de custo e categoria financeira cadastrados.
     <div class="d-flex flex-wrap gap-2 mt-2">
-      {% if not clientees %}
+      {% if not clientes %}
       <a class="btn btn-sm btn-outline-primary" href="{{ url_for('financeiro.novo_cliente') }}">Criar cliente</a>
       {% endif %}
       {% if not empresas %}
@@ -93,7 +93,7 @@
           class="form-control"
           autocomplete="off"
           placeholder="Digite o nome e pressione Tab"
-          value="{% if titulo %}{% for c in clientees %}{% if titulo.id_cliente == c.id_cliente %}{{ c.nome }}{% endif %}{% endfor %}{% endif %}"
+          value="{% if titulo %}{% for c in clientes %}{% if titulo.id_cliente == c.id_cliente %}{{ c.nome }}{% endif %}{% endfor %}{% endif %}"
           aria-describedby="cliente_help"
           required
         >
@@ -152,7 +152,7 @@
       <select name="id_plano" class="form-select" required>
         <option value="">Selecione...</option>
 
-        <optgroup label="Categorias de despesa">
+        <optgroup label="Categorias de entrada">
           {% for p in planos %}
             {# normaliza "Analítica"/"ANALÍTICA" -> "analitica" #}
             {% set tipo_norm = (p.tipo|default('')|lower|trim)
@@ -173,7 +173,7 @@
       </select>
 
       <div class="form-text">
-        Escolha a categoria analítica da despesa. Grupos aparecem apenas para orientar a hierarquia.
+        Escolha a categoria analítica da entrada. Grupos aparecem apenas para orientar a hierarquia.
       </div>
     </div>
 
@@ -369,7 +369,7 @@
         <label for="busca_cliente" class="form-label">Nome do cliente</label>
         <div class="input-group mb-3">
           <input type="text" class="form-control" id="busca_cliente" placeholder="Digite parte do nome" autocomplete="off">
-          <button type="button" class="btn btn-outline-secondary" id="atualizar_clientees">Atualizar</button>
+          <button type="button" class="btn btn-outline-secondary" id="atualizar_clientes">Atualizar</button>
         </div>
         <div id="resultado_busca_cliente" class="list-group" aria-live="polite"></div>
         <p id="mensagem_busca_cliente" class="text-muted mb-0 d-none"></p>
@@ -392,7 +392,7 @@
   const search = document.getElementById("busca_cliente");
   const results = document.getElementById("resultado_busca_cliente");
   const message = document.getElementById("mensagem_busca_cliente");
-  const refresh = document.getElementById("atualizar_clientees");
+  const refresh = document.getElementById("atualizar_clientes");
   const create = document.getElementById("novo_cliente_janela");
   document.body.appendChild(modalElement);
   const searchUrl = {{ url_for('financeiro.buscar_clientes')|tojson }};
@@ -418,14 +418,14 @@
     if (options.focus !== false) nameInput.focus();
   }
 
-  function render(clientees) {
+  function render(clientes) {
     results.replaceChildren();
-    if (!clientees.length) {
+    if (!clientes.length) {
       setMessage("Nenhum cliente encontrado. Você pode cadastrá-lo em uma nova janela.", false);
       return;
     }
     setMessage("", false);
-    clientees.forEach((cliente) => {
+    clientes.forEach((cliente) => {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "list-group-item list-group-item-action d-flex justify-content-between align-items-center";
@@ -440,27 +440,27 @@
     });
   }
 
-  async function loadClientees(options = {}) {
+  async function loadClientes(options = {}) {
     const currentRequest = ++requestNumber;
-    setMessage("Carregando clientees...", false);
+    setMessage("Carregando clientes...", false);
     try {
       const response = await fetch(`${searchUrl}?q=${encodeURIComponent(search.value.trim())}`, {
         headers: { Accept: "application/json" }
       });
-      if (!response.ok) throw new Error("Falha ao consultar clientees");
+      if (!response.ok) throw new Error("Falha ao consultar clientes");
       const data = await response.json();
       if (currentRequest !== requestNumber) return;
-      const clientees = data.clientees || [];
-      if (options.autoSelect && clientees.length === 1) {
-        selectCliente(clientees[0], { focus: false });
+      const clientes = data.clientes || [];
+      if (options.autoSelect && clientes.length === 1) {
+        selectCliente(clientes[0], { focus: false });
         return;
       }
-      render(clientees);
+      render(clientes);
       if (options.showModal) bootstrap.Modal.getOrCreateInstance(modalElement).show();
     } catch (error) {
       if (currentRequest === requestNumber) {
         results.replaceChildren();
-        setMessage("Não foi possível atualizar os clientees. Tente novamente.", true);
+        setMessage("Não foi possível atualizar os clientes. Tente novamente.", true);
       }
     }
   }
@@ -468,7 +468,7 @@
   modalElement.addEventListener("shown.bs.modal", () => {
     search.focus();
     search.select();
-    loadClientees();
+    loadClientes();
   });
   document.getElementById("abrir_busca_cliente").addEventListener("click", () => {
     search.value = nameInput.value.trim();
@@ -480,13 +480,13 @@
     const term = nameInput.value.trim();
     if (!term || (idInput.value && term === selectedName)) return;
     search.value = term;
-    loadClientees({ autoSelect: true, showModal: true });
+    loadClientes({ autoSelect: true, showModal: true });
   });
   search.addEventListener("input", () => {
     clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(loadClientees, 250);
+    debounceTimer = setTimeout(loadClientes, 250);
   });
-  refresh.addEventListener("click", loadClientees);
+  refresh.addEventListener("click", loadClientes);
   create.addEventListener("click", () => {
     if (cadastroWindow && !cadastroWindow.closed) {
       cadastroWindow.focus();
@@ -504,7 +504,7 @@
   window.addEventListener("focus", () => {
     if (cadastroWindow && cadastroWindow.closed && modalElement.classList.contains("show")) {
       cadastroWindow = null;
-      loadClientees();
+      loadClientes();
     }
   });
 })();

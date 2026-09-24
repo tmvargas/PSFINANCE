@@ -685,18 +685,18 @@ def listar_titulos():
     empresas_view, _centros_custo_view = listar_empresas_centros_ativos(session)
     id_empresa = resolver_filtro_empresa_memorizado(empresas_view, request.args, flask_session)
 
-    credores_query = (
+    clientes_query = (
         session.query(Cliente)
         .join(Recebivel, Recebivel.id_cliente == Cliente.id_cliente)
         .filter(Cliente.deleted.is_(False), Recebivel.deleted.is_(False))
     )
     if id_empresa:
-        credores_query = credores_query.filter(Recebivel.id_empresa == id_empresa)
-    credores = credores_query.order_by(Cliente.nome).distinct().all()
-    credores_view = [{"id": credor.id_cliente, "nome": credor.nome} for credor in credores]
-    ids_credores_validos = {credor["id"] for credor in credores_view}
+        clientes_query = clientes_query.filter(Recebivel.id_empresa == id_empresa)
+    clientes = clientes_query.order_by(Cliente.nome).distinct().all()
+    clientes_view = [{"id": cliente.id_cliente, "nome": cliente.nome} for cliente in clientes]
+    ids_clientes_validos = {cliente["id"] for cliente in clientes_view}
     id_cliente = _parse_int(request.args.get("id_cliente"))
-    if id_cliente not in ids_credores_validos:
+    if id_cliente not in ids_clientes_validos:
         id_cliente = None
 
     titulos_periodo = _titulos_periodo_por_parcela(
@@ -714,7 +714,7 @@ def listar_titulos():
         titulos = (
             session.query(Recebivel)
             .options(
-                joinedload(Recebivel.credor),
+                joinedload(Recebivel.cliente),
                 joinedload(Recebivel.empresa),
                 joinedload(Recebivel.centro_custo),
                 joinedload(Recebivel.plano),
@@ -780,7 +780,7 @@ def listar_titulos():
                 "id": t.id_recebivel,
                 "doc_label": doc_label,
                 "nr_documento": t.nr_documento,
-                "credor": t.credor.nome if t.credor else "",
+                "cliente": t.cliente.nome if t.cliente else "",
                 "empresa": f"{t.empresa.codigo} - {t.empresa.nome}" if t.empresa else "",
                 "centro_custo": f"{t.centro_custo.codigo} - {t.centro_custo.nome}" if t.centro_custo else "",
                 "plano": f"{t.plano.cod_estrutural} - {t.plano.nome_conta}" if t.plano else "",
@@ -795,15 +795,6 @@ def listar_titulos():
             }
         )
 
-    previsoes_cartao = _previsoes_cartao_credito(
-        session, hoje, data_ini, data_fim, id_empresa, id_cliente,
-        emissao, busca_titulo, situacao,
-    )
-    for previsao in previsoes_cartao:
-        rows.append(previsao)
-        total_valor_titulo += previsao["valor_total_titulo"]
-        total_valor_parcela_mes += previsao["valor_parcela_mes"]
-        total_nao_pago_mes += previsao["nao_pago_mes"]
     rows.sort(key=lambda row: (row.get("vencimento_data") or date.max, str(row["id"])))
 
     meses = [
@@ -826,7 +817,7 @@ def listar_titulos():
         vencimento_final=periodo["vencimento_final"],
         empresas=empresas_view,
         id_empresa=id_empresa,
-        credores=credores_view,
+        clientes=clientes_view,
         id_cliente=id_cliente,
         emissao=emissao,
         busca_titulo=busca_titulo,
@@ -870,7 +861,7 @@ def _upsert_titulo(id_recebivel: int | None, id_recebivel_copia: int | None = No
             session.query(Recebivel)
             .options(
                 joinedload(Recebivel.anexos),
-                joinedload(Recebivel.credor),
+                joinedload(Recebivel.cliente),
                 joinedload(Recebivel.empresa),
                 joinedload(Recebivel.centro_custo),
                 joinedload(Recebivel.plano),
@@ -891,7 +882,7 @@ def _upsert_titulo(id_recebivel: int | None, id_recebivel_copia: int | None = No
             receber_titulo_obj = receber_titulo_base
             anexos = [a for a in (receber_titulo_obj.anexos or []) if not getattr(a, "deleted", False)]
 
-    credores = (
+    clientes = (
         session.query(Cliente)
         .filter(Cliente.deleted.is_(False))
         .order_by(Cliente.nome)
@@ -901,7 +892,7 @@ def _upsert_titulo(id_recebivel: int | None, id_recebivel_copia: int | None = No
         session.query(PlanoDeContas)
         .filter(
             PlanoDeContas.deleted.is_(False),
-            PlanoDeContas.cod_estrutural.like("2.%"),  # ✅ só grupo 2
+            PlanoDeContas.cod_estrutural.like("1.%"),
         )
         .order_by(PlanoDeContas.cod_estrutural)
         .all()
@@ -971,6 +962,26 @@ def _upsert_titulo(id_recebivel: int | None, id_recebivel_copia: int | None = No
             )
             if not doc:
                 erros.append("Documento selecionado não existe.")
+        if id_cliente:
+            cliente = (
+                session.query(Cliente)
+                .filter(Cliente.id_cliente == id_cliente, Cliente.deleted.is_(False))
+                .first()
+            )
+            if not cliente:
+                erros.append("Cliente selecionado não existe.")
+        if id_plano:
+            plano = (
+                session.query(PlanoDeContas)
+                .filter(
+                    PlanoDeContas.id_plano == id_plano,
+                    PlanoDeContas.deleted.is_(False),
+                    PlanoDeContas.cod_estrutural.like("1.%"),
+                )
+                .first()
+            )
+            if not plano or "analit" not in (plano.tipo or "").casefold():
+                erros.append("Selecione uma conta analítica do plano financeiro de entrada.")
 
         if erros:
             for e in erros:
@@ -1087,7 +1098,7 @@ def _upsert_titulo(id_recebivel: int | None, id_recebivel_copia: int | None = No
         }
 
     anexos_view = [{"id_anexo": a.id_anexo, "nome_arquivo": a.nome_arquivo} for a in anexos]
-    credores_view = [{"id_cliente": c.id_cliente, "nome": c.nome} for c in credores]
+    clientes_view = [{"id_cliente": c.id_cliente, "nome": c.nome} for c in clientes]
     
     planos_view = [{
     "id_plano": p.id_plano,
@@ -1104,7 +1115,7 @@ def _upsert_titulo(id_recebivel: int | None, id_recebivel_copia: int | None = No
         "receber_titulo_form.html",
         titulo=receber_titulo_view,
         anexos=anexos_view,
-        credores=credores_view,
+        clientes=clientes_view,
         empresas=empresas_view,
         centros_custo=centros_custo_view,
         planos=planos_view,
@@ -1126,7 +1137,7 @@ def editar_parcelas_titulo(id_recebivel: int):
     titulo = (
         session.query(Recebivel)
         .options(
-            joinedload(Recebivel.credor),
+            joinedload(Recebivel.cliente),
             joinedload(Recebivel.documento),
             joinedload(Recebivel.parcelas),
         )
@@ -1284,7 +1295,7 @@ def editar_parcelas_titulo(id_recebivel: int):
     )
     for parcela in parcelas:
         valor = float(parcela.valor or 0)
-        valor_recebidodo = float(baixas_por_parcela.get(parcela.id_parcela, 0) or 0)
+        valor_recebido = float(baixas_por_parcela.get(parcela.id_parcela, 0) or 0)
         total_parcelas += valor
         parcelas_view.append(
             {
@@ -1292,7 +1303,7 @@ def editar_parcelas_titulo(id_recebivel: int):
                 "numero_parcela": parcela.numero_parcela,
                 "vencimento": parcela.vencimento.isoformat() if parcela.vencimento else "",
                 "valor": valor,
-                "saldo": max(0.0, valor - valor_recebidodo),
+                "saldo": max(0.0, valor - valor_recebido),
                 "tem_baixa": parcela.id_parcela in parcelas_com_baixa,
             }
         )
@@ -1301,7 +1312,7 @@ def editar_parcelas_titulo(id_recebivel: int):
         "id": titulo.id_recebivel,
         "documento": titulo.documento.tipo_doc if titulo.documento else "",
         "nr_documento": titulo.nr_documento,
-        "credor": titulo.credor.nome if titulo.credor else "",
+        "cliente": titulo.cliente.nome if titulo.cliente else "",
         "valor": float(titulo.valor or 0),
     }
     proximo_numero = (max([p["numero_parcela"] for p in parcelas_view] or [0]) + 1)
@@ -1335,7 +1346,7 @@ def excluir_titulo(id_recebivel: int):
         return redirect(url_for("receber.listar_titulos"))
 
     tem_baixa = (
-        session.query(Recebimento.id_baixa)
+        session.query(Recebimento.id_recebimento)
         .filter(Recebimento.deleted.is_(False), Recebimento.id_recebivel == id_recebivel)
         .first()
         is not None
@@ -1363,7 +1374,7 @@ def baixar_titulo(id_recebivel: int):
     titulo = (
         session.query(Recebivel)
         .options(
-            joinedload(Recebivel.credor),
+            joinedload(Recebivel.cliente),
             joinedload(Recebivel.empresa),
             joinedload(Recebivel.plano),
             joinedload(Recebivel.documento),
@@ -1431,13 +1442,13 @@ def baixar_titulo(id_recebivel: int):
             session.add(bx)
             session.commit()
             session.close()
-            flash("Recebimento registrada com sucesso!", "sucesso")
+            flash("Baixa registrada com sucesso!", "sucesso")
             return redirect(url_for("receber.listar_baixas_titulo", id_recebivel=id_recebivel))
 
     receber_titulo_view = {
         "id": titulo.id_recebivel,
         "nr_documento": titulo.nr_documento,
-        "credor": titulo.credor.nome if titulo.credor else "",
+        "cliente": titulo.cliente.nome if titulo.cliente else "",
         "empresa": f"{titulo.empresa.codigo} - {titulo.empresa.nome}" if titulo.empresa else "",
         "plano": f"{titulo.plano.cod_estrutural} - {titulo.plano.nome_conta}" if titulo.plano else "",
         "valor": float(titulo.valor or 0),
@@ -1463,7 +1474,7 @@ def listar_baixas_titulo(id_recebivel: int):
 
     titulo = (
         session.query(Recebivel)
-        .options(joinedload(Recebivel.credor), joinedload(Recebivel.documento))
+        .options(joinedload(Recebivel.cliente), joinedload(Recebivel.documento))
         .filter(Recebivel.id_recebivel == id_recebivel, Recebivel.deleted.is_(False))
         .first()
     )
@@ -1476,7 +1487,7 @@ def listar_baixas_titulo(id_recebivel: int):
         session.query(Recebimento)
         .options(joinedload(Recebimento.conta), joinedload(Recebimento.parcela))
         .filter(Recebimento.deleted.is_(False), Recebimento.id_recebivel == id_recebivel)
-        .order_by(Recebimento.data.desc(), Recebimento.id_baixa.desc())
+        .order_by(Recebimento.data.desc(), Recebimento.id_recebimento.desc())
         .all()
     )
 
@@ -1487,7 +1498,7 @@ def listar_baixas_titulo(id_recebivel: int):
         total += v
         baixas_view.append(
             {
-                "id_baixa": b.id_baixa,
+                "id_baixa": b.id_recebimento,
                 "data": b.data.strftime("%d/%m/%Y") if b.data else "",
                 "conta": b.conta.descricao if b.conta else "",
                 "parcela": (
@@ -1507,7 +1518,7 @@ def listar_baixas_titulo(id_recebivel: int):
         titulo={
             "id": titulo.id_recebivel,
             "nr_documento": titulo.nr_documento,
-            "credor": titulo.credor.nome if titulo.credor else "",
+            "cliente": titulo.cliente.nome if titulo.cliente else "",
             "valor": float(titulo.valor or 0),
         },
         baixas=baixas_view,
@@ -1530,7 +1541,7 @@ def excluir_baixa(id_recebivel: int, id_baixa: int):
     bx = (
         session.query(Recebimento)
         .filter(
-            Recebimento.id_baixa == id_baixa,
+            Recebimento.id_recebimento == id_baixa,
             Recebimento.id_recebivel == id_recebivel,
             Recebimento.deleted.is_(False),
         )
@@ -1538,7 +1549,7 @@ def excluir_baixa(id_recebivel: int, id_baixa: int):
     )
     if not bx:
         session.close()
-        flash("Recebimento não encontrada para o título informado.", "erro")
+        flash("Baixa não encontrada para o título informado.", "erro")
         return redirect(url_for("receber.listar_baixas_titulo", id_recebivel=id_recebivel))
 
     if bool(getattr(bx, "conciliado", False)):
@@ -1550,7 +1561,7 @@ def excluir_baixa(id_recebivel: int, id_baixa: int):
     session.commit()
     session.close()
 
-    flash("Recebimento excluída com sucesso.", "sucesso")
+    flash("Baixa estornada com sucesso.", "sucesso")
     return redirect(url_for("receber.listar_baixas_titulo", id_recebivel=id_recebivel))
 
 

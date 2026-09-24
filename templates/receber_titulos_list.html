@@ -308,7 +308,7 @@
   <div class="titles-page">
     <div class="titles-header">
       <div>
-        <div class="titles-kicker">Contas a pagar</div>
+        <div class="titles-kicker">Contas a receber</div>
         <h1 class="h4 mb-0">Consulta de títulos</h1>
         <p class="titles-period">
           {% if modo_vencimento == 'periodo' %}
@@ -379,7 +379,7 @@
         <label for="id_cliente">Cliente</label>
         <select id="id_cliente" name="id_cliente" class="form-select form-select-sm">
           <option value="">Todos</option>
-          {% for cliente in clientees %}
+          {% for cliente in clientes %}
             <option value="{{ cliente.id }}" {% if id_cliente == cliente.id %}selected{% endif %}>{{ cliente.nome }}</option>
           {% endfor %}
         </select>
@@ -510,11 +510,11 @@
                         <strong>R$ {{ "%.2f"|format(t.valor_parcela_mes or 0) }}</strong>
                       </div>
                       <div class="titles-value-row">
-                        <span>Pago no mês</span>
+                        <span>Baixado no mês</span>
                         <strong>R$ {{ "%.2f"|format(t.pago_mes or 0) }}</strong>
                       </div>
                       <div class="titles-value-row">
-                        <span>Não pago no mês</span>
+                        <span>Em aberto no mês</span>
                         <strong>R$ {{ "%.2f"|format(nao_pago_mes) }}</strong>
                       </div>
                     </div>
@@ -524,9 +524,9 @@
                     {% if t.tipo_linha == 'cartao_credito' %}
                       <span class="titles-status titles-status-card">Previsão</span>
                     {% elif nao_pago_mes <= 0 %}
-                      <span class="titles-status titles-status-paid">Pago no mês</span>
+                      <span class="titles-status titles-status-paid">Baixado no mês</span>
                     {% else %}
-                      <span class="titles-status titles-status-open">Não pago no mês</span>
+                      <span class="titles-status titles-status-open">Em aberto no mês</span>
                     {% endif %}
                   </td>
 
