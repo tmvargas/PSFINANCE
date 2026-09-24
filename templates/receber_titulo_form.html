@@ -1,0 +1,679 @@
+{% extends "base.html" %}
+
+{% block title %}
+  {% if modo_copia %}Copiar Título{% elif titulo %}Editar Título{% else %}Novo Título{% endif %} - PlanSmart Financeiro
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+  <h2 class="h4">
+    {% if modo_copia %}Copiar Título{% elif titulo %}Editar Título{% else %}Novo Título{% endif %}
+  </h2>
+  <div class="d-flex justify-content-end flex-wrap gap-2">
+    {% if titulo and not modo_copia %}
+    <a href="{{ url_for('receber.editar_parcelas_titulo', id_recebivel=titulo.id_recebivel) }}" class="btn btn-sm btn-outline-success">
+      Parcelas do título
+    </a>
+    {% endif %}
+    <a href="{{ url_for('financeiro.dashboard_financeiro') }}" class="btn btn-sm btn-outline-secondary">
+      Home
+    </a>
+    <a href="{{ url_for('receber.listar_titulos') }}" class="btn btn-sm btn-outline-primary">
+      Voltar para lista de títulos
+    </a>
+  </div>
+</div>
+
+<form method="post" enctype="multipart/form-data" class="card p-3 shadow-sm">
+
+  {% if modo_copia %}
+  <div class="alert alert-info">
+    Você está criando uma cópia do título{% if receber_titulo_original %} #{{ receber_titulo_original }}{% endif %}.
+    Altere os campos necessários e clique em salvar.
+  </div>
+  {% endif %}
+
+  {% set possui_cadastros_basicos = documentos and clientees and empresas and centros_custo and planos %}
+  {% if not possui_cadastros_basicos %}
+  <div class="alert alert-warning">
+    <strong>Cadastro auxiliar pendente.</strong>
+    Para criar um título, mantenha documento, cliente, empresa, centro de custo e categoria financeira cadastrados.
+    <div class="d-flex flex-wrap gap-2 mt-2">
+      {% if not clientees %}
+      <a class="btn btn-sm btn-outline-primary" href="{{ url_for('financeiro.novo_cliente') }}">Criar cliente</a>
+      {% endif %}
+      {% if not empresas %}
+      <a class="btn btn-sm btn-outline-primary" href="{{ url_for('financeiro.nova_empresa') }}">Criar empresa</a>
+      {% endif %}
+      {% if not centros_custo %}
+      <a class="btn btn-sm btn-outline-primary" href="{{ url_for('financeiro.novo_centro_custo') }}">Criar centro de custo</a>
+      {% endif %}
+      {% if not planos %}
+      <a class="btn btn-sm btn-outline-primary" href="{{ url_for('financeiro.novo_plano') }}">Criar categoria financeira</a>
+      {% endif %}
+      {% if not documentos %}
+      <span class="badge text-bg-light align-self-center">Documento deve ser cadastrado na base inicial.</span>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+
+  <div class="row mb-3">
+    <div class="col-md-3">
+      <label class="form-label">Documento</label>
+      <select name="id_doc" class="form-select" required>
+        <option value="">Selecione...</option>
+        {% for d in documentos %}
+          <option value="{{ d.id_doc }}"
+            {% if titulo and titulo.id_doc == d.id_doc %}selected{% endif %}>
+            {{ d.tipo_doc }} - {{ d.nome_doc }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">Número do Documento</label>
+      <input
+        type="text"
+        name="nr_documento"
+        class="form-control"
+        value="{{ titulo.nr_documento if titulo else '' }}"
+        required
+      >
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Cliente</label>
+      <div class="input-group">
+        <input
+          type="text"
+          id="cliente_nome"
+          class="form-control"
+          autocomplete="off"
+          placeholder="Digite o nome e pressione Tab"
+          value="{% if titulo %}{% for c in clientees %}{% if titulo.id_cliente == c.id_cliente %}{{ c.nome }}{% endif %}{% endfor %}{% endif %}"
+          aria-describedby="cliente_help"
+          required
+        >
+        <input type="hidden" name="id_cliente" id="id_cliente" value="{{ titulo.id_cliente if titulo else '' }}">
+        <button
+          type="button"
+          class="btn btn-outline-primary"
+          id="abrir_busca_cliente"
+          data-bs-toggle="modal"
+          data-bs-target="#modal_busca_cliente"
+          title="Pesquisar cliente sem sair do título"
+          aria-label="Pesquisar cliente"
+        >
+          &#128269;
+        </button>
+      </div>
+      <div class="form-text" id="cliente_help">Digite o nome e pressione Tab ou use a lupa para pesquisar.</div>
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <label class="form-label">Empresa</label>
+      <select name="id_empresa" id="id_empresa" class="form-select" required>
+        <option value="">Selecione...</option>
+        {% for e in empresas %}
+          <option value="{{ e.id }}"
+            {% if titulo and titulo.id_empresa == e.id %}selected{% endif %}>
+            {{ e.label }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Centro de Custo</label>
+      <select name="id_centro_custo" id="id_centro_custo" class="form-select" required>
+        <option value="">Selecione uma empresa primeiro...</option>
+        {% for cc in centros_custo %}
+          <option value="{{ cc.id }}" data-empresa="{{ cc.id_empresa }}"
+            {% if titulo and titulo.id_centro_custo == cc.id %}selected{% endif %}>
+            {{ cc.label }}
+          </option>
+        {% endfor %}
+      </select>
+      <div class="form-text" id="centro_custo_help">
+        Os centros de custo aparecem somente após a escolha da empresa.
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <label class="form-label">Categoria financeira</label>
+
+      <select name="id_plano" class="form-select" required>
+        <option value="">Selecione...</option>
+
+        <optgroup label="Categorias de despesa">
+          {% for p in planos %}
+            {# normaliza "Analítica"/"ANALÍTICA" -> "analitica" #}
+            {% set tipo_norm = (p.tipo|default('')|lower|trim)
+              |replace('á','a')|replace('à','a')|replace('ã','a')|replace('â','a')
+              |replace('é','e')|replace('ê','e')
+              |replace('í','i')
+              |replace('ó','o')|replace('ô','o')|replace('õ','o')
+              |replace('ú','u') %}
+            {% set is_analitica = ('analitica' in tipo_norm) %}
+
+            <option value="{{ p.id_plano }}"
+              {% if not is_analitica %}disabled{% endif %}
+              {% if titulo and titulo.id_plano == p.id_plano %}selected{% endif %}>
+              {{ p.cod_estrutural }} - {{ p.nome_conta }}{% if not is_analitica %} (grupo, não selecionável){% endif %}
+            </option>
+          {% endfor %}
+        </optgroup>
+      </select>
+
+      <div class="form-text">
+        Escolha a categoria analítica da despesa. Grupos aparecem apenas para orientar a hierarquia.
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">Valor total</label>
+      <input
+        type="text"
+        name="valor"
+        id="valor"
+        class="form-control js-money"
+        inputmode="numeric"
+        autocomplete="off"
+        placeholder="0,00"
+        value="{% if titulo and titulo.valor is not none %}{{ ('%.2f'|format(titulo.valor))|replace('.', ',') }}{% endif %}"
+        required
+      >
+      <div class="form-text">Digite o valor em reais. Ex.: 200 vira 200,00.</div>
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">Data de Emissão</label>
+      {% set emissao_val = hoje %}
+      {% if titulo and titulo.emissao %}
+        {% if titulo.emissao is string %}
+          {% set emissao_val = titulo.emissao %}
+        {% else %}
+          {% set emissao_val = titulo.emissao.isoformat() %}
+        {% endif %}
+      {% endif %}
+      <input
+        type="date"
+        name="emissao"
+        class="form-control"
+        value="{{ emissao_val }}"
+        required
+      >
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-md-3">
+      <label class="form-label">Data do 1º Vencimento</label>
+      {% set venc_val = hoje %}
+      {% if titulo and titulo.vencimento %}
+        {% if titulo.vencimento is string %}
+          {% set venc_val = titulo.vencimento %}
+        {% else %}
+          {% set venc_val = titulo.vencimento.isoformat() %}
+        {% endif %}
+      {% endif %}
+      <input
+        type="date"
+        name="vencimento"
+        id="vencimento"
+        class="form-control"
+        value="{{ venc_val }}"
+        required
+      >
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">Parcelas</label>
+      <input
+        type="number"
+        name="quantidade_parcelas"
+        id="quantidade_parcelas"
+        class="form-control"
+        min="1"
+        max="{{ limite_parcelas_titulo }}"
+        step="1"
+        value="{{ titulo.quantidade_parcelas if titulo and titulo.quantidade_parcelas else 1 }}"
+        {% if titulo and not modo_copia %}disabled{% endif %}
+        required
+      >
+      {% if not titulo or modo_copia %}
+      <div class="form-text">
+          Use 1 parcela para salvar direto. Com 2 ou mais, o sistema abrirá a revisão das parcelas após salvar.
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if not titulo or modo_copia %}
+  <div class="mb-3 pt-2" id="parcelas_preview">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+      <div>
+        <strong>Prévia das parcelas</strong>
+        <div class="form-text mb-0">
+          A prévia usa o valor total, a data do 1º vencimento e a quantidade informada.
+        </div>
+      </div>
+      <span class="badge text-bg-secondary" id="parcelas_preview_total">1 parcela</span>
+    </div>
+    <div class="table-responsive mt-3 d-none" id="parcelas_preview_table">
+      <table class="table table-sm align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Parcela</th>
+            <th>Vencimento</th>
+            <th class="text-end">Valor</th>
+          </tr>
+        </thead>
+        <tbody id="parcelas_preview_body"></tbody>
+      </table>
+    </div>
+    <div class="text-muted small mt-2" id="parcelas_preview_empty">
+      Informe valor e vencimento para visualizar a distribuição.
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="mb-3">
+    <label class="form-label">Observação</label>
+    <textarea
+      name="observacao"
+      class="form-control"
+      rows="3"
+      maxlength="1000"
+      placeholder="Detalhes, notas, instruções…"
+    >{{ titulo.observacao if titulo else '' }}</textarea>
+  </div>
+
+
+  <hr>
+
+  <details class="mb-3">
+    <summary class="fw-semibold">Anexos do título</summary>
+    <div class="mt-3">
+      <label class="form-label">Arquivos do título (máx. 5)</label>
+      <input
+        type="file"
+        name="arquivos"
+        class="form-control"
+        multiple
+        {% if anexos and anexos|length >= 5 %}disabled{% endif %}
+      >
+      <div class="form-text">
+        Anexos podem ser incluídos agora ou depois da criação do título.
+        {% if anexos and anexos|length >= 5 %}
+          <span class="text-danger">Limite atingido (5/5).</span>
+        {% endif %}
+      </div>
+    </div>
+  </details>
+
+  {% if anexos and anexos|length > 0 %}
+  <div class="mb-3">
+    <label class="form-label">Anexos já cadastrados:</label>
+    <ul class="list-group">
+      {% for a in anexos %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <span>{{ a.nome_arquivo }}</span>
+          <span class="d-flex gap-2">
+            <a
+              href="{{ url_for('receber.download_anexo_titulo', id_anexo=a.id_anexo) }}"
+              class="btn btn-sm btn-outline-secondary"
+              target="_blank"
+            >
+              Baixar
+            </a>
+
+            <a
+              href="{{ url_for('receber.excluir_anexo_titulo', id_anexo=a.id_anexo) }}"
+              class="btn btn-sm btn-outline-danger"
+              onclick="return confirm('Confirma excluir este anexo?');"
+            >
+              Excluir
+            </a>
+          </span>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endif %}
+
+
+  <div class="d-flex justify-content-end">
+    <button type="submit" class="btn btn-success">
+      {% if modo_copia %}Salvar cópia{% else %}Salvar título{% endif %}
+    </button>
+  </div>
+
+</form>
+
+<div class="modal" id="modal_busca_cliente" tabindex="-1" aria-labelledby="receber_titulo_modal_busca_cliente" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title fs-5" id="receber_titulo_modal_busca_cliente">Pesquisar cliente</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        <label for="busca_cliente" class="form-label">Nome do cliente</label>
+        <div class="input-group mb-3">
+          <input type="text" class="form-control" id="busca_cliente" placeholder="Digite parte do nome" autocomplete="off">
+          <button type="button" class="btn btn-outline-secondary" id="atualizar_clientees">Atualizar</button>
+        </div>
+        <div id="resultado_busca_cliente" class="list-group" aria-live="polite"></div>
+        <p id="mensagem_busca_cliente" class="text-muted mb-0 d-none"></p>
+      </div>
+      <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-outline-primary" id="novo_cliente_janela">
+          Cadastrar novo cliente
+        </button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const modalElement = document.getElementById("modal_busca_cliente");
+  const idInput = document.getElementById("id_cliente");
+  const nameInput = document.getElementById("cliente_nome");
+  const search = document.getElementById("busca_cliente");
+  const results = document.getElementById("resultado_busca_cliente");
+  const message = document.getElementById("mensagem_busca_cliente");
+  const refresh = document.getElementById("atualizar_clientees");
+  const create = document.getElementById("novo_cliente_janela");
+  document.body.appendChild(modalElement);
+  const searchUrl = {{ url_for('financeiro.buscar_clientes')|tojson }};
+  const createUrl = {{ url_for('financeiro.novo_cliente')|tojson }};
+  let requestNumber = 0;
+  let debounceTimer = null;
+  let cadastroWindow = null;
+  let selectedName = nameInput.value;
+
+  function setMessage(text, isError) {
+    message.textContent = text;
+    message.classList.toggle("text-danger", Boolean(isError));
+    message.classList.toggle("text-muted", !isError);
+    message.classList.toggle("d-none", !text);
+  }
+
+  function selectCliente(cliente, options = {}) {
+    idInput.value = String(cliente.id);
+    nameInput.value = cliente.nome;
+    selectedName = cliente.nome;
+    idInput.dispatchEvent(new Event("change", { bubbles: true }));
+    bootstrap.Modal.getOrCreateInstance(modalElement).hide();
+    if (options.focus !== false) nameInput.focus();
+  }
+
+  function render(clientees) {
+    results.replaceChildren();
+    if (!clientees.length) {
+      setMessage("Nenhum cliente encontrado. Você pode cadastrá-lo em uma nova janela.", false);
+      return;
+    }
+    setMessage("", false);
+    clientees.forEach((cliente) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "list-group-item list-group-item-action d-flex justify-content-between align-items-center";
+      const name = document.createElement("span");
+      name.textContent = cliente.nome;
+      const choose = document.createElement("span");
+      choose.className = "badge text-bg-primary";
+      choose.textContent = "Selecionar";
+      button.append(name, choose);
+      button.addEventListener("click", () => selectCliente(cliente));
+      results.appendChild(button);
+    });
+  }
+
+  async function loadClientees(options = {}) {
+    const currentRequest = ++requestNumber;
+    setMessage("Carregando clientees...", false);
+    try {
+      const response = await fetch(`${searchUrl}?q=${encodeURIComponent(search.value.trim())}`, {
+        headers: { Accept: "application/json" }
+      });
+      if (!response.ok) throw new Error("Falha ao consultar clientees");
+      const data = await response.json();
+      if (currentRequest !== requestNumber) return;
+      const clientees = data.clientees || [];
+      if (options.autoSelect && clientees.length === 1) {
+        selectCliente(clientees[0], { focus: false });
+        return;
+      }
+      render(clientees);
+      if (options.showModal) bootstrap.Modal.getOrCreateInstance(modalElement).show();
+    } catch (error) {
+      if (currentRequest === requestNumber) {
+        results.replaceChildren();
+        setMessage("Não foi possível atualizar os clientees. Tente novamente.", true);
+      }
+    }
+  }
+
+  modalElement.addEventListener("shown.bs.modal", () => {
+    search.focus();
+    search.select();
+    loadClientees();
+  });
+  document.getElementById("abrir_busca_cliente").addEventListener("click", () => {
+    search.value = nameInput.value.trim();
+  });
+  nameInput.addEventListener("input", () => {
+    if (nameInput.value !== selectedName) idInput.value = "";
+  });
+  nameInput.addEventListener("blur", () => {
+    const term = nameInput.value.trim();
+    if (!term || (idInput.value && term === selectedName)) return;
+    search.value = term;
+    loadClientees({ autoSelect: true, showModal: true });
+  });
+  search.addEventListener("input", () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(loadClientees, 250);
+  });
+  refresh.addEventListener("click", loadClientees);
+  create.addEventListener("click", () => {
+    if (cadastroWindow && !cadastroWindow.closed) {
+      cadastroWindow.focus();
+      return;
+    }
+    const url = `${createUrl}?origem=titulo`;
+    cadastroWindow = window.open(url, "psfinanceCadastroCliente", "width=900,height=720,resizable=yes,scrollbars=yes");
+    if (!cadastroWindow) setMessage("O navegador bloqueou a nova janela. Libere pop-ups para este site.", true);
+  });
+  window.addEventListener("message", (event) => {
+    if (event.origin !== window.location.origin || event.data?.type !== "psfinance:cliente-criado") return;
+    selectCliente(event.data.cliente);
+    cadastroWindow = null;
+  });
+  window.addEventListener("focus", () => {
+    if (cadastroWindow && cadastroWindow.closed && modalElement.classList.contains("show")) {
+      cadastroWindow = null;
+      loadClientees();
+    }
+  });
+})();
+</script>
+
+<script>
+(function () {
+  const nf = new Intl.NumberFormat('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+
+  function parseBrazilianMoney(raw) {
+    let value = String(raw || '').trim().replace(/R\$/g, '').replace(/\s/g, '');
+    if (!value) return null;
+    if (value.includes(',')) {
+      value = value.replace(/\./g, '').replace(',', '.');
+    } else {
+      const parts = value.split('.');
+      if (parts.length > 2 || (parts.length === 2 && parts[1].length > 2)) {
+        value = value.replace(/\./g, '');
+      }
+    }
+    const number = Number(value);
+    return Number.isFinite(number) ? number : null;
+  }
+
+  function formatAsReais(raw) {
+    const value = parseBrazilianMoney(raw);
+    if (value === null) return '';
+    return nf.format(value);
+  }
+
+  function attachMoneyMask(input) {
+    input.addEventListener('input', function () {
+      input.value = input.value.replace(/[^\d.,]/g, '');
+    });
+
+    input.addEventListener('blur', function () {
+      input.value = formatAsReais(input.value);
+      input.dispatchEvent(new Event('psfinance:money-formatted'));
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.js-money').forEach((el) => {
+      attachMoneyMask(el);
+      if (el.value) el.value = formatAsReais(el.value);
+    });
+  });
+})();
+</script>
+
+<script>
+(function () {
+  const empresa = document.getElementById("id_empresa");
+  const centro = document.getElementById("id_centro_custo");
+
+  function filtrarCentros() {
+    const idEmpresa = empresa.value || "";
+    const placeholder = centro.options[0];
+    let opcoesVisiveis = 0;
+    Array.from(centro.options).forEach((option) => {
+      if (!option.value) {
+        option.hidden = false;
+        return;
+      }
+      const visivel = Boolean(idEmpresa) && option.dataset.empresa === idEmpresa;
+      option.hidden = !visivel;
+      option.disabled = !visivel;
+      if (visivel) opcoesVisiveis += 1;
+      if (!visivel && option.selected) centro.value = "";
+    });
+    centro.disabled = !idEmpresa || opcoesVisiveis === 0;
+    if (placeholder) {
+      placeholder.textContent = idEmpresa
+        ? (opcoesVisiveis ? "Selecione..." : "Nenhum centro de custo ativo para esta empresa")
+        : "Selecione uma empresa primeiro...";
+    }
+  }
+
+  empresa.addEventListener("change", filtrarCentros);
+  filtrarCentros();
+})();
+</script>
+
+<script>
+(function () {
+  const valorInput = document.getElementById("valor");
+  const vencimentoInput = document.getElementById("vencimento");
+  const quantidadeInput = document.getElementById("quantidade_parcelas");
+  const table = document.getElementById("parcelas_preview_table");
+  const body = document.getElementById("parcelas_preview_body");
+  const empty = document.getElementById("parcelas_preview_empty");
+  const total = document.getElementById("parcelas_preview_total");
+
+  if (!valorInput || !vencimentoInput || !quantidadeInput || !table || !body) return;
+
+  const nf = new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  function parseMoney(raw) {
+    let value = String(raw || "").trim().replace(/R\$/g, "").replace(/\s/g, "");
+    if (!value) return null;
+    if (value.includes(",")) {
+      value = value.replace(/\./g, "").replace(",", ".");
+    } else {
+      const parts = value.split(".");
+      if (parts.length > 2 || (parts.length === 2 && parts[1].length > 2)) {
+        value = value.replace(/\./g, "");
+      }
+    }
+    const number = Number(value);
+    return Number.isFinite(number) ? number : null;
+  }
+
+  function addMonths(date, months) {
+    const baseDay = date.getUTCDate();
+    const result = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, 1));
+    const lastDay = new Date(Date.UTC(result.getUTCFullYear(), result.getUTCMonth() + 1, 0)).getUTCDate();
+    result.setUTCDate(Math.min(baseDay, lastDay));
+    return result;
+  }
+
+  function formatDate(date) {
+    return date.toLocaleDateString("pt-BR", { timeZone: "UTC" });
+  }
+
+  function renderPreview() {
+    const value = parseMoney(valorInput.value);
+    const vencimento = vencimentoInput.value ? new Date(`${vencimentoInput.value}T00:00:00Z`) : null;
+    const quantidade = Math.max(1, Math.min({{ limite_parcelas_titulo }}, parseInt(quantidadeInput.value || "1", 10) || 1));
+    total.textContent = `${quantidade} ${quantidade === 1 ? "parcela" : "parcelas"}`;
+
+    if (!value || value <= 0 || !vencimento || Number.isNaN(vencimento.getTime())) {
+      table.classList.add("d-none");
+      empty.classList.remove("d-none");
+      body.innerHTML = "";
+      return;
+    }
+
+    const totalCents = Math.round(value * 100);
+    const baseCents = Math.floor(totalCents / quantidade);
+    const remainder = totalCents % quantidade;
+    const visibleRows = Math.min(quantidade, 6);
+    const rows = [];
+    for (let index = 0; index < visibleRows; index += 1) {
+      const cents = baseCents + (index < remainder ? 1 : 0);
+      rows.push(`
+        <tr>
+          <td>${index + 1}/${quantidade}</td>
+          <td>${formatDate(addMonths(vencimento, index))}</td>
+          <td class="text-end">R$ ${nf.format(cents / 100)}</td>
+        </tr>
+      `);
+    }
+    if (quantidade > visibleRows) {
+      rows.push(`<tr><td colspan="3" class="text-muted">Mais ${quantidade - visibleRows} parcelas serão geradas na sequência mensal.</td></tr>`);
+    }
+    body.innerHTML = rows.join("");
+    empty.classList.add("d-none");
+    table.classList.remove("d-none");
+  }
+
+  ["input", "change", "psfinance:money-formatted"].forEach((eventName) => {
+    valorInput.addEventListener(eventName, renderPreview);
+    vencimentoInput.addEventListener(eventName, renderPreview);
+    quantidadeInput.addEventListener(eventName, renderPreview);
+  });
+  document.addEventListener("DOMContentLoaded", renderPreview);
+})();
+</script>
+{% endblock %}

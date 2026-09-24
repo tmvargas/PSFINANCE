@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}Baixar Título{% endblock %}
+
+{% block content %}
+  <h1 class="h4 mb-3">Baixar Título #{{ titulo.id }} – {{ titulo.nr_documento }}</h1>
+
+  <div class="mb-3">
+    <dl class="row">
+      <dt class="col-sm-2">Cliente</dt>
+      <dd class="col-sm-10">{{ titulo.cliente }}</dd>
+
+      <dt class="col-sm-2">Empresa</dt>
+      <dd class="col-sm-10">{{ titulo.empresa or '-' }}</dd>
+
+      <dt class="col-sm-2">Plano</dt>
+      <dd class="col-sm-10">{{ titulo.plano }}</dd>
+
+      <dt class="col-sm-2">Valor</dt>
+      <dd class="col-sm-10">R$ {{ "%.2f"|format(titulo.valor or 0) }}</dd>
+
+      <dt class="col-sm-2">Saldo em aberto</dt>
+      <dd class="col-sm-10 fw-bold">R$ {{ "%.2f"|format(titulo.saldo_aberto or 0) }}</dd>
+    </dl>
+  </div>
+
+  {% if parcelas %}
+    <div class="table-responsive mb-3">
+      <table class="table table-sm table-striped align-middle">
+        <thead>
+          <tr>
+            <th>Parcela</th>
+            <th>Vencimento</th>
+            <th class="text-end">Valor</th>
+            <th class="text-end">Baixado</th>
+            <th class="text-end">Saldo</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in parcelas %}
+            <tr>
+              <td>{{ p.numero }}</td>
+              <td>{{ p.vencimento }}</td>
+              <td class="text-end">R$ {{ "%.2f"|format(p.valor or 0) }}</td>
+              <td class="text-end">R$ {{ "%.2f"|format(p.baixado or 0) }}</td>
+              <td class="text-end fw-semibold">R$ {{ "%.2f"|format(p.saldo or 0) }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+
+  <div class="card">
+    <div class="card-body">
+      <form method="post">
+        <div class="row g-2">
+          <div class="col-md-3">
+            <label class="form-label">Data</label>
+            <input
+              type="date"
+              name="data"
+              class="form-control"
+              value="{{ hoje }}"
+              required
+            >
+          </div>
+
+          <div class="col-md-5">
+            <label class="form-label">Conta</label>
+            <select name="id_conta" class="form-select" required>
+              <option value="">Selecione...</option>
+              {% for c in contas %}
+                <option value="{{ c.id }}">{{ c.descricao }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Parcela</label>
+            <select name="id_parcela" id="id_parcela" class="form-select" required>
+              <option value="">Selecione...</option>
+              {% for p in parcelas %}
+                <option
+                  value="{{ p.id }}"
+                  data-saldo="{{ '%.2f'|format(p.saldo or 0) }}"
+                  {% if (p.saldo or 0) <= 0 %}disabled{% endif %}
+                >
+                  Parcela {{ p.numero }} - {{ p.vencimento }} - saldo R$ {{ "%.2f"|format(p.saldo or 0) }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Valor da baixa</label>
+            <input
+              type="text"
+              name="valor_recebido"
+              id="valor_recebido"
+              class="form-control js-money"
+              inputmode="numeric"
+              autocomplete="off"
+              placeholder="0,00"
+              required
+            >
+            <div class="form-text">
+              Máximo: saldo da parcela selecionada.
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-3 d-flex gap-2">
+          <button type="submit" class="btn btn-success" {% if (titulo.saldo_aberto or 0) <= 0 %}disabled{% endif %}>
+            Salvar baixa
+          </button>
+
+          <a href="{{ url_for('receber.listar_titulos') }}" class="btn btn-secondary">
+            Cancelar
+          </a>
+
+          <a href="{{ url_for('receber.listar_baixas_titulo', id_recebivel=titulo.id) }}" class="btn btn-outline-info">
+            Ver baixas
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script>
+  (function () {
+    const nf = new Intl.NumberFormat('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+
+    function formatAsCents(raw) {
+      const digits = String(raw || '').replace(/\D/g, '');
+      if (!digits) return '';
+      const cents = parseInt(digits, 10);
+      return nf.format(cents / 100);
+    }
+
+    function attachMoneyMask(input) {
+      input.addEventListener('input', function () {
+        input.value = formatAsCents(input.value);
+        try { input.setSelectionRange(input.value.length, input.value.length); } catch (e) {}
+      });
+
+      input.addEventListener('blur', function () {
+        input.value = formatAsCents(input.value);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const parcelaSelect = document.getElementById('id_parcela');
+      const valorInput = document.getElementById('valor_recebido');
+      if (!parcelaSelect || !valorInput) return;
+
+      attachMoneyMask(valorInput);
+
+      function sugerirSaldoParcela() {
+        const option = parcelaSelect.selectedOptions[0];
+        const saldo = option ? option.dataset.saldo : '';
+        valorInput.value = saldo ? formatAsCents(saldo) : '';
+      }
+
+      parcelaSelect.addEventListener('change', sugerirSaldoParcela);
+
+      const parcelasDisponiveis = Array.from(parcelaSelect.options).filter((option) => (
+        option.value && !option.disabled
+      ));
+      if (!parcelaSelect.value && parcelasDisponiveis.length === 1) {
+        parcelasDisponiveis[0].selected = true;
+      }
+      if (parcelaSelect.value) {
+        sugerirSaldoParcela();
+      }
+    });
+  })();
+  </script>
+{% endblock %}

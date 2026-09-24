@@ -75,6 +75,21 @@ class ClientesReceberTest(unittest.TestCase):
         self.assertEqual(recebivel.saldo_aberto, 200.0)
         session.close()
 
+    def test_rotina_receber_replica_titulos_parcelas_baixas_e_anexos(self):
+        lista = self.client.get("/financeiro/receber/titulos")
+        novo = self.client.get("/financeiro/receber/titulos/novo")
+        self.assertEqual(lista.status_code, 200)
+        self.assertEqual(novo.status_code, 200)
+        html = novo.get_data(as_text=True)
+        self.assertIn("Parcelas", html)
+        self.assertIn("Anexos", html)
+        self.assertIn("Cliente", html)
+        regras = {r.endpoint for r in app.url_map.iter_rules() if r.endpoint.startswith("receber.")}
+        for endpoint in ("receber.editar_parcelas_titulo", "receber.baixar_titulo",
+                         "receber.listar_baixas_titulo", "receber.excluir_baixa",
+                         "receber.download_anexo_titulo"):
+            self.assertIn(endpoint, regras)
+
 
 if __name__ == "__main__":
     unittest.main()

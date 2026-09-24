@@ -1,0 +1,657 @@
+{% extends "base.html" %}
+
+{% block title %}Títulos{% endblock %}
+
+{% block content %}
+  <style>
+    .titles-page {
+      display: grid;
+      gap: 18px;
+    }
+
+    .titles-header {
+      align-items: start;
+      display: flex;
+      gap: 14px;
+      justify-content: space-between;
+    }
+
+    .titles-kicker {
+      color: var(--ps-green-dark);
+      font-size: 0.75rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    .titles-period {
+      color: var(--ps-muted);
+      margin: 4px 0 0;
+    }
+
+    .titles-filter {
+      align-items: end;
+      background: var(--ps-surface);
+      border: 1px solid var(--ps-border);
+      border-radius: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+      padding: 12px;
+    }
+
+    .titles-filter-field {
+      display: grid;
+      gap: 4px;
+      min-width: 112px;
+    }
+
+    .titles-filter-field label,
+    .titles-filter-field > span {
+      color: var(--ps-muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .titles-filter-company {
+      min-width: 240px;
+    }
+
+    .titles-filter-wide {
+      min-width: 210px;
+    }
+
+    .titles-filter-mode {
+      align-items: center;
+      display: flex;
+      gap: 10px;
+      min-height: 31px;
+    }
+
+    .titles-filter-mode label {
+      align-items: center;
+      color: var(--ps-text);
+      display: inline-flex;
+      gap: 5px;
+    }
+
+    .titles-summary {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
+    .titles-metric {
+      background: var(--ps-surface);
+      border: 1px solid var(--ps-border);
+      border-radius: 8px;
+      min-width: 0;
+      padding: 14px;
+    }
+
+    .titles-metric span {
+      color: var(--ps-muted);
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    .titles-metric strong {
+      color: var(--ps-text);
+      display: block;
+      font-size: 1.05rem;
+      line-height: 1.25;
+      overflow-wrap: anywhere;
+    }
+
+    .titles-table-shell {
+      background: var(--ps-surface);
+      border: 1px solid var(--ps-border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .titles-table {
+      margin-bottom: 0;
+      min-width: 920px;
+    }
+
+    .titles-table thead th {
+      background: #173c28;
+      border-bottom: 0;
+      color: #ffffff;
+      font-size: 0.74rem;
+      letter-spacing: 0;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .titles-table td {
+      vertical-align: middle;
+    }
+
+    .titles-col-title {
+      width: 190px;
+    }
+
+    .titles-col-date {
+      width: 104px;
+    }
+
+    .titles-col-values {
+      width: 210px;
+    }
+
+    .titles-col-actions {
+      width: 190px;
+    }
+
+    .titles-text-main {
+      font-weight: 700;
+      max-width: 220px;
+    }
+
+    .titles-text-muted {
+      color: var(--ps-muted);
+      font-size: 0.82rem;
+      max-width: 220px;
+    }
+
+    .titles-truncate {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .titles-status {
+      border-radius: 999px;
+      display: inline-flex;
+      font-size: 0.76rem;
+      font-weight: 800;
+      justify-content: center;
+      min-width: 72px;
+      padding: 4px 9px;
+    }
+
+    .titles-status-open {
+      background: #fff2d6;
+      color: #815100;
+    }
+
+    .titles-status-paid {
+      background: var(--ps-green-soft);
+      color: var(--ps-green-dark);
+    }
+
+    .titles-status-card {
+      background: #e8e8ff;
+      color: #34348a;
+    }
+
+    .titles-row-card {
+      --bs-table-bg: #fafaff;
+    }
+
+    .titles-values {
+      display: grid;
+      gap: 2px;
+    }
+
+    .titles-value-row {
+      display: flex;
+      gap: 8px;
+      justify-content: space-between;
+      white-space: nowrap;
+    }
+
+    .titles-value-row span {
+      color: var(--ps-muted);
+      font-size: 0.76rem;
+      font-weight: 700;
+    }
+
+    .titles-actions {
+      display: inline-flex;
+      gap: 6px;
+      justify-content: center;
+      white-space: nowrap;
+    }
+
+    .titles-action-form {
+      display: inline-flex;
+      margin: 0;
+    }
+
+    .titles-action {
+      align-items: center;
+      background: #ffffff;
+      border: 1px solid var(--ps-border);
+      border-radius: 7px;
+      color: var(--ps-green-dark);
+      display: inline-flex;
+      height: 32px;
+      justify-content: center;
+      padding: 0;
+      text-decoration: none;
+      width: 32px;
+    }
+
+    .titles-action:hover,
+    .titles-action:focus-visible {
+      background: var(--ps-green-soft);
+      border-color: #9fd8b8;
+      color: var(--ps-green-dark);
+      outline: 0;
+    }
+
+    .titles-action-danger {
+      color: #b42318;
+    }
+
+    .titles-action-danger:hover,
+    .titles-action-danger:focus-visible {
+      background: #ffe8e5;
+      border-color: #ffc8c1;
+      color: #8f1b12;
+    }
+
+    .titles-action[disabled],
+    .titles-action-disabled {
+      background: #f1f5f2;
+      color: #9aa79f;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .titles-action .icon {
+      height: 15px;
+      width: 15px;
+    }
+
+    .titles-empty {
+      background: var(--ps-surface);
+      border: 1px solid var(--ps-border);
+      border-radius: 8px;
+      color: var(--ps-muted);
+      padding: 28px;
+      text-align: center;
+    }
+
+    @media (max-width: 980px) {
+      .titles-header {
+        display: grid;
+      }
+
+      .titles-filter {
+        justify-content: stretch;
+      }
+
+      .titles-filter .btn,
+      .titles-filter-field {
+        flex: 1 1 140px;
+      }
+
+      .titles-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 560px) {
+      .titles-summary {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+
+  <div class="titles-page">
+    <div class="titles-header">
+      <div>
+        <div class="titles-kicker">Contas a pagar</div>
+        <h1 class="h4 mb-0">Consulta de títulos</h1>
+        <p class="titles-period">
+          {% if modo_vencimento == 'periodo' %}
+            Vencimentos de {{ vencimento_inicial.strftime('%d/%m/%Y') }} a {{ vencimento_final.strftime('%d/%m/%Y') }}.
+          {% else %}
+            Vencimentos filtrados por
+            {% for m, nome in meses %}{% if mes == m %}{{ nome }}{% endif %}{% endfor %}
+            / {{ ano }}.
+          {% endif %}
+        </p>
+      </div>
+
+      <a href="{{ url_for('receber.novo_titulo') }}" class="btn btn-primary btn-sm">
+        Novo título
+      </a>
+    </div>
+
+    <form method="get" class="titles-filter" aria-label="Filtros da consulta de títulos">
+      <div class="titles-filter-field titles-filter-wide">
+        <span>Modo de vencimento</span>
+        <div class="titles-filter-mode" role="radiogroup" aria-label="Modo do filtro de vencimento">
+          <label><input type="radio" name="modo_vencimento" value="mes" {% if modo_vencimento == 'mes' %}checked{% endif %}> Mês</label>
+          <label><input type="radio" name="modo_vencimento" value="periodo" {% if modo_vencimento == 'periodo' %}checked{% endif %}> Período</label>
+        </div>
+      </div>
+
+      <div class="titles-filter-field" data-vencimento-mes>
+        <label for="mes">Mês de vencimento</label>
+        <select id="mes" name="mes" class="form-select form-select-sm">
+          {% for m, nome in meses %}
+            <option value="{{ m }}" {% if mes == m %}selected{% endif %}>{{ nome }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="titles-filter-field" data-vencimento-mes>
+        <label for="ano">Ano</label>
+        <select id="ano" name="ano" class="form-select form-select-sm">
+          {% for a in anos %}
+            <option value="{{ a }}" {% if ano == a %}selected{% endif %}>{{ a }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="titles-filter-field" data-vencimento-periodo>
+        <label for="vencimento_inicial">Vencimento inicial</label>
+        <input id="vencimento_inicial" name="vencimento_inicial" type="date" class="form-control form-control-sm" value="{{ vencimento_inicial.isoformat() if vencimento_inicial else '' }}">
+      </div>
+
+      <div class="titles-filter-field" data-vencimento-periodo>
+        <label for="vencimento_final">Vencimento final</label>
+        <input id="vencimento_final" name="vencimento_final" type="date" class="form-control form-control-sm" value="{{ vencimento_final.isoformat() if vencimento_final else '' }}">
+      </div>
+
+      <div class="titles-filter-field titles-filter-company">
+        <label for="id_empresa">Empresa</label>
+        <select id="id_empresa" name="id_empresa" class="form-select form-select-sm">
+          <option value="">Todas</option>
+          {% for empresa in empresas %}
+            <option value="{{ empresa.id }}" {% if id_empresa == empresa.id %}selected{% endif %}>
+              {{ empresa.label }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="titles-filter-field titles-filter-wide">
+        <label for="id_cliente">Cliente</label>
+        <select id="id_cliente" name="id_cliente" class="form-select form-select-sm">
+          <option value="">Todos</option>
+          {% for cliente in clientees %}
+            <option value="{{ cliente.id }}" {% if id_cliente == cliente.id %}selected{% endif %}>{{ cliente.nome }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="titles-filter-field">
+        <label for="emissao">Data de emissão</label>
+        <input id="emissao" name="emissao" type="date" class="form-control form-control-sm" value="{{ emissao.isoformat() if emissao else '' }}">
+      </div>
+
+      <div class="titles-filter-field titles-filter-wide">
+        <label for="titulo">Título</label>
+        <input id="titulo" name="titulo" type="search" maxlength="80" class="form-control form-control-sm" value="{{ busca_titulo }}" placeholder="Documento, descrição, número ou ID">
+      </div>
+
+      <div class="titles-filter-field">
+        <label for="situacao">Situação</label>
+        <select id="situacao" name="situacao" class="form-select form-select-sm">
+          <option value="todas" {% if situacao == 'todas' %}selected{% endif %}>Todas</option>
+          <option value="em_aberto" {% if situacao == 'em_aberto' %}selected{% endif %}>Em aberto</option>
+          <option value="baixada" {% if situacao == 'baixada' %}selected{% endif %}>Baixada</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-sm btn-outline-primary">
+        Filtrar
+      </button>
+
+      <a href="{{ url_for('receber.listar_titulos') }}" class="btn btn-sm btn-outline-secondary">
+        Limpar filtros
+      </a>
+    </form>
+
+    <script>
+      (() => {
+        const radios = document.querySelectorAll('input[name="modo_vencimento"]');
+        const atualizarModo = () => {
+          const modo = document.querySelector('input[name="modo_vencimento"]:checked')?.value || 'mes';
+          document.querySelectorAll('[data-vencimento-mes]').forEach((campo) => campo.hidden = modo !== 'mes');
+          document.querySelectorAll('[data-vencimento-periodo]').forEach((campo) => campo.hidden = modo !== 'periodo');
+        };
+        radios.forEach((radio) => radio.addEventListener('change', atualizarModo));
+        atualizarModo();
+      })();
+    </script>
+
+    <div class="titles-summary" aria-label="Resumo financeiro dos títulos filtrados">
+      <div class="titles-metric">
+        <span>Títulos e previsões</span>
+        <strong>{{ titulos|length }}</strong>
+      </div>
+      <div class="titles-metric">
+        <span>Valor total dos títulos</span>
+        <strong>R$ {{ "%.2f"|format(total_valor_titulo or 0) }}</strong>
+      </div>
+      <div class="titles-metric">
+        <span>Valor da parcela no mês</span>
+        <strong>R$ {{ "%.2f"|format(total_valor_parcela_mes or 0) }}</strong>
+      </div>
+      <div class="titles-metric">
+        <span>Pago no mês</span>
+        <strong>R$ {{ "%.2f"|format(total_pago_mes or 0) }}</strong>
+      </div>
+      <div class="titles-metric">
+        <span>Não pago no mês</span>
+        <strong>R$ {{ "%.2f"|format(total_nao_pago_mes or 0) }}</strong>
+      </div>
+    </div>
+
+    {% if titulos %}
+      <div class="titles-table-shell">
+        <div class="table-responsive">
+          <table class="table table-sm table-hover align-middle titles-table">
+            <thead>
+              <tr>
+                <th class="titles-col-title">Título</th>
+                <th>Cliente e plano</th>
+                <th>Empresa e centro</th>
+                <th class="titles-col-date">Vencimento</th>
+                <th class="titles-col-values text-end">Valores</th>
+                <th class="text-center">Status</th>
+                <th class="titles-col-actions text-center">Ações</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {% for t in titulos %}
+                {% set nao_pago_mes = (t.nao_pago_mes or 0) %}
+
+                <tr class="{% if t.tipo_linha == 'cartao_credito' %}titles-row-card{% endif %}">
+                  <td>
+                    <div
+                      class="titles-text-main titles-truncate"
+                      title="Título {{ t.id }}{% if t.doc_label %} - {{ t.doc_label }}{% endif %}"
+                    >
+                      {% if t.tipo_linha == 'cartao_credito' %}{{ t.doc_label }}{% else %}{{ t.id }}{% if t.doc_label %} - {{ t.doc_label }}{% endif %}{% endif %}
+                    </div>
+                    <div class="titles-text-muted titles-truncate" title="{{ t.nr_documento or '-' }}">
+                      Nº {{ t.nr_documento or '-' }}
+                    </div>
+                  </td>
+                  <td>
+                    <div class="titles-text-main titles-truncate" title="{{ t.cliente or '-' }}">
+                      {{ t.cliente or '-' }}
+                    </div>
+                    <div class="titles-text-muted titles-truncate" title="{{ t.plano or '-' }}">
+                      {{ t.plano or '-' }}
+                    </div>
+                  </td>
+                  <td>
+                    <div class="titles-text-main titles-truncate" title="{{ t.empresa or '-' }}">
+                      {{ t.empresa or '-' }}
+                    </div>
+                    <div class="titles-text-muted titles-truncate" title="{{ t.centro_custo or '-' }}">
+                      {{ t.centro_custo or '-' }}
+                    </div>
+                  </td>
+                  <td class="text-nowrap">{{ t.vencimento or '-' }}</td>
+
+                  <td class="text-end">
+                    <div class="titles-values">
+                      <div class="titles-value-row">
+                        <span>{% if t.tipo_linha == 'cartao_credito' %}Saldo previsto{% else %}Valor total do título{% endif %}</span>
+                        <strong>R$ {{ "%.2f"|format(t.valor_total_titulo or 0) }}</strong>
+                      </div>
+                      <div class="titles-value-row">
+                        <span>Valor da parcela no mês</span>
+                        <strong>R$ {{ "%.2f"|format(t.valor_parcela_mes or 0) }}</strong>
+                      </div>
+                      <div class="titles-value-row">
+                        <span>Pago no mês</span>
+                        <strong>R$ {{ "%.2f"|format(t.pago_mes or 0) }}</strong>
+                      </div>
+                      <div class="titles-value-row">
+                        <span>Não pago no mês</span>
+                        <strong>R$ {{ "%.2f"|format(nao_pago_mes) }}</strong>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td class="text-center">
+                    {% if t.tipo_linha == 'cartao_credito' %}
+                      <span class="titles-status titles-status-card">Previsão</span>
+                    {% elif nao_pago_mes <= 0 %}
+                      <span class="titles-status titles-status-paid">Pago no mês</span>
+                    {% else %}
+                      <span class="titles-status titles-status-open">Não pago no mês</span>
+                    {% endif %}
+                  </td>
+
+                  <td class="text-center">
+                    {% if t.tipo_linha == 'cartao_credito' %}
+                      <div class="titles-actions" aria-label="Ações da previsão {{ t.cliente }}">
+                        <a href="{{ url_for('financeiro.extrato_conta', id_empresa=t.id_empresa, id_conta=t.id_conta) }}" class="titles-action" title="Abrir extrato do cartão" aria-label="Abrir extrato do cartão {{ t.cliente }}">
+                          <svg class="icon"><use href="#icon-receipt"></use></svg>
+                        </a>
+                      </div>
+                    {% else %}
+                    <div class="titles-actions" aria-label="Ações do título {{ t.id }}">
+                      {% if nao_pago_mes > 0 %}
+                        <a
+                          href="{{ url_for('receber.baixar_titulo', id_recebivel=t.id) }}"
+                          class="titles-action"
+                          title="Baixar título"
+                          aria-label="Baixar título {{ t.id }}"
+                        >
+                          <svg class="icon"><use href="#icon-check-circle"></use></svg>
+                        </a>
+                      {% else %}
+                        <span class="titles-action titles-action-disabled" title="Parcela do mês já paga" aria-label="Parcela do mês já paga">
+                          <svg class="icon"><use href="#icon-check-circle"></use></svg>
+                        </span>
+                      {% endif %}
+
+                      {% if (t.pago_mes or 0) > 0 %}
+                        <a
+                          href="{{ url_for('receber.listar_baixas_titulo', id_recebivel=t.id) }}"
+                          class="titles-action"
+                          title="Consultar baixas"
+                          aria-label="Consultar baixas do título {{ t.id }}"
+                        >
+                          <svg class="icon"><use href="#icon-receipt"></use></svg>
+                        </a>
+                      {% else %}
+                        <span class="titles-action titles-action-disabled" title="Sem baixas registradas" aria-label="Sem baixas registradas">
+                          <svg class="icon"><use href="#icon-receipt"></use></svg>
+                        </span>
+                      {% endif %}
+
+                      <a
+                        href="{{ url_for('receber.editar_titulo', id_recebivel=t.id) }}"
+                        class="titles-action"
+                        title="Editar título"
+                        aria-label="Editar título {{ t.id }}"
+                      >
+                        <svg class="icon"><use href="#icon-pencil"></use></svg>
+                      </a>
+
+                      <a
+                        href="{{ url_for('receber.editar_parcelas_titulo', id_recebivel=t.id) }}"
+                        class="titles-action"
+                        title="Editar parcelas"
+                        aria-label="Editar parcelas do título {{ t.id }}"
+                      >
+                        <svg class="icon"><use href="#icon-list-tree"></use></svg>
+                      </a>
+
+                      <a
+                        href="{{ url_for('receber.copiar_titulo', id_recebivel=t.id) }}"
+                        class="titles-action"
+                        title="Copiar título"
+                        aria-label="Copiar título {{ t.id }}"
+                      >
+                        <svg class="icon"><use href="#icon-copy"></use></svg>
+                      </a>
+
+                      <form
+                        method="post"
+                        action="{{ url_for('receber.excluir_titulo', id_recebivel=t.id) }}"
+                        class="titles-action-form"
+                        onsubmit="return confirm('Confirma exclusão do título {{ t.doc_label }} {{ t.nr_documento }}?');"
+                      >
+                        <button
+                          type="submit"
+                          class="titles-action titles-action-danger"
+                          title="{% if (t.pago_mes or 0) > 0 %}Título possui baixa e não pode ser excluído{% else %}Excluir título{% endif %}"
+                          aria-label="Excluir título {{ t.id }}"
+                          {% if (t.pago_mes or 0) > 0 %}disabled{% endif %}
+                        >
+                          <svg class="icon"><use href="#icon-trash"></use></svg>
+                        </button>
+                      </form>
+                    </div>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+
+            <tfoot>
+              <tr class="fw-bold">
+                <td colspan="4" class="text-end">Totais do período:</td>
+                <td class="text-end">
+                  <div class="titles-values">
+                    <div class="titles-value-row">
+                      <span>Valor total do título</span>
+                      <strong>R$ {{ "%.2f"|format(total_valor_titulo or 0) }}</strong>
+                    </div>
+                    <div class="titles-value-row">
+                      <span>Valor da parcela no mês</span>
+                      <strong>R$ {{ "%.2f"|format(total_valor_parcela_mes or 0) }}</strong>
+                    </div>
+                    <div class="titles-value-row">
+                      <span>Pago no mês</span>
+                      <strong>R$ {{ "%.2f"|format(total_pago_mes or 0) }}</strong>
+                    </div>
+                    <div class="titles-value-row">
+                      <span>Não pago no mês</span>
+                      <strong>R$ {{ "%.2f"|format(total_nao_pago_mes or 0) }}</strong>
+                    </div>
+                  </div>
+                </td>
+                <td colspan="2"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    {% else %}
+      <div class="titles-empty">
+        Não há títulos para os filtros selecionados.
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}

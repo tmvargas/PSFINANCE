@@ -10,6 +10,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 
 from database import database_metadata, init_db
 from financeiro import bp_financeiro
+from receber import bp_receber
 
 
 STARTED_AT = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
@@ -46,6 +47,7 @@ Path(app.config["UPLOAD_TITULOS_FOLDER"]).mkdir(parents=True, exist_ok=True)
 
 init_db()
 app.register_blueprint(bp_financeiro, url_prefix="/financeiro")
+app.register_blueprint(bp_receber, url_prefix="/financeiro/receber")
 
 
 def app_metadata():
