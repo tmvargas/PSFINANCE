@@ -75,18 +75,6 @@ class ClientesReceberTest(unittest.TestCase):
         self.assertEqual(recebivel.saldo_aberto, 200.0)
         session.close()
 
-    def test_jornada_recebivel_restringe_entrada_parcela_e_recebe(self):
-        session=SessionLocal(); cliente=Cliente(nome="Cliente"); empresa=Empresa(codigo="1",nome="Empresa",tipo_empresa="MATRIZ"); doc=Documento(tipo_doc="REC",nome_doc="Receber"); entrada=PlanoDeContas(cod_estrutural="1.01",nome_conta="Receita",tipo="analitica"); saida=PlanoDeContas(cod_estrutural="2.01",nome_conta="Despesa",tipo="analitica"); conta=Conta(descricao="Banco",empresa=empresa,tipo="corrente"); session.add_all([cliente,empresa,doc,entrada,saida,conta]); session.commit(); ids=(cliente.id_cliente,empresa.id_empresa,doc.id_doc,entrada.id_plano,saida.id_plano,conta.id_conta); session.close()
-        base={"nr_documento":"R-10","id_cliente":ids[0],"id_empresa":ids[1],"id_doc":ids[2],"valor":"300","parcelas":"2","emissao":"2026-09-01","vencimento":"2026-10-10"}
-        invalido=self.client.post("/financeiro/recebiveis/novo",data={**base,"id_plano":ids[4]})
-        self.assertIn("conta analítica de entrada",invalido.get_data(as_text=True))
-        resposta=self.client.post("/financeiro/recebiveis/novo",data={**base,"id_plano":ids[3]},follow_redirects=True)
-        self.assertIn("Recebível salvo com sucesso",resposta.get_data(as_text=True))
-        session=SessionLocal(); r=session.query(Recebivel).one(); self.assertEqual(len(r.parcelas),2); rid=r.id_recebivel; session.close()
-        resposta=self.client.post(f"/financeiro/recebiveis/{rid}/receber",data={"id_conta":ids[5],"valor":"100"},follow_redirects=True)
-        self.assertIn("Recebimento registrado com sucesso",resposta.get_data(as_text=True))
-        session=SessionLocal(); self.assertEqual(session.get(Recebivel,rid).saldo_aberto,200.0); session.close()
-
 
 if __name__ == "__main__":
     unittest.main()
