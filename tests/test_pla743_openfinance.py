@@ -28,11 +28,11 @@ class OpenFinanceTest(unittest.TestCase):
         session = SessionLocal()
         empresa = Empresa(codigo="2", nome="PS", tipo_empresa="MATRIZ")
         centro = CentroCusto(empresa=empresa, codigo="200", nome="Administrativo")
-        conta = Conta(empresa=empresa, descricao="Santander PS", tipo="corrente")
-        conexao = OpenFinanceConexao(nome="Santander", ambiente="sandbox")
+        conta = Conta(empresa=empresa, descricao="C6 Bank PS", tipo="corrente")
+        conexao = OpenFinanceConexao(nome="C6 Bank", ambiente="sandbox")
         conta_of = OpenFinanceConta(
             conexao=conexao, conta=conta, centro_custo=centro,
-            external_id="acc-1", tipo="conta_corrente", nome="Santander PS",
+            external_id="acc-1", tipo="conta_corrente", nome="C6 Bank PS",
         )
         session.add_all([
             empresa, centro, conta, conexao, conta_of,

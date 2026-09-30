@@ -2,7 +2,7 @@ BEGIN;
 
 CREATE TABLE openfinance_conexao (
     id_conexao SERIAL PRIMARY KEY, uuid VARCHAR(36) NOT NULL UNIQUE,
-    provedor VARCHAR(40) NOT NULL DEFAULT 'santander', nome VARCHAR(120) NOT NULL,
+    provedor VARCHAR(40) NOT NULL DEFAULT 'c6_bank', nome VARCHAR(120) NOT NULL,
     ambiente VARCHAR(20) NOT NULL DEFAULT 'sandbox', client_id VARCHAR(255),
     secret_env VARCHAR(120), consentimento_id VARCHAR(255),
     status VARCHAR(30) NOT NULL DEFAULT 'configuracao_pendente',

@@ -523,7 +523,7 @@ class OpenFinanceConexao(Base, TimestampMixin):
 
     id_conexao = Column(Integer, primary_key=True, autoincrement=True)
     uuid = Column(String(36), default=lambda: str(uuid.uuid4()), unique=True, nullable=False)
-    provedor = Column(String(40), nullable=False, default="santander")
+    provedor = Column(String(40), nullable=False, default="c6_bank")
     nome = Column(String(120), nullable=False)
     ambiente = Column(String(20), nullable=False, default="sandbox")
     client_id = Column(String(255), nullable=True)
