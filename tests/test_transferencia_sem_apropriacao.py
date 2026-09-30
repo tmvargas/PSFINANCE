@@ -63,6 +63,8 @@ class TransferenciaSemApropriacaoTest(unittest.TestCase):
         session.commit()
         self.ids = {
             "id_empresa": empresa.id_empresa,
+            "id_empresa_origem": empresa.id_empresa,
+            "id_empresa_destino": outra_empresa.id_empresa,
             "id_centro_custo": centro.id_centro_custo,
             "id_conta_origem": origem.id_conta,
             "id_conta_destino": destino.id_conta,
@@ -73,7 +75,7 @@ class TransferenciaSemApropriacaoTest(unittest.TestCase):
         session.close()
 
     def _dados_transferencia(self):
-        return {
+        dados = {
             "tipo": "T",
             "data": date.today().isoformat(),
             "documento": "AV",
@@ -82,6 +84,8 @@ class TransferenciaSemApropriacaoTest(unittest.TestCase):
             "valor": "100,00",
             **{chave: str(valor) for chave, valor in self.ids.items()},
         }
+        dados["id_conta_destino"] = str(self.ids["id_conta_outra_empresa"])
+        return dados
 
     def test_criacao_ignora_centro_custo_e_plano_enviados(self):
         response = app.test_client().post(
@@ -106,7 +110,8 @@ class TransferenciaSemApropriacaoTest(unittest.TestCase):
         movimentos = session.query(MovimentacaoConta).all()
         self.assertEqual(len(movimentos), 1)
         self.assertEqual(movimentos[0].id_conta_origem, self.ids["id_conta_origem"])
-        self.assertEqual(movimentos[0].id_conta_destino, self.ids["id_conta_destino"])
+        self.assertEqual(movimentos[0].id_conta_destino, self.ids["id_conta_outra_empresa"])
+        self.assertEqual(movimentos[0].id_empresa, self.ids["id_empresa_origem"])
         session.close()
 
     def test_transferencia_rejeita_origem_igual_ao_destino(self):
@@ -123,9 +128,9 @@ class TransferenciaSemApropriacaoTest(unittest.TestCase):
         self.assertEqual(session.query(MovimentacaoConta).count(), 0)
         session.close()
 
-    def test_transferencia_rejeita_conta_de_outra_empresa(self):
+    def test_transferencia_rejeita_conta_que_nao_pertence_a_empresa_de_destino(self):
         dados = self._dados_transferencia()
-        dados["id_conta_destino"] = str(self.ids["id_conta_outra_empresa"])
+        dados["id_conta_destino"] = str(self.ids["id_conta_destino"])
 
         response = app.test_client().post(
             "/financeiro/movimentacoes/nova", data=dados
@@ -194,6 +199,8 @@ class TransferenciaSemApropriacaoTest(unittest.TestCase):
         self.assertIn(b'id="col_centro_custo"', novo.data)
         self.assertIn(b'centroCusto.removeAttribute("required")', novo.data)
         self.assertIn(b'centroCusto.setAttribute("required", "required")', novo.data)
+        self.assertIn(b'id="id_empresa_origem"', novo.data)
+        self.assertIn(b'id="id_empresa_destino"', novo.data)
 
 
 if __name__ == "__main__":

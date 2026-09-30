@@ -418,6 +418,8 @@ def nova_movimentacao():
         descricao = (request.form.get("descricao") or "").strip()
         valor_raw = (request.form.get("valor") or "").strip()
         id_empresa = request.form.get("id_empresa", type=int)
+        id_empresa_origem = request.form.get("id_empresa_origem", type=int)
+        id_empresa_destino = request.form.get("id_empresa_destino", type=int)
         id_centro_custo = request.form.get("id_centro_custo", type=int)
 
         # Campos conforme tipo
@@ -434,7 +436,14 @@ def nova_movimentacao():
         if tipo not in ("E", "S", "T"):
             erros.append("Selecione um tipo de movimentação válido.")
         if tipo == "T":
-            erros_empresa_centro, _empresa = validar_empresa_ativa(session, id_empresa)
+            erros_origem_empresa, _empresa_origem = validar_empresa_ativa(
+                session, id_empresa_origem, "Selecione a empresa de origem."
+            )
+            erros_destino_empresa, _empresa_destino = validar_empresa_ativa(
+                session, id_empresa_destino, "Selecione a empresa de destino."
+            )
+            erros_empresa_centro = erros_origem_empresa + erros_destino_empresa
+            id_empresa = id_empresa_origem
             id_centro_custo = None
         else:
             erros_empresa_centro, _empresa, _centro = validar_empresa_centro(
@@ -533,7 +542,7 @@ def nova_movimentacao():
             erros_origem, conta_origem = validar_conta_da_empresa(
                 session,
                 id_origem,
-                id_empresa,
+                id_empresa_origem,
                 "Selecione a conta de origem da transferência.",
             )
             erros.extend(erros_origem)
@@ -542,7 +551,7 @@ def nova_movimentacao():
             erros_destino, conta_destino = validar_conta_da_empresa(
                 session,
                 id_destino,
-                id_empresa,
+                id_empresa_destino,
                 "Selecione a conta de destino da transferência.",
             )
             erros.extend(erros_destino)
@@ -733,6 +742,8 @@ def editar_movimentacao(id_mov):
         descricao = (request.form.get("descricao") or "").strip()
         valor_raw = (request.form.get("valor") or "").strip()
         id_empresa = request.form.get("id_empresa", type=int)
+        id_empresa_origem = request.form.get("id_empresa_origem", type=int)
+        id_empresa_destino = request.form.get("id_empresa_destino", type=int)
         id_centro_custo = request.form.get("id_centro_custo", type=int)
 
         id_conta_unica = request.form.get("id_conta")
@@ -745,7 +756,14 @@ def editar_movimentacao(id_mov):
         if tipo not in ("E", "S", "T"):
             erros.append("Selecione um tipo de movimentação válido.")
         if tipo == "T":
-            erros_empresa_centro, _empresa = validar_empresa_ativa(session, id_empresa)
+            erros_origem_empresa, _empresa_origem = validar_empresa_ativa(
+                session, id_empresa_origem, "Selecione a empresa de origem."
+            )
+            erros_destino_empresa, _empresa_destino = validar_empresa_ativa(
+                session, id_empresa_destino, "Selecione a empresa de destino."
+            )
+            erros_empresa_centro = erros_origem_empresa + erros_destino_empresa
+            id_empresa = id_empresa_origem
             id_centro_custo = None
         else:
             erros_empresa_centro, _empresa, _centro = validar_empresa_centro(
@@ -829,7 +847,7 @@ def editar_movimentacao(id_mov):
             erros_origem, conta_origem = validar_conta_da_empresa(
                 session,
                 id_origem,
-                id_empresa,
+                id_empresa_origem,
                 "Selecione a conta de origem da transferência.",
             )
             erros.extend(erros_origem)
@@ -838,7 +856,7 @@ def editar_movimentacao(id_mov):
             erros_destino, conta_destino = validar_conta_da_empresa(
                 session,
                 id_destino,
-                id_empresa,
+                id_empresa_destino,
                 "Selecione a conta de destino da transferência.",
             )
             erros.extend(erros_destino)
@@ -939,6 +957,8 @@ def editar_movimentacao(id_mov):
         "id_conta_origem": mov.id_conta_origem,
         "id_conta_destino": mov.id_conta_destino,
         "id_empresa": getattr(mov, "id_empresa", None),
+        "id_empresa_origem": getattr(getattr(mov, "conta_origem", None), "id_empresa", None),
+        "id_empresa_destino": getattr(getattr(mov, "conta_destino", None), "id_empresa", None),
         "id_centro_custo": getattr(mov, "id_centro_custo", None),
         "id_plano": mov.id_plano,
     }

@@ -54,7 +54,12 @@
 
     {# ---------- TRANSFERÊNCIA: ORIGEM ---------- #}
     <div class="col-md-3" id="col_conta_origem" style="display:none;">
-      <label class="form-label">Conta Origem</label>
+      <label class="form-label">Empresa de origem</label>
+      <select name="id_empresa_origem" id="id_empresa_origem" class="form-select mb-2">
+        <option value="">Selecione...</option>
+        {% for e in empresas %}<option value="{{ e.id }}" {% if movimentacao and movimentacao.id_empresa_origem == e.id %}selected{% endif %}>{{ e.label }}</option>{% endfor %}
+      </select>
+      <label class="form-label">Conta de origem</label>
       <select name="id_conta_origem" id="id_conta_origem" class="form-select">
         <option value="">Selecione...</option>
         {% for c in contas %}
@@ -68,7 +73,12 @@
 
     {# ---------- TRANSFERÊNCIA: DESTINO ---------- #}
     <div class="col-md-3" id="col_conta_destino" style="display:none;">
-      <label class="form-label">Conta Destino</label>
+      <label class="form-label">Empresa de destino</label>
+      <select name="id_empresa_destino" id="id_empresa_destino" class="form-select mb-2">
+        <option value="">Selecione...</option>
+        {% for e in empresas %}<option value="{{ e.id }}" {% if movimentacao and movimentacao.id_empresa_destino == e.id %}selected{% endif %}>{{ e.label }}</option>{% endfor %}
+      </select>
+      <label class="form-label">Conta de destino</label>
       <select name="id_conta_destino" id="id_conta_destino" class="form-select">
         <option value="">Selecione...</option>
         {% for c in contas %}
@@ -151,7 +161,7 @@
   </div>
 
   <div class="row mb-3">
-    <div class="col-md-6">
+    <div class="col-md-6" id="col_empresa">
       <label class="form-label">Empresa</label>
       <select name="id_empresa" id="id_empresa" class="form-select" required>
         <option value="">Selecione...</option>
@@ -265,6 +275,10 @@
 
   const colPlano = document.getElementById("col_plano");
   const colCentroCusto = document.getElementById("col_centro_custo");
+  const colEmpresa = document.getElementById("col_empresa");
+  const empresa = document.getElementById("id_empresa");
+  const empresaOrigem = document.getElementById("id_empresa_origem");
+  const empresaDestino = document.getElementById("id_empresa_destino");
   const centroCusto = document.getElementById("id_centro_custo");
   const plano = document.getElementById("id_plano");
   const grp1 = document.getElementById("grp_1");
@@ -296,6 +310,10 @@
       // plano zera
       if (plano) plano.value = "";
       colCentroCusto.style.display = "none";
+      colEmpresa.style.display = "none";
+      setRequired(empresa, false);
+      setRequired(empresaOrigem, true);
+      setRequired(empresaDestino, true);
       centroCusto.value = "";
       setRequired(centroCusto, false);
 
@@ -311,6 +329,10 @@
     colContaUnica.style.display = "";
     colPlano.style.display = "";
     colCentroCusto.style.display = "";
+    colEmpresa.style.display = "";
+    setRequired(empresa, true);
+    setRequired(empresaOrigem, false);
+    setRequired(empresaDestino, false);
     setRequired(centroCusto, true);
 
     setRequired(selOrigem, false);
@@ -379,11 +401,11 @@
 (function () {
   const empresa = document.getElementById("id_empresa");
   const centro = document.getElementById("id_centro_custo");
-  const contas = [
-    document.getElementById("id_conta"),
-    document.getElementById("id_conta_origem"),
-    document.getElementById("id_conta_destino"),
-  ].filter(Boolean);
+  const contaUnica = document.getElementById("id_conta");
+  const empresaOrigem = document.getElementById("id_empresa_origem");
+  const empresaDestino = document.getElementById("id_empresa_destino");
+  const contaOrigem = document.getElementById("id_conta_origem");
+  const contaDestino = document.getElementById("id_conta_destino");
 
   function filtrarCentros() {
     const idEmpresa = empresa.value || "";
@@ -398,9 +420,7 @@
     });
   }
 
-  function filtrarContas() {
-    const idEmpresa = empresa.value || "";
-    contas.forEach((select) => {
+  function filtrarConta(select, idEmpresa) {
       Array.from(select.options).forEach((option) => {
         if (!option.value) {
           option.hidden = false;
@@ -410,13 +430,20 @@
         option.hidden = !visivel;
         if (!visivel && option.selected) select.value = "";
       });
-    });
+  }
+
+  function filtrarContas() {
+    filtrarConta(contaUnica, empresa.value || "");
+    filtrarConta(contaOrigem, empresaOrigem.value || "");
+    filtrarConta(contaDestino, empresaDestino.value || "");
   }
 
   empresa.addEventListener("change", function () {
     filtrarCentros();
     filtrarContas();
   });
+  empresaOrigem.addEventListener("change", filtrarContas);
+  empresaDestino.addEventListener("change", filtrarContas);
   filtrarCentros();
   filtrarContas();
 })();

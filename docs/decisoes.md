@@ -972,3 +972,13 @@ misturar títulos a pagar. O cadastro de Cliente segue os mesmos dados e padrão
 de popup do Credor; os recebíveis usarão apenas contas analíticas do grupo de
 entrada do Plano Financeiro. A separação evita que consultas, baixas e saldos
 de pagar e receber contaminem um ao outro.
+## 2026-09-30 - PLA-743 - Transferência entre empresas
+
+- Transferência usa seleções independentes de Empresa/Conta de origem e
+  Empresa/Conta de destino, permitindo movimentação entre empresas.
+- Cada conta é validada no backend contra a empresa selecionada para seu lado;
+  origem e destino iguais continuam proibidos.
+- O campo legado `id_empresa` da movimentação guarda a empresa de origem para
+  preservar consultas existentes. Transferências continuam sem centro de custo
+  e sem plano financeiro.
+- Não há alteração de schema ou migration.
