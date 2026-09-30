@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Configuração C6 Bank{% endblock %}
+{% block content %}
+<div class="consultation-page">
+  <div class="consultation-header"><div><div class="consultation-kicker">Open Finance</div><h1 class="h4 mb-0">Configuração C6 Bank</h1><p class="consultation-subtitle">Conexão segura da API de Extrato C6 Empresas.</p></div></div>
+  {% if not conexoes %}
+  <div class="alert alert-warning"><strong>Aguardando credenciais C6.</strong><br>É necessário possuir conta C6 Empresas, credenciais e certificado da API. Nenhum segredo será salvo no banco.</div>
+  <div class="card"><div class="card-body"><h2 class="h6">Como habilitar</h2><ol class="mb-0"><li>Gerar credenciais e certificado em Integrações via API no C6 Empresas.</li><li>Disponibilizar os arquivos no cofre corporativo da VPS.</li><li>Após validação técnica, vincular cada conta C6 à Conta e ao Centro de Custo do PSFINANCE.</li></ol></div></div>
+  {% else %}
+  <div class="consultation-table-shell"><table class="table consultation-table"><thead><tr><th>Conexão</th><th>Ambiente</th><th>Status</th><th>Última sincronização</th></tr></thead><tbody>{% for c in conexoes %}<tr><td>{{ c.nome }}</td><td>{{ c.ambiente }}</td><td>{{ c.status }}</td><td>{{ c.sincronizado_em or '-' }}</td></tr>{% endfor %}</tbody></table></div>
+  {% endif %}
+</div>
+{% endblock %}
