@@ -11,6 +11,7 @@ from sqlalchemy import (
     DateTime,
     Boolean,
     ForeignKey,
+    UniqueConstraint,
 )
 from sqlalchemy.orm import declarative_base, relationship
 
@@ -515,3 +516,64 @@ class MovimentacaoConta(Base, TimestampMixin):
 
     def __repr__(self):
         return f"<MovimentacaoConta {self.tipo} id={self.id_movimentacao} R$ {float(self.valor or 0):.2f}>"
+
+
+class OpenFinanceConexao(Base, TimestampMixin):
+    __tablename__ = "openfinance_conexao"
+
+    id_conexao = Column(Integer, primary_key=True, autoincrement=True)
+    uuid = Column(String(36), default=lambda: str(uuid.uuid4()), unique=True, nullable=False)
+    provedor = Column(String(40), nullable=False, default="santander")
+    nome = Column(String(120), nullable=False)
+    ambiente = Column(String(20), nullable=False, default="sandbox")
+    client_id = Column(String(255), nullable=True)
+    secret_env = Column(String(120), nullable=True)
+    consentimento_id = Column(String(255), nullable=True)
+    status = Column(String(30), nullable=False, default="configuracao_pendente")
+    sincronizado_em = Column(DateTime, nullable=True)
+    erro_ultima_sincronizacao = Column(String(1000), nullable=True)
+
+
+class OpenFinanceConta(Base, TimestampMixin):
+    __tablename__ = "openfinance_conta"
+    __table_args__ = (UniqueConstraint("id_conexao", "external_id", name="uq_openfinance_conta_external"),)
+
+    id_openfinance_conta = Column(Integer, primary_key=True, autoincrement=True)
+    uuid = Column(String(36), default=lambda: str(uuid.uuid4()), unique=True, nullable=False)
+    id_conexao = Column(Integer, ForeignKey("openfinance_conexao.id_conexao"), nullable=False)
+    id_conta = Column(Integer, ForeignKey("conta.id_conta"), nullable=True)
+    id_centro_custo = Column(Integer, ForeignKey("centro_custo.id_centro_custo"), nullable=True)
+    external_id = Column(String(255), nullable=False)
+    tipo = Column(String(30), nullable=False)  # conta_corrente | cartao_credito
+    nome = Column(String(255), nullable=False)
+    moeda = Column(String(3), nullable=False, default="BRL")
+    ativa = Column(Boolean, nullable=False, default=True)
+
+    conexao = relationship("OpenFinanceConexao")
+    conta = relationship("Conta")
+    centro_custo = relationship("CentroCusto")
+
+
+class OpenFinanceTransacao(Base, TimestampMixin):
+    __tablename__ = "openfinance_transacao"
+    __table_args__ = (
+        UniqueConstraint("id_openfinance_conta", "external_id", name="uq_openfinance_transacao_external"),
+    )
+
+    id_transacao = Column(Integer, primary_key=True, autoincrement=True)
+    uuid = Column(String(36), default=lambda: str(uuid.uuid4()), unique=True, nullable=False)
+    id_openfinance_conta = Column(Integer, ForeignKey("openfinance_conta.id_openfinance_conta"), nullable=False)
+    external_id = Column(String(255), nullable=False)
+    data = Column(Date, nullable=False)
+    descricao = Column(String(1000), nullable=False)
+    valor = Column(Numeric(15, 2), nullable=False)
+    natureza = Column(String(10), nullable=False)  # entrada | saida
+    id_plano = Column(Integer, ForeignKey("plano_de_contas.id_plano"), nullable=True)
+    status = Column(String(20), nullable=False, default="pendente")
+    id_movimentacao = Column(Integer, ForeignKey("movimentacao_conta.id_movimentacao"), nullable=True)
+    processada_em = Column(DateTime, nullable=True)
+    payload_hash = Column(String(64), nullable=True)
+
+    openfinance_conta = relationship("OpenFinanceConta")
+    plano = relationship("PlanoDeContas")
+    movimentacao = relationship("MovimentacaoConta")
