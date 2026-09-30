@@ -240,7 +240,7 @@ class Recebimento(Base, TimestampMixin):
     id_parcela = Column(Integer, ForeignKey("recebivel_parcela.id_parcela"), nullable=True)
     valor_recebido = Column(Numeric(15, 2), nullable=False)
     conciliado = Column(Boolean, default=False, nullable=False)
-    conta = relationship("Conta")
+    conta = relationship("Conta", back_populates="recebimentos")
     recebivel = relationship("Recebivel", back_populates="recebimentos")
     parcela = relationship("RecebivelParcela", back_populates="recebimentos")
 
@@ -266,6 +266,7 @@ class Conta(Base, TimestampMixin):
 
     empresa = relationship("Empresa", back_populates="contas")
     baixas = relationship("Baixa", back_populates="conta")
+    recebimentos = relationship("Recebimento", back_populates="conta")
 
     movimentos_origem = relationship(
         "MovimentacaoConta",
@@ -320,6 +321,14 @@ class Conta(Base, TimestampMixin):
         )
 
     @property
+    def saldo_recebimentos(self):
+        return sum(
+            float(recebimento.valor_recebido or 0)
+            for recebimento in self.recebimentos
+            if not recebimento.deleted
+        )
+
+    @property
     def saldo_atual(self):
         return (
             float(self.saldo_inicial or 0)
@@ -328,6 +337,7 @@ class Conta(Base, TimestampMixin):
             - self.saldo_saidas
             - self.saldo_transf_sai
             - self.saldo_baixas
+            + self.saldo_recebimentos
         )
 
     def __repr__(self):

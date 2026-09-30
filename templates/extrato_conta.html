@@ -146,6 +146,12 @@
                           name="bx_{{ lin.id }}"
                           {% if lin.conciliado %}checked{% endif %}
                         >
+                      {% elif lin.origem_tipo == 'rc' %}
+                        <input
+                          type="checkbox"
+                          name="rc_{{ lin.id }}"
+                          {% if lin.conciliado %}checked{% endif %}
+                        >
                       {% endif %}
                     </td>
                     <td>{{ lin.data_str }}</td>
@@ -183,6 +189,15 @@
                           {% else %}
                             Baixa legada sem parcela
                           {% endif %}
+                        </a>
+                      {% elif lin.origem_tipo == 'rc' %}
+                        <a
+                          href="{{ url_for('receber.listar_baixas_titulo', id_recebivel=lin.id_recebivel, baixa=lin.id) }}#baixa-{{ lin.id }}"
+                          class="btn btn-sm btn-outline-primary"
+                          title="Abrir título a receber #{{ lin.id_recebivel }} e baixa"
+                        >
+                          Título #{{ lin.id_recebivel }} ·
+                          {% if lin.id_parcela %}Parcela {{ lin.numero_parcela }}{% else %}Baixa sem parcela{% endif %}
                         </a>
                       {% endif %}
                     </td>

@@ -982,3 +982,12 @@ de pagar e receber contaminem um ao outro.
   preservar consultas existentes. Transferências continuam sem centro de custo
   e sem plano financeiro.
 - Não há alteração de schema ou migration.
+## 2026-09-30 - PLA-743 - Baixas a receber no extrato
+
+- Baixa de título do Contas a Receber compõe o extrato como entrada na conta
+  bancária informada e participa do saldo anterior, saldo do período e
+  conciliação.
+- O saldo calculado da Conta também inclui recebimentos ativos.
+- Recebimentos estornados por exclusão lógica não compõem extrato nem saldo.
+- A linha oferece rastreabilidade para o título, parcela e baixa de origem.
+- Não há alteração de schema ou migration.

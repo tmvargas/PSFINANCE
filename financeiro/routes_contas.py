@@ -23,6 +23,8 @@ from models import (
     Baixa,
     Titulo,
     Documento,
+    Recebimento,
+    Recebivel,
 )
 
 def get_session():
@@ -1532,6 +1534,7 @@ def extrato_conta():
         # IDs marcados como conciliados na tela
         marcados_mov = set()
         marcados_bx = set()
+        marcados_rc = set()
         for key in request.form.keys():
             if key.startswith("mov_"):
                 try:
@@ -1541,6 +1544,11 @@ def extrato_conta():
             elif key.startswith("bx_"):
                 try:
                     marcados_bx.add(int(key.split("_", 1)[1]))
+                except ValueError:
+                    pass
+            elif key.startswith("rc_"):
+                try:
+                    marcados_rc.add(int(key.split("_", 1)[1]))
                 except ValueError:
                     pass
 
@@ -1575,6 +1583,19 @@ def extrato_conta():
 
         for b in baixas_periodo_db:
             b.conciliado = b.id_baixa in marcados_bx
+
+        recebimentos_periodo_db = (
+            session.query(Recebimento)
+            .filter(
+                Recebimento.deleted.is_(False),
+                Recebimento.data >= d_ini,
+                Recebimento.data <= d_fim,
+                Recebimento.id_conta == conta_sel.id_conta,
+            )
+            .all()
+        )
+        for recebimento in recebimentos_periodo_db:
+            recebimento.conciliado = recebimento.id_recebimento in marcados_rc
 
         session.commit()
         flash("Conciliação salva com sucesso.", "sucesso")
@@ -1646,6 +1667,17 @@ def extrato_conta():
         )
         saldo -= float(total_baixas_anteriores or 0)
 
+        total_recebimentos_anteriores = (
+            session.query(func.coalesce(func.sum(Recebimento.valor_recebido), 0))
+            .filter(
+                Recebimento.deleted.is_(False),
+                Recebimento.data < d_ini,
+                Recebimento.id_conta == conta_sel.id_conta,
+            )
+            .scalar()
+        )
+        saldo += float(total_recebimentos_anteriores or 0)
+
         saldo_inicial = saldo
 
         # movimentações no período (com flag conciliado)
@@ -1678,6 +1710,21 @@ def extrato_conta():
                 Baixa.id_conta == conta_sel.id_conta,
             )
             .order_by(Baixa.data, Baixa.id_baixa)
+            .all()
+        )
+
+        recebimentos_periodo = (
+            session.query(Recebimento, Recebivel)
+            .options(joinedload(Recebivel.documento))
+            .join(Recebivel, Recebimento.id_recebivel == Recebivel.id_recebivel)
+            .filter(
+                Recebimento.deleted.is_(False),
+                Recebivel.deleted.is_(False),
+                Recebimento.data >= d_ini,
+                Recebimento.data <= d_fim,
+                Recebimento.id_conta == conta_sel.id_conta,
+            )
+            .order_by(Recebimento.data, Recebimento.id_recebimento)
             .all()
         )
 
@@ -1744,6 +1791,32 @@ def extrato_conta():
                     ),
                     "entrada": 0.0,
                     "saida": valor,
+                }
+            )
+
+        # Baixas de Contas a Receber (entrada)
+        for recebimento, titulo in recebimentos_periodo:
+            valor = float(recebimento.valor_recebido or 0)
+            linhas.append(
+                {
+                    "origem_tipo": "rc",
+                    "id": recebimento.id_recebimento,
+                    "conciliado": bool(recebimento.conciliado),
+                    "data": recebimento.data,
+                    "tipo": "Baixa de título",
+                    "origem": "Contas a Receber",
+                    "documento": _compor_documento_extrato(titulo.documento, titulo.nr_documento),
+                    "nr_documento": "",
+                    "descricao": titulo.observacao or "",
+                    "id_recebivel": titulo.id_recebivel,
+                    "id_parcela": recebimento.id_parcela,
+                    "numero_parcela": (
+                        recebimento.parcela.numero_parcela
+                        if getattr(recebimento, "parcela", None)
+                        else None
+                    ),
+                    "entrada": valor,
+                    "saida": 0.0,
                 }
             )
 

@@ -13,12 +13,16 @@ os.environ["PSFINANCE_STAGING_BASE_PATH"] = "/staging/psfinance"
 from database import Base, SessionLocal, engine  # noqa: E402
 from models import (  # noqa: E402
     Baixa,
+    Cliente,
     Conta,
     Credor,
     Documento,
     Empresa,
     MovimentacaoConta,
     PlanoDeContas,
+    Recebimento,
+    Recebivel,
+    RecebivelParcela,
     Titulo,
 )
 from src.app import app  # noqa: E402
@@ -124,6 +128,52 @@ class FiltroEmpresaAnaliseExtratoTest(unittest.TestCase):
         self.assertIn(b"Pagamento identificado", response.data)
         self.assertNotIn(b"&lt;Documento", response.data)
         self.assertNotIn(b"Baixa &lt;Documento", response.data)
+
+    def test_extrato_inclui_baixa_de_contas_a_receber_como_entrada_e_ignora_estorno(self):
+        session = SessionLocal()
+        conta = session.get(Conta, self.conta_a_id)
+        empresa = session.get(Empresa, self.empresa_a_id)
+        documento = session.query(Documento).first()
+        plano = session.query(PlanoDeContas).filter(PlanoDeContas.cod_estrutural.like("1.%")).first()
+        cliente = Cliente(nome="Cliente do recebimento")
+        titulo = Recebivel(
+            documento=documento, nr_documento="CR-INTER", cliente=cliente,
+            empresa=empresa, plano=plano, valor=50, emissao=date(2026, 8, 1),
+            vencimento=date(2026, 8, 12), observacao="Baixa recebida no Inter",
+        )
+        parcela = RecebivelParcela(
+            recebivel=titulo, numero_parcela=1, vencimento=date(2026, 8, 12), valor=50,
+        )
+        recebimento = Recebimento(
+            data=date(2026, 8, 12), conta=conta, recebivel=titulo,
+            parcela=parcela, valor_recebido=50,
+        )
+        session.add(recebimento); session.commit()
+        id_recebimento = recebimento.id_recebimento
+        session.close()
+
+        url = (
+            f"/financeiro/extrato?id_empresa={self.empresa_a_id}&id_conta={self.conta_a_id}"
+            "&data_ini=2026-08-01&data_fim=2026-08-31"
+        )
+        response = app.test_client().get(url)
+        self.assertIn(b"Contas a Receber", response.data)
+        self.assertIn(b"CR-INTER", response.data)
+        self.assertIn(b"Baixa recebida no Inter", response.data)
+        self.assertIn(b"R$ 50.00", response.data)
+        self.assertIn(f'name="rc_{id_recebimento}"'.encode(), response.data)
+
+        session = SessionLocal()
+        self.assertEqual(session.get(Conta, self.conta_a_id).saldo_atual, 130.0)
+        session.close()
+
+        session = SessionLocal(); session.get(Recebimento, id_recebimento).deleted = True
+        session.commit(); session.close()
+        response_estorno = app.test_client().get(url)
+        self.assertNotIn(b"CR-INTER", response_estorno.data)
+        session = SessionLocal()
+        self.assertEqual(session.get(Conta, self.conta_a_id).saldo_atual, 80.0)
+        session.close()
 
     def test_layout_usa_assets_locais_sem_dependencia_de_cdn(self):
         response = app.test_client().get("/staging/psfinance/financeiro/extrato")
