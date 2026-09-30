@@ -991,3 +991,22 @@ de pagar e receber contaminem um ao outro.
 - Recebimentos estornados por exclusão lógica não compõem extrato nem saldo.
 - A linha oferece rastreabilidade para o título, parcela e baixa de origem.
 - Não há alteração de schema ou migration.
+
+## 2026-09-30 - PLA-743 - Integração bancária C6 Bank
+
+- Credenciais, certificados e tokens não serão gravados no banco. A conexão
+  guarda somente identificadores públicos e o nome da variável de ambiente que
+  fornece o segredo ao serviço.
+- Conta corrente ou cartão retornado pelo C6 Bank precisa ser vinculado a uma
+  Conta e a um Centro de Custo da mesma empresa no PSFINANCE.
+- A importação cria uma pendência única pela combinação conta externa + ID da
+  transação; sincronizações repetidas não duplicam lançamentos.
+- O usuário classifica cada pendência em uma conta analítica do Plano
+  Financeiro. Entrada aceita grupo `1.*`; saída aceita grupo `2.*`.
+- Processar cria uma `MovimentacaoConta` normal, ainda não conciliada. A partir
+  daí, extrato, saldo, edição e conciliação usam o fluxo existente.
+- Uma pendência processada não pode ser processada novamente. A integração real
+  usa a API Extrato do C6 Empresas e depende do cadastro da PlanSmart no Portal
+  do Desenvolvedor, homologação, credenciais e certificado emitidos pelo C6.
+- A migration `20260930_pla743_openfinance.sql` não pode ser aplicada sem
+  autorização expressa de Thiago.
