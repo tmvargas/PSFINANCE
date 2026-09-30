@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Transações C6 Bank{% endblock %}
+{% block content %}
+<div class="consultation-page">
+  <div class="consultation-header"><div><div class="consultation-kicker">Open Finance</div><h1 class="h4 mb-0">Transações C6 Bank</h1><p class="consultation-subtitle">Classifique e processe transações importadas para Movimentações.</p></div><div class="consultation-actions"><a class="btn btn-sm btn-outline-secondary" href="{{ url_for('financeiro.openfinance_configuracao') }}">Configuração</a></div></div>
+  {% if transacoes %}<div class="consultation-table-shell"><div class="table-responsive"><table class="table table-sm consultation-table"><thead><tr><th>Conta</th><th>Data</th><th>Descrição</th><th>Valor</th><th>Plano financeiro</th><th>Ação</th></tr></thead><tbody>
+  {% for t in transacoes %}<tr><td>{{ t.openfinance_conta.nome }}</td><td>{{ t.data.strftime('%d/%m/%Y') }}</td><td>{{ t.descricao }}</td><td class="text-nowrap">R$ {{ '%.2f'|format(t.valor) }}</td><td colspan="2"><form class="d-flex gap-2" method="post" action="{{ url_for('financeiro.openfinance_processar', id_transacao=t.id_transacao) }}"><select class="form-select form-select-sm" name="id_plano" required><option value="">Selecione...</option>{% set planos = planos_entrada if t.natureza == 'entrada' else planos_saida %}{% for p in planos %}<option value="{{ p.id_plano }}">{{ p.cod_estrutural }} - {{ p.nome_conta }}</option>{% endfor %}</select><button class="btn btn-sm btn-primary" type="submit">Processar</button></form></td></tr>{% endfor %}
+  </tbody></table></div></div>{% else %}<div class="consultation-empty"><strong>Nenhuma transação disponível.</strong><div>Configure e sincronize a API C6 Bank para receber o extrato.</div></div>{% endif %}
+</div>
+{% endblock %}
