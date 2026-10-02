@@ -1005,8 +1005,15 @@ de pagar e receber contaminem um ao outro.
   Financeiro. Entrada aceita grupo `1.*`; saída aceita grupo `2.*`.
 - Processar cria uma `MovimentacaoConta` normal, ainda não conciliada. A partir
   daí, extrato, saldo, edição e conciliação usam o fluxo existente.
-- Uma pendência processada não pode ser processada novamente. A integração real
-  usa a API Extrato do C6 Empresas e depende do cadastro da PlanSmart no Portal
-  do Desenvolvedor, homologação, credenciais e certificado emitidos pelo C6.
+- Uma pendência processada não pode ser processada novamente.
+- A hipótese de integração direta pela API Extrato C6 foi descartada: ela não
+  entrega a jornada de consentimento Open Finance solicitada. O fluxo correto é
+  `Conectar C6` → widget de uma receptora/agregadora autorizada → autorização no
+  C6 → retorno ao PSFINANCE → sincronização assíncrona por webhook.
+- A Pluggy é a opção técnica recomendada porque declara cobertura C6 pessoal e
+  empresarial para contas, transações e cartões. A ativação depende de conta e
+  chaves da Pluggy; segredo permanece exclusivamente no servidor.
+- Sandbox e teste real de 15 dias não implicam contratação. Plano pago, hoje a
+  partir de R$ 2.500/mês para Dados, exige autorização específica de Thiago.
 - A migration `20260930_pla743_openfinance.sql` não pode ser aplicada sem
   autorização expressa de Thiago.
