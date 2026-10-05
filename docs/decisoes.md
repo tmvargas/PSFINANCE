@@ -1010,9 +1010,16 @@ de pagar e receber contaminem um ao outro.
   entrega a jornada de consentimento Open Finance solicitada. O fluxo correto é
   `Conectar C6` → widget de uma receptora/agregadora autorizada → autorização no
   C6 → retorno ao PSFINANCE → sincronização assíncrona por webhook.
-- A Pluggy é a opção técnica recomendada porque declara cobertura C6 pessoal e
-  empresarial para contas, transações e cartões. A ativação depende de conta e
-  chaves da Pluggy; segredo permanece exclusivamente no servidor.
+- Existem dois fluxos automáticos distintos. A API oficial C6 Empresas exige
+  ativação única pelo usuário Master no Web Banking, com geração de ClientId,
+  ClientSecret e certificado; depois disso a sincronização do extrato pelo
+  PSFINANCE é automática e o C6 declara a integração ao ERP como gratuita.
+- O widget Open Finance da Pluggy redireciona o usuário ao banco para consentir
+  e retorna ao PSFINANCE. Ele cobre C6 pessoal e empresarial, contas,
+  transações e cartões, porém é um serviço comercial.
+- Para o uso interno e a preferência por ausência de mensalidade, a API oficial
+  C6 Empresas é a recomendação atual. Pluggy permanece alternativa quando a
+  experiência de consentimento embutida ou múltiplos bancos justificar o custo.
 - Sandbox e teste real de 15 dias não implicam contratação. Plano pago, hoje a
   partir de R$ 2.500/mês para Dados, exige autorização específica de Thiago.
 - A migration `20260930_pla743_openfinance.sql` não pode ser aplicada sem
