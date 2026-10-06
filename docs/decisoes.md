@@ -1024,3 +1024,16 @@ de pagar e receber contaminem um ao outro.
   partir de R$ 2.500/mês para Dados, exige autorização específica de Thiago.
 - A migration `20260930_pla743_openfinance.sql` não pode ser aplicada sem
   autorização expressa de Thiago.
+
+## 2026-10-06 - PLA-743 - Suspensão da integração bancária automática
+
+- Por decisão de Thiago, a conexão automática com C6, Pluggy ou outro provedor
+  fica suspensa sem contratação, credenciamento ou continuidade técnica.
+- O menu e as rotas Open Finance deixam de ser expostos no staging para não
+  apresentar uma funcionalidade incompleta ao usuário.
+- As tabelas Open Finance, já criadas e vazias, permanecem preservadas. Não será
+  executado `DROP` nem qualquer outra escrita destrutiva no banco.
+- A retomada futura deverá usar importação e exportação de arquivos. O formato,
+  leiaute, deduplicação, pré-visualização e confirmação serão definidos quando
+  Thiago reabrir essa frente; nenhuma implementação OFX/CSV está sendo afirmada
+  nesta entrega.
