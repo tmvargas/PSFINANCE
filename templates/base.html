@@ -752,7 +752,6 @@
       'financeiro.editar_movimentacao',
       'financeiro.extrato_conta'
     ] %}
-    {% set openfinance_endpoints = ['financeiro.openfinance_configuracao', 'financeiro.openfinance_transacoes', 'financeiro.openfinance_processar'] %}
     {% set gerencial_endpoints = [
       'financeiro.analise_resultados',
       'financeiro.detalhe_conta_resultado'
@@ -938,15 +937,6 @@
                   <a class="submenu-item {% if endpoint == 'financeiro.extrato_conta' %}active{% endif %}" href="{{ url_for('financeiro.extrato_conta') }}">
                     <span class="nav-icon"><svg class="icon"><use href="#icon-receipt"></use></svg></span><span>Extrato</span>
                   </a>
-                </div>
-              </div>
-              <div class="menu-node" data-menu-node="open-finance">
-                <button class="menu-item submenu-toggle {% if endpoint in openfinance_endpoints %}active{% endif %}" type="button" aria-label="Expandir Open Finance" aria-expanded="false">
-                  <span class="nav-icon"><svg class="icon"><use href="#icon-repeat"></use></svg></span><span class="nav-label">Open Finance</span><span class="nav-chevron">›</span>
-                </button>
-                <div class="submenu" aria-label="Submenu Open Finance">
-                  <a class="submenu-item {% if endpoint == 'financeiro.openfinance_configuracao' %}active{% endif %}" href="{{ url_for('financeiro.openfinance_configuracao') }}">Configuração</a>
-                  <a class="submenu-item {% if endpoint == 'financeiro.openfinance_transacoes' %}active{% endif %}" href="{{ url_for('financeiro.openfinance_transacoes') }}">Transações</a>
                 </div>
               </div>
             </div>

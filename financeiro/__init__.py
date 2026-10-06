@@ -12,7 +12,6 @@ from . import (
     routes_cliente,
     routes_empresa,
     routes_home,
-    routes_openfinance,
     routes_plano,
     routes_titulos,
 )
