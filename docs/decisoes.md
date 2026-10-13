@@ -1037,3 +1037,14 @@ de pagar e receber contaminem um ao outro.
   leiaute, deduplicação, pré-visualização e confirmação serão definidos quando
   Thiago reabrir essa frente; nenhuma implementação OFX/CSV está sendo afirmada
   nesta entrega.
+
+## 2026-10-13 - PLA-743 - HTTPS no hostname técnico do staging
+
+- O acesso `https://vps69143.publiccloud.com.br/staging/psfinance` apresentava o
+  certificado de `plansmart.com.br`, causando `NET::ERR_CERT_COMMON_NAME_INVALID`.
+- A VPS já possui certificado Let's Encrypt válido para
+  `vps69143.publiccloud.com.br`; faltava associá-lo a um servidor Nginx na porta
+  443 para esse hostname.
+- A configuração versionada expõe somente `/staging/psfinance` nesse host e
+  mantém os demais caminhos com resposta 404, sem alterar o domínio corporativo
+  `plansmart.com.br` ou serviços de produção.
