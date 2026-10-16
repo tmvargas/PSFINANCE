@@ -83,9 +83,92 @@ A coleta da página publicada enumerou todos os elementos `link[href]` e
 | `bootstrap.bundle.min.js` | PSFINANCE local | 200 | 2,32 ms | não |
 
 Não restou host externo, recurso pendente ou erro. O ambiente de execução não
-possuía Chromium, Chrome, Firefox ou Playwright instalado; por isso a evidência
-de rede foi coletada diretamente do HTML servido e de todas as dependências da
-página, sem instalação ou aumento de escopo na VPS.
+possuía Chromium, Chrome, Firefox ou Playwright instalado na primeira coleta;
+essa limitação foi eliminada na complementação solicitada pela revisão do CEO.
+
+## Complementação da revisão executiva — navegador real
+
+Em 2026-08-19, a URL exata foi aberta em Chromium real automatizado, pela porta
+pública `5001`, aguardando `networkidle`:
+
+- HTTP 200 e conclusão da navegação em 826 ms;
+- `DOMContentLoaded` em 398,40 ms e evento `load` em 420,00 ms;
+- CSS local concluído em 45,10 ms;
+- JavaScript local concluído em 37,20 ms;
+- zero falhas e zero requisições pendentes após `networkidle`;
+- screenshot: `docs/evidencias/PLA-2597/extrato-navegador-real-staging.png`;
+- waterfall HAR: `docs/evidencias/PLA-2597/extrato-waterfall.har`;
+- métricas estruturadas: `docs/evidencias/PLA-2597/navegador-real.json`.
+
+A inspeção visual confirma a tela Extrato de Conta / Conciliação renderizada,
+com filtros, totais e oito movimentações do período, sem indicador de
+carregamento persistente.
+
+## Medição SQL e eliminação do N+1
+
+A rota foi executada no Flask com eventos `before_cursor_execute` e
+`after_cursor_execute` do SQLAlchemy. A conexão foi forçada por `PGOPTIONS` a
+`default_transaction_read_only=on`; a própria captura confirmou o modo somente
+leitura antes do teste.
+
+| Métrica | Resultado |
+| --- | ---: |
+| HTTP | 200 |
+| Tempo total da rota instrumentada | 159,888 ms |
+| Consultas SQL | 8 `SELECT` |
+| Tempo SQL total | 10,516 ms |
+| Maior consulta | 2,125 ms |
+| Escritas | 0 |
+
+As oito consultas têm quantidade fixa por carregamento (empresas, contas,
+saldo anterior, movimentações, baixas, documentos e parcelas). Os documentos
+de movimentações e títulos são obtidos por duas consultas em lote com `JOIN`,
+e não por consulta individual por linha. Para os oito registros exibidos no
+screenshot, a contagem permaneceu em oito consultas totais: não foi detectado
+N+1. Evidência: `docs/evidencias/PLA-2597/sql-readonly.json`.
+
+## CPU, workers e pool PostgreSQL durante carga
+
+Nova carga controlada de 30 requisições, concorrência 6, foi executada entre
+19:44:52Z e 19:44:56Z, com 30 amostras de CPU e memória dos processos Gunicorn:
+
+| Métrica | Resultado |
+| --- | ---: |
+| Respostas HTTP 200 | 30/30 |
+| Erros/timeouts | 0/0 |
+| Média | 70,241 ms |
+| Máximo | 85,251 ms |
+| CPU Gunicorn média | 0,50% |
+| CPU Gunicorn máxima | 0,50% |
+| RSS máximo dos processos | 241.648 KiB |
+| `max_connections` PostgreSQL | 100 |
+| Conexões do banco após carga | 4 |
+| Ativas após carga | 1 (a própria coleta) |
+| Ociosas após carga | 3 |
+| Aguardando lock | 0 |
+
+Os dois workers do serviço permaneceram ativos. Evidência estruturada:
+`docs/evidencias/PLA-2597/runtime-readonly.json`.
+
+No mesmo intervalo, o access log do Nginx registrou 30 requisições da URL e
+30 respostas HTTP 200. Os journals do `psfinance-staging`/Gunicorn e do
+PostgreSQL não registraram erro, exceção, timeout, saída de worker, `FATAL` ou
+deadlock. Evidência correlacionada:
+`docs/evidencias/PLA-2597/logs-correlacionados.txt`.
+
+## Smoke tests das demais jornadas
+
+O mesmo Chromium real, aguardando `networkidle` em cada navegação, confirmou:
+
+| Jornada | HTTP | Tempo |
+| --- | ---: | ---: |
+| Healthcheck | 200 | 672 ms |
+| Home | 200 | 1.036 ms |
+| Consulta de títulos | 200 | 856 ms |
+| Análise financeira | 200 | 793 ms |
+
+Não houve falha de request durante a sessão. Os detalhes estão em
+`docs/evidencias/PLA-2597/navegador-real.json`.
 
 ## Infraestrutura e PostgreSQL
 
@@ -98,6 +181,10 @@ página, sem instalação ou aumento de escopo na VPS.
   de banco;
 - Nginx registrou as 60 respostas HTTP 200 da rota e as respostas HTTP 200 dos
   dois assets locais.
+- a carga complementar registrou CPU máxima de 0,50%, quatro conexões de 100
+  disponíveis e zero espera por lock no PostgreSQL;
+- Nginx, Gunicorn e PostgreSQL foram correlacionados no intervalo
+  `2026-08-19T19:44:52Z/2026-08-19T19:44:57Z`, sem erro de aplicação ou banco.
 
 ## Testes e gate de recorrência
 
@@ -124,6 +211,15 @@ página, sem instalação ou aumento de escopo na VPS.
 - `tests/test_filtro_empresa_analise_extrato.py` - Valida assets locais e preservação do saldo agregado.
 - `docs/decisoes.md` - Registra causa, correção e preservação das regras existentes.
 - `docs/PLA-2597-travamentos-recorrentes.md` - Consolida os gates pós-correção e a evidência de não recorrência.
+- `scripts/pla2597_capture_browser.js` - Captura screenshot, HAR, métricas de navegação e smoke tests em Chromium real.
+- `scripts/pla2597_measure_sql.py` - Mede quantidade e duração das consultas da rota em transação somente leitura.
+- `scripts/pla2597_measure_runtime_readonly.sh` - Mede carga, CPU e conexões PostgreSQL sem escrita.
+- `docs/evidencias/PLA-2597/extrato-navegador-real-staging.png` - Comprova a tela real renderizada.
+- `docs/evidencias/PLA-2597/extrato-waterfall.har` - Registra o waterfall completo do navegador.
+- `docs/evidencias/PLA-2597/navegador-real.json` - Registra métricas e smoke tests do Chromium.
+- `docs/evidencias/PLA-2597/sql-readonly.json` - Registra as oito consultas SQL e seus tempos.
+- `docs/evidencias/PLA-2597/runtime-readonly.json` - Registra CPU, memória, carga e pool PostgreSQL.
+- `docs/evidencias/PLA-2597/logs-correlacionados.txt` - Correlaciona Nginx, Gunicorn e PostgreSQL no intervalo da carga.
 
 ## Dependências de ambiente
 

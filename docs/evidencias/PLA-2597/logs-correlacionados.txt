@@ -1,0 +1,8 @@
+interval_utc=2026-08-19T19:44:52Z/2026-08-19T19:44:57Z
+gunicorn_journal_lines=0
+gunicorn_error_lines=0
+postgres_unit=postgresql.service
+postgres_journal_lines=0
+postgres_error_lines=0
+nginx_extrato_requests=30
+nginx_http_200=30

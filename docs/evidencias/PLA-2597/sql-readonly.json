@@ -1,0 +1,83 @@
+{
+  "captured_at": "2026-08-19T19:42:53Z",
+  "default_transaction_read_only": "on",
+  "http_status": 200,
+  "response_bytes": 46475,
+  "route_elapsed_ms": 159.888,
+  "sql_query_count": 8,
+  "sql_total_ms": 10.516,
+  "sql_max_ms": 2.125,
+  "operations": {
+    "SELECT": 8
+  },
+  "query_groups": {
+    "empresa": 1,
+    "conta": 2,
+    "movimentacao_conta": 1,
+    "baixa": 1,
+    "documento,movimentacao_conta": 1,
+    "baixa,documento,titulo": 1,
+    "titulo_parcela": 1
+  },
+  "queries": [
+    {
+      "elapsed_ms": 1.264,
+      "operation": "SELECT",
+      "tables": [
+        "empresa"
+      ]
+    },
+    {
+      "elapsed_ms": 1.107,
+      "operation": "SELECT",
+      "tables": [
+        "conta"
+      ]
+    },
+    {
+      "elapsed_ms": 0.687,
+      "operation": "SELECT",
+      "tables": [
+        "conta"
+      ]
+    },
+    {
+      "elapsed_ms": 1.374,
+      "operation": "SELECT",
+      "tables": [
+        "movimentacao_conta"
+      ]
+    },
+    {
+      "elapsed_ms": 0.943,
+      "operation": "SELECT",
+      "tables": [
+        "baixa"
+      ]
+    },
+    {
+      "elapsed_ms": 1.807,
+      "operation": "SELECT",
+      "tables": [
+        "documento",
+        "movimentacao_conta"
+      ]
+    },
+    {
+      "elapsed_ms": 2.125,
+      "operation": "SELECT",
+      "tables": [
+        "baixa",
+        "documento",
+        "titulo"
+      ]
+    },
+    {
+      "elapsed_ms": 1.209,
+      "operation": "SELECT",
+      "tables": [
+        "titulo_parcela"
+      ]
+    }
+  ]
+}
