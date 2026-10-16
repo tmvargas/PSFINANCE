@@ -30,6 +30,27 @@ das telas.
 - Acionar o estado compacto e confirmar que o icone de `APOIO` abre o mesmo
   submenu em flyout lateral.
 
+## Validacao executada em 2026-08-06
+
+- `python3 -m compileall src financeiro models.py database.py`: sem erro.
+- `git diff --check`: sem erro.
+- Porta `5001` local em modo `staging`: `/gate` retornou `status=healthy`,
+  `branch=staging` e `commit=9502730`.
+- Playwright com `localStorage` limpo confirmou que `/financeiro/` inicia com
+  `sidebar-compact=true`, nenhum `.menu-node.submenu-open` e `APOIO` com
+  `aria-expanded=false`.
+- Playwright confirmou que o clique no icone de `APOIO` abre o flyout com
+  `Empresa`, `Centro de Custo`, `Contas`, `Credor` e `Plano Financeiro`.
+- Playwright confirmou que `/financeiro/contas` responde com a tela `Contas`,
+  mantem `APOIO` e `Contas` destacados, mas inicia sem submenu aberto e com
+  `aria-expanded=false`.
+
+## Evidencias visuais
+
+- `docs/mockups/evidencias/PLA-1480-menu-inicial-compacto.png`
+- `docs/mockups/evidencias/PLA-1480-menu-apoio-contas.png`
+- `docs/mockups/evidencias/PLA-1480-rota-contas-fechada.png`
+
 ## Impacto
 
 A alteracao e restrita ao template base e ao comportamento visual do menu.
