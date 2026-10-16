@@ -26,7 +26,10 @@ from models import (  # noqa: E402
     Titulo,
 )
 from src.app import app  # noqa: E402
-from financeiro.routes_contas import _compor_documento_extrato  # noqa: E402
+from financeiro.routes_contas import (  # noqa: E402
+    _compor_documento_extrato,
+    _descricao_movimentacao_extrato,
+)
 
 
 class FiltroEmpresaAnaliseExtratoTest(unittest.TestCase):
@@ -128,6 +131,55 @@ class FiltroEmpresaAnaliseExtratoTest(unittest.TestCase):
         self.assertIn(b"Pagamento identificado", response.data)
         self.assertNotIn(b"&lt;Documento", response.data)
         self.assertNotIn(b"Baixa &lt;Documento", response.data)
+
+    def test_extrato_identifica_as_duas_pontas_da_transferencia(self):
+        session = SessionLocal()
+        conta_a = session.get(Conta, self.conta_a_id)
+        conta_b = session.get(Conta, self.conta_b_id)
+        documento = session.query(Documento).first()
+        transferencia = MovimentacaoConta(
+            data=date(2026, 8, 10),
+            tipo="T",
+            documento=documento,
+            nr_documento="TR-01",
+            descricao="Reserva mensal",
+            valor=25,
+            conta_origem=conta_a,
+            conta_destino=conta_b,
+            empresa=conta_a.empresa,
+        )
+        session.add(transferencia)
+        session.commit()
+        self.assertEqual(
+            _descricao_movimentacao_extrato(transferencia, conta_a.id_conta),
+            "Transferência para Conta Beta (B - Empresa Beta) — Reserva mensal",
+        )
+        self.assertEqual(
+            _descricao_movimentacao_extrato(transferencia, conta_b.id_conta),
+            "Transferência de Conta Alfa (A - Empresa Alfa) — Reserva mensal",
+        )
+        session.close()
+
+        periodo = "&data_ini=2026-08-01&data_fim=2026-08-31"
+        extrato_origem = app.test_client().get(
+            f"/financeiro/extrato?id_empresa={self.empresa_a_id}"
+            f"&id_conta={self.conta_a_id}{periodo}"
+        )
+        extrato_destino = app.test_client().get(
+            f"/financeiro/extrato?id_empresa={self.empresa_b_id}"
+            f"&id_conta={self.conta_b_id}{periodo}"
+        )
+
+        self.assertIn(b"Transf. sa\xc3\xadda", extrato_origem.data)
+        self.assertIn(
+            "Transferência para Conta Beta (B - Empresa Beta) — Reserva mensal".encode(),
+            extrato_origem.data,
+        )
+        self.assertIn(b"Transf. entrada", extrato_destino.data)
+        self.assertIn(
+            "Transferência de Conta Alfa (A - Empresa Alfa) — Reserva mensal".encode(),
+            extrato_destino.data,
+        )
 
     def test_extrato_inclui_baixa_de_contas_a_receber_como_entrada_e_ignora_estorno(self):
         session = SessionLocal()

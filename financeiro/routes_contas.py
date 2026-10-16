@@ -45,6 +45,30 @@ def _compor_documento_extrato(documento, descricao):
     return " - ".join(componentes_normalizados)
 
 
+def _descricao_movimentacao_extrato(movimentacao, id_conta):
+    descricao_original = (movimentacao.descricao or "").strip()
+    if movimentacao.tipo != "T":
+        return descricao_original
+
+    if movimentacao.id_conta_destino == id_conta:
+        preposicao = "de"
+        contraparte = movimentacao.conta_origem
+    else:
+        preposicao = "para"
+        contraparte = movimentacao.conta_destino
+
+    if not contraparte:
+        return descricao_original or "Transferência"
+
+    descricao = f"Transferência {preposicao} {contraparte.descricao}"
+    empresa = getattr(contraparte, "empresa", None)
+    if empresa:
+        descricao += f" ({empresa.codigo} - {empresa.nome})"
+    if descricao_original:
+        descricao += f" — {descricao_original}"
+    return descricao
+
+
 def _empresas_ativas_e_filtro(session):
     empresas = (
         session.query(Empresa)
@@ -1683,7 +1707,11 @@ def extrato_conta():
         # movimentações no período (com flag conciliado)
         movs_periodo = (
             session.query(MovimentacaoConta)
-            .options(joinedload(MovimentacaoConta.documento))
+            .options(
+                joinedload(MovimentacaoConta.documento),
+                joinedload(MovimentacaoConta.conta_origem).joinedload(Conta.empresa),
+                joinedload(MovimentacaoConta.conta_destino).joinedload(Conta.empresa),
+            )
             .filter(
                 MovimentacaoConta.deleted.is_(False),
                 MovimentacaoConta.data >= d_ini,
@@ -1762,7 +1790,9 @@ def extrato_conta():
                     "origem": "Movimentação",
                     "documento": _compor_documento_extrato(m.documento, m.nr_documento),
                     "nr_documento": "",
-                    "descricao": m.descricao or "",
+                    "descricao": _descricao_movimentacao_extrato(
+                        m, conta_sel.id_conta
+                    ),
                     "entrada": entrada,
                     "saida": saida,
                 }

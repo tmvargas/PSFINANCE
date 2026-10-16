@@ -1054,3 +1054,4 @@ de pagar e receber contaminem um ao outro.
 - O valor deve ser subtraído do saldo da origem e somado ao saldo do destino.
 - Como não há entrada ou saída de recursos do conjunto de contas, o saldo total consolidado permanece inalterado.
 - O formulário deve comunicar essa regra para evitar que a estabilidade do total consolidado seja interpretada como falha no saldo das contas individuais.
+- No extrato, a descrição deve identificar a contraparte: `Transferência para <conta/empresa>` na origem e `Transferência de <conta/empresa>` no destino. Uma descrição informada pelo usuário é preservada após essa identificação.
