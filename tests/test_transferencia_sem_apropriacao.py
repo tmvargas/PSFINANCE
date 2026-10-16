@@ -185,6 +185,12 @@ class TransferenciaSemApropriacaoTest(unittest.TestCase):
         movimento_id = movimento.id_movimentacao
         session.close()
 
+        edicao = app.test_client().get(
+            f"/financeiro/movimentacoes/{movimento_id}/editar"
+        )
+        self.assertEqual(edicao.status_code, 200)
+        self.assertIn(b'O saldo total consolidado n\xc3\xa3o muda', edicao.data)
+
         response = app.test_client().post(
             f"/financeiro/movimentacoes/{movimento_id}/editar",
             data=self._dados_transferencia(),
