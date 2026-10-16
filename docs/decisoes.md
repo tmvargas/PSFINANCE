@@ -1048,3 +1048,9 @@ de pagar e receber contaminem um ao outro.
 - A configuração versionada expõe somente `/staging/psfinance` nesse host e
   mantém os demais caminhos com resposta 404, sem alterar o domínio corporativo
   `plansmart.com.br` ou serviços de produção.
+# Transferências e saldo consolidado (PLA-743)
+
+- Uma transferência é representada por uma única movimentação do tipo `T`, com conta de origem e conta de destino.
+- O valor deve ser subtraído do saldo da origem e somado ao saldo do destino.
+- Como não há entrada ou saída de recursos do conjunto de contas, o saldo total consolidado permanece inalterado.
+- O formulário deve comunicar essa regra para evitar que a estabilidade do total consolidado seja interpretada como falha no saldo das contas individuais.

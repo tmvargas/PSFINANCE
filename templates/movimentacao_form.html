@@ -125,6 +125,11 @@
     </div>
   </div>
 
+  <div id="aviso_transferencia_saldo" class="alert alert-info py-2" style="display:none;" role="status">
+    A transferência reduz o saldo da conta de origem e aumenta o saldo da conta de destino.
+    O saldo total consolidado não muda.
+  </div>
+
   <div class="row mb-3">
     <div class="col-md-6" id="col_empresa">
       <label class="form-label">Empresa</label>
@@ -240,11 +245,13 @@
   const contaDestino = document.getElementById("id_conta_destino");
   const centroCusto = document.getElementById("id_centro_custo");
   const labelConta = document.getElementById("label_conta");
+  const avisoTransferenciaSaldo = document.getElementById("aviso_transferencia_saldo");
 
   function ajustar() {
     const t = tipo.value;
 
     if (t === "T") {
+      avisoTransferenciaSaldo.style.display = "";
       colContaUnica.style.display = "none";
       colOrigem.style.display = "";
       colDestino.style.display = "";
@@ -261,6 +268,8 @@
       centroCusto.removeAttribute("required");
       return;
     }
+
+    avisoTransferenciaSaldo.style.display = "none";
 
     colOrigem.style.display = "none";
     colDestino.style.display = "none";

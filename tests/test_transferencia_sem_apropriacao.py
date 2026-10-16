@@ -112,6 +112,11 @@ class TransferenciaSemApropriacaoTest(unittest.TestCase):
         self.assertEqual(movimentos[0].id_conta_origem, self.ids["id_conta_origem"])
         self.assertEqual(movimentos[0].id_conta_destino, self.ids["id_conta_outra_empresa"])
         self.assertEqual(movimentos[0].id_empresa, self.ids["id_empresa_origem"])
+        origem = session.get(Conta, self.ids["id_conta_origem"])
+        destino = session.get(Conta, self.ids["id_conta_outra_empresa"])
+        self.assertEqual(origem.saldo_atual, -100.0)
+        self.assertEqual(destino.saldo_atual, 100.0)
+        self.assertEqual(origem.saldo_atual + destino.saldo_atual, 0.0)
         session.close()
 
     def test_transferencia_rejeita_origem_igual_ao_destino(self):
@@ -201,6 +206,7 @@ class TransferenciaSemApropriacaoTest(unittest.TestCase):
         self.assertIn(b'centroCusto.setAttribute("required", "required")', novo.data)
         self.assertIn(b'id="id_empresa_origem"', novo.data)
         self.assertIn(b'id="id_empresa_destino"', novo.data)
+        self.assertIn(b'O saldo total consolidado n\xc3\xa3o muda', novo.data)
 
 
 if __name__ == "__main__":
